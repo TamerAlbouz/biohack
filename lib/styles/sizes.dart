@@ -1,0 +1,24 @@
+import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+
+const kEmptyWidget = SizedBox.shrink();
+const kGap14 = Gap(14);
+const kGap10 = Gap(10);
+const kGap5 = Gap(5);
+const kGap28 = Gap(28);
+const kGap20 = Gap(20);
+const kGap68 = Gap(68);
+final kRadius20 = BorderRadius.circular(20);
+final kRadius10 = BorderRadius.circular(10);
+final kRadiusAll = BorderRadius.circular(999);
+const kPaddH20V15 = EdgeInsets.symmetric(horizontal: 20, vertical: 15);
+const kPaddH32 = EdgeInsets.symmetric(horizontal: 32);
+const kPadd0 = EdgeInsets.all(0);
+const kPadd20 = EdgeInsets.all(20);
+const kPadd4 = EdgeInsets.all(4);
+const kPadd10 = EdgeInsets.all(10);
+const kPadd14 = EdgeInsets.all(14);
+const kPaddH42 = EdgeInsets.symmetric(horizontal: 42);
+const kPaddH14 = EdgeInsets.symmetric(horizontal: 14);
+const kPaddH24 = EdgeInsets.symmetric(horizontal: 24);
+const kPaddV14 = EdgeInsets.symmetric(vertical: 14);

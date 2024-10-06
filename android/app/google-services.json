@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "295625806851",
+    "project_id": "medtalk-aefa8",
+    "storage_bucket": "medtalk-aefa8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:295625806851:android:aacc9da88ab780e7a4aa36",
+        "android_client_info": {
+          "package_name": "com.medtalk.tamer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "295625806851-kmoq2kvk2pm9f5rj3i7uu3ko65ha73p8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.medtalk.tamer",
+            "certificate_hash": "6b7802c0a1b37677fc0e12b86eb55c8c0a003163"
+          }
+        },
+        {
+          "client_id": "295625806851-idui8k1c7s2i1oae85p5qmm41rgr3uk8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAj7s0oULeZZ_GdbvTzrsF2HLcKFeC0Scg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "295625806851-idui8k1c7s2i1oae85p5qmm41rgr3uk8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
