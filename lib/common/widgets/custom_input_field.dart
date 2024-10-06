@@ -34,7 +34,7 @@ class InputField extends StatelessWidget {
             key: key,
             onChanged: onChanged,
             keyboardType: keyboardType,
-            cursorColor: MyColors.lightPurple,
+            cursorColor: MyColors.buttonTextPurple,
             style: const TextStyle(
               color: MyColors.textWhite,
             ),

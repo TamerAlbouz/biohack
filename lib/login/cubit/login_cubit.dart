@@ -11,70 +11,22 @@ class LoginCubit extends Cubit<LoginState> {
 
   final AuthenticationRepository _authenticationRepository;
 
-  void signInEmailChanged(String value) {
+  void emailChanged(String value) {
     final email = Email.dirty(value);
     emit(
       state.copyWith(
-        signInEmail: email,
-        isValid: Formz.validate([email, state.signInPassword]),
+        email: email,
+        isValid: Formz.validate([email, state.password]),
       ),
     );
   }
 
-  void signInPasswordChanged(String value) {
+  void passwordChanged(String value) {
     final password = Password.dirty(value);
     emit(
       state.copyWith(
-        signInPassword: password,
-        isValid: Formz.validate([state.signInEmail, password]),
-      ),
-    );
-  }
-
-  void signUpEmailChanged(String value) {
-    final email = Email.dirty(value);
-    emit(
-      state.copyWith(
-        signUpEmail: email,
-        isValid: Formz.validate(
-            [email, state.signUpPassword, state.signUpConfirmPassword]),
-      ),
-    );
-  }
-
-  void signUpPasswordChanged(String value) {
-    final password = Password.dirty(value);
-    emit(
-      state.copyWith(
-        signUpPassword: password,
-        isValid: Formz.validate(
-            [state.signUpEmail, password, state.signUpConfirmPassword]),
-      ),
-    );
-  }
-
-  void signUpConfirmPasswordChanged(String value) {
-    final confirmPassword = Password.dirty(value);
-
-    // also check if the password and confirm password match
-    if (state.signUpPassword.value != confirmPassword.value) {
-      emit(
-        state.copyWith(
-          signUpConfirmPassword: confirmPassword,
-          isValid: false,
-        ),
-      );
-      return;
-    }
-
-    emit(
-      state.copyWith(
-        signUpConfirmPassword: confirmPassword,
-        isValid: Formz.validate([
-          state.signUpEmail,
-          state.signUpPassword,
-          confirmPassword,
-        ]),
+        password: password,
+        isValid: Formz.validate([state.email, password]),
       ),
     );
   }
@@ -84,8 +36,8 @@ class LoginCubit extends Cubit<LoginState> {
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
       await _authenticationRepository.logInWithEmailAndPassword(
-        email: state.signInPassword.value,
-        password: state.signInPassword.value,
+        email: state.email.value,
+        password: state.password.value,
       );
       emit(state.copyWith(status: FormzSubmissionStatus.success));
     } on LogInWithEmailAndPasswordFailure catch (e) {
@@ -122,7 +74,7 @@ class LoginCubit extends Cubit<LoginState> {
     try {
       await _authenticationRepository.logInAnonymously();
       emit(state.copyWith(status: FormzSubmissionStatus.success));
-    } on LogInAnonymouslyFailure {
+    } on LogInAnonymouslyFailure catch (e) {
       emit(
         state.copyWith(
           errorMessage: 'An unknown error occurred',
@@ -132,30 +84,5 @@ class LoginCubit extends Cubit<LoginState> {
     } catch (_) {
       emit(state.copyWith(status: FormzSubmissionStatus.failure));
     }
-  }
-
-  Future<void> signUpWithCredential() async {
-    emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
-    try {
-      await _authenticationRepository.signUp(
-        email: state.signUpEmail.value,
-        password: state.signUpPassword.value,
-      );
-      emit(state.copyWith(status: FormzSubmissionStatus.success));
-    } on SignUpWithEmailAndPasswordFailure catch (e) {
-      emit(
-        state.copyWith(
-          errorMessage: e.message,
-          status: FormzSubmissionStatus.failure,
-        ),
-      );
-    } catch (_) {
-      emit(state.copyWith(status: FormzSubmissionStatus.failure));
-    }
-  }
-
-  void resetStatus() {
-    emit(state.copyWith(
-        status: FormzSubmissionStatus.initial, errorMessage: null));
   }
 }

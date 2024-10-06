@@ -1,11 +1,9 @@
 import 'package:authentication/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:formz/formz.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
-import 'package:medtalk/common/widgets/custom_password_field.dart';
 import 'package:medtalk/styles/sizes.dart';
 import 'package:medtalk/styles/styles/text.dart';
 
@@ -72,67 +70,72 @@ class LoginForm extends StatelessWidget {
                 content: Text(state.errorMessage ?? 'Authentication Failure'),
               ),
             );
-
-          // reset the status to initial
-          context.read<LoginCubit>().resetStatus();
         }
       },
-      child: Padding(
-        padding: kPaddL42R42T42,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Column(
-              children: [
-                SvgPicture.asset(
-                  'assets/svgs/Logo.svg',
-                  semanticsLabel: "Logo",
-                  width: 70,
-                  height: 70,
-                ),
-                kGap5,
-                _GreetingText(),
-                kGap28,
-                TabBar(
-                  controller: tabController,
-                  tabs: const [
-                    Tab(text: 'Sign In'),
-                    Tab(text: 'Sign Up'),
-                  ],
-                ),
-                SizedBox(
-                  height: 300,
-                  child: TabBarView(
+      child: Column(
+        children: [
+          Flexible(
+            flex: 2,
+            child: Padding(
+              padding: kPaddH42,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _GreetingText(),
+                  kGap10,
+                  _LineDivider(),
+                  kGap14,
+                  TabBar(
                     controller: tabController,
-                    children: [
-                      _SignIn(),
-                      _SignUp(),
+                    tabs: const [
+                      Tab(text: 'Sign In'),
+                      Tab(text: 'Sign Up'),
                     ],
                   ),
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                const Text(
-                  'Or',
-                  style: TextStyle(
-                    fontFamily: Font.family,
-                    color: Colors.grey,
-                    fontSize: Font.medium,
-                    fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: TabBarView(
+                      controller: tabController,
+                      children: [
+                        _SignIn(),
+                        _SignUp(),
+                      ],
+                    ),
                   ),
-                ),
-                kGap14,
-                _GoogleLoginButton(),
-                kGap14,
-                _SignInAsGuest(),
-              ],
+                  kGap14,
+                  const Text('Or',
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: Font.medium,
+                          fontWeight: FontWeight.bold)),
+                  kGap14,
+                  _GoogleLoginButton(),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+          Flexible(
+            flex: 1,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Stack(
+                children: [
+                  Image.asset(
+                    'assets/images/Cool-Waves-medium.png',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                  Positioned(
+                    bottom: 10,
+                    left: 0,
+                    right: 0,
+                    child: _SignInAsGuest(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -141,19 +144,14 @@ class LoginForm extends StatelessWidget {
 class _SignUp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          kGap14,
-          _SignUpEmailInput(),
-          kGap14,
-          _SignUpPasswordInput(),
-          kGap14,
-          _SignUpConfirmPasswordInput(),
-          kGap14,
-          _SignUpButton(),
-        ],
-      ),
+    return Column(
+      children: [
+        _EmailInput(),
+        kGap14,
+        _PasswordInput(),
+        kGap14,
+        _SignInButton(),
+      ],
     );
   }
 }
@@ -161,18 +159,14 @@ class _SignUp extends StatelessWidget {
 class _SignIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          kGap14,
-          _SignInEmailInput(),
-          kGap14,
-          _SignInPasswordInput(),
-          kGap14,
-          _SignInButton(),
-          kGap14,
-        ],
-      ),
+    return Column(
+      children: [
+        _EmailInput(),
+        kGap14,
+        _PasswordInput(),
+        kGap14,
+        _SignInButton(),
+      ],
     );
   }
 }
@@ -186,7 +180,6 @@ class _SignInAsGuest extends StatelessWidget {
         'Sign in as a Guest',
         style: TextStyle(
           // underline
-          fontFamily: Font.family,
           color: MyColors.textWhite,
           fontSize: Font.small,
           decoration: TextDecoration.underline,
@@ -198,115 +191,37 @@ class _SignInAsGuest extends StatelessWidget {
   }
 }
 
-class _SignInEmailInput extends StatelessWidget {
+class _EmailInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayError = context.select(
-      (LoginCubit cubit) => cubit.state.signInEmail.displayError,
-    );
-
-    final emptyInput = context.select(
-      (LoginCubit cubit) => cubit.state.signInEmail.value.isEmpty,
+      (LoginCubit cubit) => cubit.state.email.displayError,
     );
 
     return InputField(
-      key: const Key('loginForm_signInEmailInput_textField'),
+      key: const Key('loginForm_emailInput_textField'),
       hintText: "Email",
-      onChanged: (email) =>
-          context.read<LoginCubit>().signInEmailChanged(email),
+      onChanged: (email) => context.read<LoginCubit>().emailChanged(email),
       keyboardType: TextInputType.emailAddress,
-      errorText: displayError != null && !emptyInput ? "Invalid Email" : null,
+      errorText: displayError != null ? "Invalid Email" : null,
     );
   }
 }
 
-class _SignUpEmailInput extends StatelessWidget {
+class _PasswordInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayError = context.select(
-      (LoginCubit cubit) => cubit.state.signUpEmail.displayError,
-    );
-
-    final emptyInput = context.select(
-      (LoginCubit cubit) => cubit.state.signUpEmail.value.isEmpty,
+      (LoginCubit cubit) => cubit.state.password.displayError,
     );
 
     return InputField(
-      key: const Key('loginForm_signUpEmailInput_textField'),
-      hintText: "Email",
-      onChanged: (email) =>
-          context.read<LoginCubit>().signUpEmailChanged(email),
-      keyboardType: TextInputType.emailAddress,
-      errorText: displayError != null && !emptyInput ? "Invalid Email" : null,
-    );
-  }
-}
-
-class _SignInPasswordInput extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final displayError = context.select(
-      (LoginCubit cubit) => cubit.state.signInPassword.displayError,
-    );
-
-    final emptyInput = context.select(
-      (LoginCubit cubit) => cubit.state.signInPassword.value.isEmpty,
-    );
-
-    return PasswordInputField(
-      key: const Key('loginForm_signInPasswordInput_textField'),
+      key: const Key('loginForm_passwordInput_textField'),
       hintText: "Password",
       onChanged: (password) =>
-          context.read<LoginCubit>().signInPasswordChanged(password),
+          context.read<LoginCubit>().passwordChanged(password),
       keyboardType: TextInputType.visiblePassword,
-      errorText:
-          displayError != null && !emptyInput ? "Invalid Password" : null,
-    );
-  }
-}
-
-class _SignUpPasswordInput extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final displayError = context.select(
-      (LoginCubit cubit) => cubit.state.signUpPassword.displayError,
-    );
-
-    final emptyInput = context.select(
-      (LoginCubit cubit) => cubit.state.signUpPassword.value.isEmpty,
-    );
-
-    return PasswordInputField(
-      key: const Key('loginForm_signUpPasswordInput_textField'),
-      hintText: "Password",
-      onChanged: (password) =>
-          context.read<LoginCubit>().signUpPasswordChanged(password),
-      keyboardType: TextInputType.visiblePassword,
-      errorText:
-          displayError != null && !emptyInput ? "Invalid Password" : null,
-    );
-  }
-}
-
-class _SignUpConfirmPasswordInput extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final displayError = context.select(
-      (LoginCubit cubit) => cubit.state.signUpConfirmPassword.displayError,
-    );
-
-    final emptyInput = context.select(
-      (LoginCubit cubit) => cubit.state.signUpConfirmPassword.value.isEmpty,
-    );
-
-    return PasswordInputField(
-      key: const Key('loginForm_confirmPasswordInput_textField'),
-      hintText: "Confirm Password",
-      onChanged: (password) =>
-          context.read<LoginCubit>().signUpConfirmPasswordChanged(password),
-      keyboardType: TextInputType.visiblePassword,
-      errorText:
-          displayError != null && !emptyInput ? "Password's don't match" : null,
+      errorText: displayError != null ? "Invalid Password" : null,
     );
   }
 }
@@ -315,7 +230,7 @@ class _LineDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Divider(
-      color: MyColors.grey,
+      color: Colors.grey,
       height: 20,
       thickness: 2,
       indent: 0,
@@ -330,12 +245,18 @@ class _GreetingText extends StatelessWidget {
     return Padding(
       padding: kPaddH14,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           RichText(
               text: TextSpan(
-            text: 'BioHack',
+            text: 'Hello,\n',
             style: Theme.of(context).textTheme.titleLarge,
+            children: <TextSpan>[
+              TextSpan(
+                text: 'How\'re you doing today?',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ],
           )),
         ],
       ),
@@ -351,10 +272,10 @@ class _GoogleLoginButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         padding: kPadd10,
         shape: const CircleBorder(),
-        backgroundColor: MyColors.black,
+        backgroundColor: MyColors.buttonBlack,
       ),
-      child:
-          const Icon(FontAwesomeIcons.google, color: MyColors.grey, size: 28),
+      child: const Icon(FontAwesomeIcons.google,
+          color: MyColors.buttonHint, size: 28),
       onPressed: () => context.read<LoginCubit>().logInWithGoogle(),
     );
   }
@@ -384,26 +305,17 @@ class _SignInButton extends StatelessWidget {
   }
 }
 
-class _SignUpButton extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final isInProgress = context.select(
-      (LoginCubit cubit) => cubit.state.status.isInProgress,
-    );
-
-    if (isInProgress) return const CircularProgressIndicator();
-
-    final isValid = context.select(
-      (LoginCubit cubit) => cubit.state.isValid,
-    );
-
-    return ElevatedButton(
-      key: const Key('signUpForm_continue_raisedButton'),
-      style: kMainButtonStyle,
-      onPressed: isValid
-          ? () => context.read<LoginCubit>().signUpWithCredential()
-          : null,
-      child: const Text('SIGN UP', style: kButtonText),
-    );
-  }
-}
+// class _SignUpButton extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     final theme = Theme.of(context);
+//     return TextButton(
+//       key: const Key('loginForm_createAccount_flatButton'),
+//       onPressed: () => Navigator.of(context).push<void>(SignUpPage.route()),
+//       child: Text(
+//         'CREATE ACCOUNT',
+//         style: TextStyle(color: theme.primaryColor),
+//       ),
+//     );
+//   }
+// }

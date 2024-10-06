@@ -2,11 +2,11 @@ import 'package:authentication/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/auth/bloc/auth_bloc.dart';
-import 'package:medtalk/loading/screens/loading_screen.dart';
 import 'package:medtalk/login/screens/login_screen.dart';
+import 'package:medtalk/splash/screens/splash_screen.dart';
 import 'package:medtalk/styles/themes.dart';
 
-import '../../navigation/screens/navigation_patient_screen.dart';
+import '../../home/screens/home_screen.dart';
 
 class App extends StatelessWidget {
   const App({
@@ -54,7 +54,7 @@ class _AppViewState extends State<AppView> {
             switch (state.status) {
               case AuthStatus.authenticated:
                 _navigator.pushAndRemoveUntil<void>(
-                  NavigationPatient.route(),
+                  HomeScreen.route(),
                   (route) => false,
                 );
               case AuthStatus.unauthenticated:
@@ -67,7 +67,7 @@ class _AppViewState extends State<AppView> {
           child: child,
         );
       },
-      onGenerateRoute: (_) => LoadingScreen.route(),
+      onGenerateRoute: (_) => SplashScreen.route(),
       theme: darkTheme,
     );
   }

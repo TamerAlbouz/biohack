@@ -2,7 +2,6 @@ import 'package:authentication/authentication.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:models/models.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
