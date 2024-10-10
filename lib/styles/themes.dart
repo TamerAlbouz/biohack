@@ -65,7 +65,20 @@ ThemeData get darkTheme {
     ),
     tabBarTheme: const TabBarTheme(
       labelColor: MyColors.textWhite,
-      unselectedLabelColor: MyColors.subtitle,
+      labelStyle: TextStyle(
+        fontSize: Font.medium,
+        fontWeight: FontWeight.bold,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontSize: Font.medium,
+        fontWeight: FontWeight.bold,
+      ),
+      unselectedLabelColor: MyColors.textWhite,
+      dividerHeight: 0,
+      indicatorColor: MyColors.buttonPurple,
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: MyColors.textWhite,
     ),
   );
 }

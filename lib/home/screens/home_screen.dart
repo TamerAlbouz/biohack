@@ -42,7 +42,7 @@ class _UserId extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userId = context.select(
-      (AuthBloc bloc) => bloc.state.user.id,
+      (AuthBloc bloc) => bloc.state.user.uid,
     );
 
     return Text('UserID: $userId');
