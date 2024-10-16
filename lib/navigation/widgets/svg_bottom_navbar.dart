@@ -17,17 +17,20 @@ class SvgBottomNavBar<T extends Cubit<S>, S extends NavbarStateBase>
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      Positioned(
-        child: SvgPicture.asset(
-          'assets/svgs/Cool-Waves-Nav.svg',
-          fit: BoxFit.cover,
-        ),
+    return Stack(alignment: Alignment.bottomCenter, children: [
+      SvgPicture.asset(
+        'assets/svgs/Cool-Waves-Nav.svg',
+        fit: BoxFit.cover,
+        allowDrawingOutsideViewBox: true,
+        width: MediaQuery.of(context).size.width + 20,
+        alignment: Alignment.bottomCenter,
+        clipBehavior: Clip.none,
+        placeholderBuilder: (context) => const SizedBox.shrink(),
       ),
       BlocBuilder<T, S>(
         builder: (context, state) {
           return Container(
-            padding: kPadd0,
+            padding: kPaddH10,
             alignment: Alignment.bottomCenter,
             height: 95,
             child: Theme(
@@ -39,7 +42,7 @@ class SvgBottomNavBar<T extends Cubit<S>, S extends NavbarStateBase>
                 currentIndex: state.index,
                 items: items,
                 onTap: (index) => onTap(index),
-                iconSize: 32,
+                iconSize: 40,
               ),
             ),
           );

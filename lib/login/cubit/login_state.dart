@@ -2,32 +2,54 @@ part of 'login_cubit.dart';
 
 final class LoginState extends Equatable {
   const LoginState({
-    this.email = const Email.pure(),
-    this.password = const Password.pure(),
+    this.signInEmail = const Email.pure(),
+    this.signInPassword = const Password.pure(),
+    this.signUpEmail = const Email.pure(),
+    this.signUpPassword = const Password.pure(),
+    this.signUpConfirmPassword = "",
     this.status = FormzSubmissionStatus.initial,
     this.isValid = false,
     this.errorMessage,
   });
 
-  final Email email;
-  final Password password;
+  final Email signInEmail;
+  final Password signInPassword;
+  final Email signUpEmail;
+  final Password signUpPassword;
+  final String signUpConfirmPassword;
   final FormzSubmissionStatus status;
   final bool isValid;
   final String? errorMessage;
 
   @override
-  List<Object?> get props => [email, password, status, isValid, errorMessage];
+  List<Object?> get props => [
+        signInEmail,
+        signInPassword,
+        signUpEmail,
+        signUpPassword,
+        signUpConfirmPassword,
+        status,
+        isValid,
+        errorMessage
+      ];
 
   LoginState copyWith({
-    Email? email,
-    Password? password,
+    Email? signInEmail,
+    Password? signInPassword,
+    Email? signUpEmail,
+    Password? signUpPassword,
+    String? signUpConfirmPassword,
     FormzSubmissionStatus? status,
     bool? isValid,
     String? errorMessage,
   }) {
     return LoginState(
-      email: email ?? this.email,
-      password: password ?? this.password,
+      signInEmail: signInEmail ?? this.signInEmail,
+      signInPassword: signInPassword ?? this.signInPassword,
+      signUpEmail: signUpEmail ?? this.signUpEmail,
+      signUpPassword: signUpPassword ?? this.signUpPassword,
+      signUpConfirmPassword:
+          signUpConfirmPassword ?? this.signUpConfirmPassword,
       status: status ?? this.status,
       isValid: isValid ?? this.isValid,
       errorMessage: errorMessage ?? this.errorMessage,
