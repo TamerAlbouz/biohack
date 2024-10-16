@@ -1,6 +1,7 @@
 import 'package:authentication/authentication.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:formz/formz.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
@@ -76,63 +77,62 @@ class LoginForm extends StatelessWidget {
           context.read<LoginCubit>().resetStatus();
         }
       },
-      child: Column(
-        children: [
-          Flexible(
-            flex: 2,
-            child: Padding(
-              padding: kPaddL42R42T42,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _GreetingText(),
-                  kGap5,
-                  _LineDivider(),
-                  kGap14,
-                  TabBar(
+      child: Padding(
+        padding: kPaddL42R42T42,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                SvgPicture.asset(
+                  'assets/svgs/Logo.svg',
+                  semanticsLabel: "Logo",
+                  width: 70,
+                  height: 70,
+                ),
+                kGap5,
+                _GreetingText(),
+                kGap28,
+                TabBar(
+                  controller: tabController,
+                  tabs: const [
+                    Tab(text: 'Sign In'),
+                    Tab(text: 'Sign Up'),
+                  ],
+                ),
+                SizedBox(
+                  height: 300,
+                  child: TabBarView(
                     controller: tabController,
-                    tabs: const [
-                      Tab(text: 'Sign In'),
-                      Tab(text: 'Sign Up'),
+                    children: [
+                      _SignIn(),
+                      _SignUp(),
                     ],
                   ),
-                  Expanded(
-                    child: TabBarView(
-                      controller: tabController,
-                      children: [
-                        _SignIn(),
-                        _SignUp(),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-          Flexible(
-            flex: 1,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Stack(
-                children: [
-                  Image.asset(
-                    'assets/images/Cool-Waves-medium.png',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
+            Column(
+              children: [
+                const Text(
+                  'Or',
+                  style: TextStyle(
+                    fontFamily: Font.family,
+                    color: Colors.grey,
+                    fontSize: Font.medium,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Positioned(
-                    bottom: 10,
-                    left: 0,
-                    right: 0,
-                    child: _SignInAsGuest(),
-                  ),
-                ],
-              ),
+                ),
+                kGap14,
+                _GoogleLoginButton(),
+                kGap14,
+                _SignInAsGuest(),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -171,13 +171,6 @@ class _SignIn extends StatelessWidget {
           kGap14,
           _SignInButton(),
           kGap14,
-          const Text('Or',
-              style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: Font.medium,
-                  fontWeight: FontWeight.bold)),
-          kGap14,
-          _GoogleLoginButton(),
         ],
       ),
     );
@@ -193,6 +186,7 @@ class _SignInAsGuest extends StatelessWidget {
         'Sign in as a Guest',
         style: TextStyle(
           // underline
+          fontFamily: Font.family,
           color: MyColors.textWhite,
           fontSize: Font.small,
           decoration: TextDecoration.underline,
@@ -321,7 +315,7 @@ class _LineDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Divider(
-      color: Colors.grey,
+      color: MyColors.grey,
       height: 20,
       thickness: 2,
       indent: 0,
@@ -336,18 +330,12 @@ class _GreetingText extends StatelessWidget {
     return Padding(
       padding: kPaddH14,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           RichText(
               text: TextSpan(
-            text: 'Hello,\n',
+            text: 'BioHack',
             style: Theme.of(context).textTheme.titleLarge,
-            children: <TextSpan>[
-              TextSpan(
-                text: 'How\'re you doing today?',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-            ],
           )),
         ],
       ),
@@ -363,10 +351,10 @@ class _GoogleLoginButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         padding: kPadd10,
         shape: const CircleBorder(),
-        backgroundColor: MyColors.buttonBlack,
+        backgroundColor: MyColors.black,
       ),
-      child: const Icon(FontAwesomeIcons.google,
-          color: MyColors.buttonHint, size: 28),
+      child:
+          const Icon(FontAwesomeIcons.google, color: MyColors.grey, size: 28),
       onPressed: () => context.read<LoginCubit>().logInWithGoogle(),
     );
   }

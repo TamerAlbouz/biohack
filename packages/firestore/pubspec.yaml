@@ -1,0 +1,14 @@
+name: firestore
+description: Dart package which manages the db process for the app.
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  cloud_firestore: ^5.4.4
+  firebase_core: ^3.6.0
+  p_logger:
+    path: ../p_logger
+  models:
+    path: ../models

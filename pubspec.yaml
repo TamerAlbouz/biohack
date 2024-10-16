@@ -1,5 +1,5 @@
 name: medtalk
-description: "MedTalk, helping patients reach doctors."
+description: "Biohack, helping patients reach doctors."
 publish_to: 'none'
 
 # The following defines the version and build number for your application.
@@ -24,23 +24,38 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
+
+  # bloc
   bloc: ^8.1.4
+  flutter_bloc: ^8.1.6
+
+  # firebase
+  firebase_auth: ^5.3.1
+  firebase_core: ^3.6.0
+  cloud_firestore: ^5.4.4
+
+  # External packages
+  equatable: ^2.0.5
+  flutter_native_splash: ^2.4.1
+  gap: ^3.0.1
+  formz: ^0.7.0
+  font_awesome_flutter: ^10.7.0
+  flutter_launcher_icons: ^0.14.1
+  flutter_svg: ^2.0.10+1
+  agora_rtc_engine: ^6.3.2
+
+  # Permission handler
+  permission_handler: ^11.3.1
+
+  # Local packages
   p_logger:
     path: packages/p_logger
   authentication:
     path: packages/authentication
   formz_inputs:
     path: packages/formz_inputs
-  firebase_auth: ^5.3.1
-  equatable: ^2.0.5
-  flutter_bloc: ^8.1.6
-  firebase_core: ^3.6.0
-  flutter_native_splash: ^2.4.1
-  gap: ^3.0.1
-  formz: ^0.7.0
-  font_awesome_flutter: ^10.7.0
-  cloud_firestore: ^5.4.4
-  flutter_launcher_icons: ^0.14.1
+  models:
+    path: packages/models
 
 dev_dependencies:
   flutter_test:
@@ -53,7 +68,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/icons/Logo.svg
+    - assets/svgs/
     - assets/icons/
     - assets/images/
 

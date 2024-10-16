@@ -2,11 +2,10 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:meta/meta.dart';
+import 'package:models/models.dart';
 
 import '../exceptions/auth_exception.dart';
 import '../exceptions/google_exception.dart';
-import '../models/models.dart';
 
 /// Repository which manages user authentication.
 class AuthenticationRepository {
@@ -19,11 +18,6 @@ class AuthenticationRepository {
 
   final firebase_auth.FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
-
-  /// User cache key.
-  /// Should only be used for testing purposes.
-  @visibleForTesting
-  static const userCacheKey = '__user_cache_key__';
 
   /// Stream of [User] which will emit the current user when
   /// the authentication state changes.
@@ -130,6 +124,11 @@ extension on firebase_auth.User {
   /// Maps a [firebase_auth.User] into a [User].
   User get toUser {
     return User(
-        uid: uid, email: email, name: displayName, profilePictureUrl: photoURL);
+        uid: uid,
+        email: email ?? "guest@gmail.com",
+        name: displayName ?? "Guest",
+        role: "patient",
+        busy: false,
+        profilePictureUrl: photoURL);
   }
 }

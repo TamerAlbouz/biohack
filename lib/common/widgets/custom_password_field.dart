@@ -49,7 +49,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
             obscureText: _obscureText,
             onChanged: widget.onChanged,
             keyboardType: widget.keyboardType,
-            cursorColor: MyColors.buttonTextPurple,
+            cursorColor: MyColors.lightPurple,
             style: const TextStyle(
               color: MyColors.textWhite,
             ),
@@ -62,7 +62,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
                 icon: Icon(
                   _obscureText ? Icons.visibility : Icons.visibility_off,
                   size: 22,
-                  color: MyColors.buttonHint,
+                  color: MyColors.grey,
                 ),
                 onPressed: _togglePasswordVisibility,
               ),
