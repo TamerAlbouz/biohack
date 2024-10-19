@@ -1,4 +1,4 @@
-import 'package:authentication/authentication.dart';
+import 'package:firebase/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -45,7 +45,8 @@ class _LoginScreenState extends State<LoginScreen>
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: BlocProvider(
-        create: (_) => LoginCubit(context.read<AuthenticationRepository>()),
+        create: (_) => LoginCubit(context.read<IAuthenticationRepository>(),
+            context.read<IPatientInterface>()),
         child: LoginForm(tabController: _tabController),
       ),
     );
@@ -310,18 +311,18 @@ class _SignUpConfirmPasswordInput extends StatelessWidget {
   }
 }
 
-class _LineDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const Divider(
-      color: MyColors.grey,
-      height: 20,
-      thickness: 2,
-      indent: 0,
-      endIndent: 0,
-    );
-  }
-}
+// class _LineDivider extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return const Divider(
+//       color: MyColors.grey,
+//       height: 20,
+//       thickness: 2,
+//       indent: 0,
+//       endIndent: 0,
+//     );
+//   }
+// }
 
 class _GreetingText extends StatelessWidget {
   @override

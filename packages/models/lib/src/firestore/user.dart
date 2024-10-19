@@ -1,16 +1,17 @@
 import 'package:equatable/equatable.dart';
+import 'package:models/models.dart';
 
 /// User model
 ///
 /// [User.empty] represents an unauthenticated user.
-class User extends Equatable {
+class User extends Equatable implements IUser {
   /// {@macro user}
   const User(
       {required this.uid,
-      required this.role,
+      this.role,
       required this.email,
-      required this.name,
-      required this.busy,
+      this.name,
+      this.busy = false,
       this.profilePictureUrl,
       this.createdAt,
       this.updatedAt,
@@ -20,80 +21,91 @@ class User extends Equatable {
       this.biography});
 
   /// The current user's role.
-  final String role;
+  @override
+  final Role? role;
 
   /// The current user's profile picture.
+  @override
   final String? profilePictureUrl;
 
+  @override
   final DateTime? createdAt;
 
+  @override
   final DateTime? updatedAt;
 
   /// The current user's email address.
+  @override
   final String email;
 
   /// The current user's id.
+  @override
   final String uid;
 
   /// The current user's name (display name).
-  final String name;
+  @override
+  final String? name;
 
   /// The current state of the user in a video call.
+  @override
   final bool busy;
 
   /// The current user's appointments.
+  @override
   final List<String>? appointments;
 
   /// tokens FCM
+  @override
   final List<String>? tokens;
-
-  /// Empty user which represents an unauthenticated user.
-  static const empty =
-      User(uid: '', email: '', name: '', role: '', busy: false);
 
   /// Payment IDs Payment records for the doctor.
   /// Example: {'transactionId': 'xyz123', 'amount': 100.0, 'currency': 'USD'}
+  @override
   final List<String>? paymentIds;
 
   /// Biography of the user.
+  @override
   final String? biography;
 
+  static const empty = User(
+    uid: '',
+    role: Role.patient,
+    email: '',
+  );
+
   /// Returns a new [User] with updated fields.
+  @override
   User copyWith({
     String? email,
-    String? uid,
     String? name,
-    String? role,
     String? profilePictureUrl,
-    DateTime? createdAt,
     DateTime? updatedAt,
     List<String>? appointments,
     bool? busy,
+    String? biography,
     List<String>? tokens,
     List<String>? paymentIds,
-    String? biography,
   }) {
     return User(
       email: email ?? this.email,
-      uid: uid ?? this.uid,
       name: name ?? this.name,
-      role: role ?? this.role,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
-      createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       appointments: appointments ?? this.appointments,
       busy: busy ?? this.busy,
+      biography: biography ?? this.biography,
       tokens: tokens ?? this.tokens,
       paymentIds: paymentIds ?? this.paymentIds,
-      biography: biography ?? this.biography,
+      role: role,
+      uid: uid,
     );
   }
 
-  /// Converts a [Map<String, dynamic>] to a [User].
-  factory User.fromMap(Map<String, dynamic> data) {
+  /// fromMap
+  factory User.fromMap(String docId, Map<String, dynamic> data) {
     return User(
-      uid: data['uid'],
       email: data['email'],
+      uid: docId,
       name: data['name'],
       role: data['role'],
       profilePictureUrl: data['profilePictureUrl'],
@@ -105,24 +117,6 @@ class User extends Equatable {
       paymentIds: data['paymentIds'],
       biography: data['biography'],
     );
-  }
-
-  /// Converts a [User] to a [Map<String, dynamic>].
-  Map<String, dynamic> toMap() {
-    return {
-      'uid': uid,
-      'email': email,
-      'name': name,
-      'role': role,
-      'profilePictureUrl': profilePictureUrl,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'appointments': appointments,
-      'busy': busy,
-      'tokens': tokens,
-      'paymentIds': paymentIds,
-      'biography': biography,
-    };
   }
 
   @override
@@ -140,4 +134,19 @@ class User extends Equatable {
         paymentIds,
         biography,
       ];
+
+  @override
+  Map<String, dynamic> get toMap => {
+        'email': email,
+        'name': name,
+        'role': role!.name,
+        'profilePictureUrl': profilePictureUrl,
+        'createdAt': createdAt,
+        'updatedAt': updatedAt,
+        'appointments': appointments,
+        'busy': busy,
+        'tokens': tokens,
+        'paymentIds': paymentIds,
+        'biography': biography,
+      };
 }

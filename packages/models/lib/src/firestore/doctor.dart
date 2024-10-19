@@ -4,9 +4,9 @@ class Doctor extends User {
   const Doctor({
     required super.email,
     required super.uid,
-    required super.name,
+    super.name,
     required super.role,
-    required super.busy,
+    super.busy,
     super.profilePictureUrl,
     super.createdAt,
     super.updatedAt,
@@ -48,11 +48,8 @@ class Doctor extends User {
   @override
   Doctor copyWith({
     String? email,
-    String? uid,
     String? name,
-    String? role,
     String? profilePictureUrl,
-    DateTime? createdAt,
     DateTime? updatedAt,
     List<String>? appointments,
     bool? busy,
@@ -69,11 +66,11 @@ class Doctor extends User {
   }) {
     return Doctor(
       email: email ?? this.email,
-      uid: uid ?? this.uid,
+      uid: uid,
       name: name ?? this.name,
-      role: role ?? this.role,
+      role: role,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
-      createdAt: createdAt ?? this.createdAt,
+      createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       appointments: appointments ?? this.appointments,
       busy: busy ?? this.busy,
@@ -90,10 +87,10 @@ class Doctor extends User {
   }
 
   /// Converts a [Map<String, dynamic>] to a [Doctor].
-  factory Doctor.fromMap(Map<String, dynamic> data) {
+  factory Doctor.fromMap(String docId, Map<String, dynamic> data) {
     return Doctor(
       email: data['email'],
-      uid: data['uid'],
+      uid: docId,
       name: data['name'],
       role: data['role'],
       profilePictureUrl: data['profilePictureUrl'],
@@ -116,7 +113,7 @@ class Doctor extends User {
 
   /// Converts a [Doctor] to a [Map<String, dynamic>].
   @override
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> get toMap {
     return {
       'email': email,
       'uid': uid,

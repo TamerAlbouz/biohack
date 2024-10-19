@@ -1,12 +1,13 @@
-import 'package:authentication/authentication.dart';
 import 'package:bloc/bloc.dart';
+import 'package:firebase/firebase.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:medtalk/auth/screens/auth_screen.dart';
 import 'package:medtalk/bloc_observer.dart';
 import 'package:medtalk/styles/styles/system.dart';
 import 'package:p_logger/p_logger.dart';
+
+import 'app/screens/auth_screen.dart';
 
 void main() async {
   logger.i('Starting application');
@@ -25,8 +26,12 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(kStatusBarLight);
   logger.i('System chrome set');
 
+  logger.i('Configuring dependencies');
+  configureDependencies();
+  logger.i('Dependencies configured');
+
   logger.i('Initializing authentication repository');
-  final authenticationRepository = AuthenticationRepository();
+  final authenticationRepository = getIt<IAuthenticationRepository>();
   await authenticationRepository.user.first;
   logger.i('Authentication repository initialized');
 

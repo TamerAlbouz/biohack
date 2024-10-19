@@ -50,12 +50,14 @@ dependencies:
   # Local packages
   p_logger:
     path: packages/p_logger
-  authentication:
-    path: packages/authentication
   formz_inputs:
     path: packages/formz_inputs
   models:
     path: packages/models
+  firebase:
+    path: packages/firebase
+  stream_transform: ^2.1.0
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:
