@@ -4,16 +4,13 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase/firebase.dart';
 import 'package:formz/formz.dart';
 import 'package:formz_inputs/formz_inputs.dart';
-import 'package:models/models.dart';
 import 'package:p_logger/p_logger.dart';
 
 part 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
-  LoginCubit(this._authenticationRepository, this._patientRepository)
-      : super(const LoginState());
+  LoginCubit(this._authenticationRepository) : super(const LoginState());
 
-  final IPatientInterface _patientRepository;
   final IAuthenticationRepository _authenticationRepository;
 
   void signInEmailChanged(String value) {
@@ -119,27 +116,6 @@ class LoginCubit extends Cubit<LoginState> {
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
       await _authenticationRepository.logInWithGoogle();
-
-      // check if user exists
-      final authUser = _authenticationRepository.currentUser;
-
-      final Patient? user = await _patientRepository.getPatient(authUser.uid);
-
-      if (user == null) {
-        // create user
-        final Patient user = Patient(
-          email: authUser.email,
-          uid: authUser.uid,
-          name: authUser.name,
-          role: Role.patient,
-          profilePictureUrl: authUser.profilePictureUrl,
-          createdAt: DateTime.now(),
-        );
-
-        _patientRepository.addPatient(user);
-        logger.i('Patient created successfully');
-      }
-
       emit(state.copyWith(status: FormzSubmissionStatus.success));
       logger.i('User logged in with Google');
     } on FirebaseException catch (e) {
@@ -194,20 +170,6 @@ class LoginCubit extends Cubit<LoginState> {
         password: state.signUpPassword.value,
       );
       logger.i('User signed up successfully');
-
-      final authUser = _authenticationRepository.currentUser;
-      // create user
-      final Patient user = Patient(
-        email: authUser.email,
-        uid: authUser.uid,
-        name: authUser.name,
-        role: Role.patient,
-        profilePictureUrl: authUser.profilePictureUrl,
-        createdAt: DateTime.now(),
-      );
-
-      _patientRepository.addPatient(user);
-      logger.i('Patient created successfully');
       emit(state.copyWith(status: FormzSubmissionStatus.success));
     } on SignUpWithEmailAndPasswordFailure catch (e) {
       logger.e(e.message);

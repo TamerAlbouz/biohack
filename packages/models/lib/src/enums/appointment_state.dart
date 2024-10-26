@@ -1,4 +1,0 @@
-enum AppointmentState {
-  confirmed,
-  canceled,
-}

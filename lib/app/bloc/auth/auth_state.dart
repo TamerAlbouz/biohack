@@ -1,22 +1,55 @@
 part of 'auth_bloc.dart';
 
 final class AuthState extends Equatable {
-  AuthState({User user = User.empty})
-      : this._(
-          status: user == User.empty
-              ? AuthStatus.unauthenticated
-              : AuthStatus.authenticated,
-          user: user,
-          role: user.role,
-        );
+  @override
+  List<Object> get props => [];
+}
 
-  const AuthState._(
-      {required this.status, this.user = User.empty, this.role? = Role.patient});
-
-  final AuthStatus status;
+final class AuthInitial extends AuthState {
   final User user;
-  final Role? role;
+
+  AuthInitial({required this.user});
 
   @override
-  List<Object> get props => [status, user];
+  List<Object> get props => [user];
+}
+
+final class AuthChooseRole extends AuthState {
+  @override
+  List<Object> get props => [];
+}
+
+final class AuthLoading extends AuthState {
+  @override
+  List<Object> get props => [];
+}
+
+final class AuthSuccess extends AuthState {
+  final User user;
+  final Role role;
+  final AuthStatus status;
+
+  AuthSuccess(this.user,
+      {this.role = Role.unknown, this.status = AuthStatus.unauthenticated});
+
+  @override
+  List<Object> get props => [user, role, status];
+}
+
+final class AuthLogin extends AuthState {
+  final Role role;
+
+  AuthLogin(this.role);
+
+  @override
+  List<Object> get props => [role];
+}
+
+final class AuthFailure extends AuthState {
+  final String message;
+
+  AuthFailure(this.message);
+
+  @override
+  List<Object> get props => [message];
 }

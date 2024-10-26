@@ -12,16 +12,16 @@ class AppointmentRepository implements IAppointmentRepository {
   late final CollectionReference _appointmentCollection;
 
   AppointmentRepository(this._firestore) {
-    _appointmentCollection = _firestore.collection('appointments');
+    _appointmentCollection = _firestore.collection('apppointments');
   }
 
   @override
-  Stream<List<Appointment>> getAppointments() {
+  Future<List<Appointment>> getAppointments() {
     try {
-      return _appointmentCollection.snapshots().map((snapshot) {
-        return snapshot.docs.map((doc) {
-          return Appointment.fromMap(doc.data().toMap());
-        }).toList();
+      return _appointmentCollection.get().then((querySnapshot) {
+        return querySnapshot.docs
+            .map((doc) => Appointment.fromMap(doc.id, doc.data().toMap()))
+            .toList();
       });
     } on FirebaseException catch (e) {
       logger.e(e.message);
@@ -33,11 +33,10 @@ class AppointmentRepository implements IAppointmentRepository {
   }
 
   @override
-  Stream<Appointment> getAppointment(String appointmentId) {
+  Future<Appointment> getAppointment(String appointmentId) {
     try {
-      return _appointmentCollection.doc(appointmentId).snapshots().map((doc) {
-        return Appointment.fromMap(doc.data().toMap());
-      });
+      return _appointmentCollection.doc(appointmentId).get().then(
+          (doc) => Appointment.fromMap(appointmentId, doc.data().toMap()));
     } on FirebaseException catch (e) {
       logger.e(e.message);
       rethrow;

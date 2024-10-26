@@ -42,7 +42,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
             borderRadius: kRadius10,
             color: MyColors.textFieldBlack,
           ),
-          padding: kPaddL24R12,
+          padding: kPaddL24R12T2,
           height: 50,
           child: TextField(
             key: widget.key,
@@ -52,6 +52,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
             cursorColor: MyColors.lightPurple,
             style: const TextStyle(
               color: MyColors.textWhite,
+              fontSize: 16,
             ),
             decoration: InputDecoration(
               // remove underline

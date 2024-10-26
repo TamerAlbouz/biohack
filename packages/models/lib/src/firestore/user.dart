@@ -1,9 +1,13 @@
 import 'package:equatable/equatable.dart';
+import 'package:json_annotation/json_annotation.dart';
 import 'package:models/models.dart';
+
+part 'user.g.dart';
 
 /// User model
 ///
 /// [User.empty] represents an unauthenticated user.
+@JsonSerializable()
 class User extends Equatable implements IUser {
   /// {@macro user}
   const User(
@@ -18,6 +22,8 @@ class User extends Equatable implements IUser {
       this.appointments,
       this.tokens,
       this.paymentIds,
+      this.firstTime = true,
+      this.emailVerified = false,
       this.biography});
 
   /// The current user's role.
@@ -63,13 +69,20 @@ class User extends Equatable implements IUser {
   @override
   final List<String>? paymentIds;
 
+  /// First time user
+  @override
+  final bool? firstTime;
+
   /// Biography of the user.
   @override
   final String? biography;
 
+  /// Email verification status
+  final bool emailVerified;
+
   static const empty = User(
     uid: '',
-    role: Role.patient,
+    role: Role.unknown,
     email: '',
   );
 
@@ -81,14 +94,18 @@ class User extends Equatable implements IUser {
     String? profilePictureUrl,
     DateTime? updatedAt,
     List<String>? appointments,
+    bool? emailVerified,
     bool? busy,
     String? biography,
     List<String>? tokens,
     List<String>? paymentIds,
+    bool? firstTime,
   }) {
     return User(
+      firstTime: firstTime ?? this.firstTime,
       email: email ?? this.email,
       name: name ?? this.name,
+      emailVerified: emailVerified ?? this.emailVerified,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       updatedAt: updatedAt ?? this.updatedAt,
       appointments: appointments ?? this.appointments,
@@ -101,28 +118,11 @@ class User extends Equatable implements IUser {
     );
   }
 
-  /// fromMap
-  factory User.fromMap(String docId, Map<String, dynamic> data) {
-    return User(
-      email: data['email'],
-      uid: docId,
-      name: data['name'],
-      role: data['role'],
-      profilePictureUrl: data['profilePictureUrl'],
-      createdAt: data['createdAt'],
-      updatedAt: data['updatedAt'],
-      appointments: data['appointments'],
-      busy: data['busy'],
-      tokens: data['tokens'],
-      paymentIds: data['paymentIds'],
-      biography: data['biography'],
-    );
-  }
-
   @override
   List<Object?> get props => [
         email,
         uid,
+        firstTime,
         name,
         role,
         profilePictureUrl,
@@ -133,20 +133,10 @@ class User extends Equatable implements IUser {
         tokens,
         paymentIds,
         biography,
+        emailVerified,
       ];
 
-  @override
-  Map<String, dynamic> get toMap => {
-        'email': email,
-        'name': name,
-        'role': role!.name,
-        'profilePictureUrl': profilePictureUrl,
-        'createdAt': createdAt,
-        'updatedAt': updatedAt,
-        'appointments': appointments,
-        'busy': busy,
-        'tokens': tokens,
-        'paymentIds': paymentIds,
-        'biography': biography,
-      };
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserToJson(this);
 }

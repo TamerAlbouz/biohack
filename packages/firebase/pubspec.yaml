@@ -17,6 +17,7 @@ dependencies:
     path: ../p_logger
   models:
     path: ../models
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   injectable_generator: ^2.6.2

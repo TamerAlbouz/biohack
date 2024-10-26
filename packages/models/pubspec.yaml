@@ -7,5 +7,11 @@ environment:
 
 dependencies:
   equatable: ^2.0.5
+  cloud_firestore: ^5.4.4
   p_logger:
     path: ../p_logger
+  json_annotation: ^4.9.0
+
+dev_dependencies:
+  json_serializable: ^6.8.0
+  build_runner: ^2.4.13

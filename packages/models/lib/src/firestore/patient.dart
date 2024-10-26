@@ -1,11 +1,18 @@
+import 'package:json_annotation/json_annotation.dart';
+
 import '../../models.dart';
 
+part 'patient.g.dart';
+
+@JsonSerializable()
 class Patient extends User {
   const Patient({
     required super.email,
     required super.uid,
     super.name,
+    super.emailVerified,
     required super.role,
+    super.firstTime,
     super.busy,
     super.profilePictureUrl,
     super.createdAt,
@@ -49,6 +56,8 @@ class Patient extends User {
   Patient copyWith({
     String? email,
     String? name,
+    bool? firstTime,
+    bool? emailVerified,
     String? profilePictureUrl,
     DateTime? updatedAt,
     List<String>? appointments,
@@ -67,6 +76,8 @@ class Patient extends User {
     return Patient(
       email: email ?? this.email,
       uid: uid,
+      firstTime: firstTime ?? this.firstTime,
+      emailVerified: emailVerified ?? this.emailVerified,
       name: name ?? this.name,
       role: Role.patient,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
@@ -92,12 +103,15 @@ class Patient extends User {
     return Patient(
       email: data['email'],
       uid: docId,
+      firstTime: data['firstTime'],
       name: data['name'],
-      role: data['role'],
+      role: Role.values.byName(data['role']),
+      emailVerified: data['emailVerified'],
       profilePictureUrl: data['profilePictureUrl'],
-      createdAt: data['createdAt'],
-      updatedAt: data['updatedAt'],
-      appointments: data['appointments'],
+      createdAt: data['createdAt'].toDate(),
+      updatedAt: data['updatedAt']?.toDate(),
+      // List dynamic to List String
+      appointments: List<String>.from(data['appointments']),
       busy: data['busy'],
       tokens: data['tokens'],
       paymentIds: data['paymentIds'],
@@ -113,17 +127,18 @@ class Patient extends User {
   }
 
   /// Converts a [Patient] to a [Map<String, dynamic>].
-  @override
   Map<String, dynamic> get toMap {
     return {
       'email': email,
       'name': name,
       'role': role!.name,
+      'emailVerified': emailVerified,
       'profilePictureUrl': profilePictureUrl,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
       'appointments': appointments,
       'busy': busy,
+      'firstTime': firstTime,
       'tokens': tokens,
       'paymentIds': paymentIds,
       'biography': biography,
@@ -154,9 +169,16 @@ class Patient extends User {
         recentDoctors,
         sex,
         age,
+        firstTime,
         bloodType,
         weight,
         height,
         biography,
       ];
+
+  factory Patient.fromJson(Map<String, dynamic> json) =>
+      _$PatientFromJson(json);
+
+  @override
+  Map<String, dynamic> toJson() => _$PatientToJson(this);
 }

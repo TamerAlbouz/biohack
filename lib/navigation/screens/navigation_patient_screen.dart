@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/navigation/cubit/navigation_patient_cubit.dart';
 
-import '../../dashboard/screens/dashboard_screen.dart';
+import '../../dashboard/patient/screens/dashboard_screen.dart';
 import '../models/enums/navbar_screen_items_patients.dart';
 import '../widgets/svg_bottom_navbar.dart';
 

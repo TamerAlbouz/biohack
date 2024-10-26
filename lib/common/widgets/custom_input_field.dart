@@ -37,6 +37,7 @@ class InputField extends StatelessWidget {
             cursorColor: MyColors.lightPurple,
             style: const TextStyle(
               color: MyColors.textWhite,
+              fontSize: 16,
             ),
             decoration: InputDecoration(
               // remove underline

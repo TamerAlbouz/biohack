@@ -4,12 +4,12 @@ abstract class IAppointmentRepository {
   /// Stream of [Appointment] which will emit a list of appointments.
   ///
   /// Emits an empty list if there are no appointments.
-  Stream<List<Appointment>> getAppointments();
+  Future<List<Appointment>> getAppointments();
 
   /// Stream of [Appointment] which will emit the appointment with the given [appointmentId].
   ///
   /// Emits an empty stream if the appointment is not found.
-  Stream<Appointment> getAppointment(String appointmentId);
+  Future<Appointment> getAppointment(String appointmentId);
 
   /// Adds a new appointment to the collection.
   ///

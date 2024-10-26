@@ -3,11 +3,10 @@ import 'package:firebase/firebase.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:medtalk/app/screens/app_screen.dart';
 import 'package:medtalk/bloc_observer.dart';
 import 'package:medtalk/styles/styles/system.dart';
 import 'package:p_logger/p_logger.dart';
-
-import 'app/screens/auth_screen.dart';
 
 void main() async {
   logger.i('Starting application');
@@ -27,17 +26,19 @@ void main() async {
   logger.i('System chrome set');
 
   logger.i('Configuring dependencies');
-  configureDependencies();
+  await configureDependencies();
   logger.i('Dependencies configured');
-
-  logger.i('Initializing authentication repository');
-  final authenticationRepository = getIt<IAuthenticationRepository>();
-  await authenticationRepository.user.first;
-  logger.i('Authentication repository initialized');
 
   // only portrait mode
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+
+  logger.i('Initializing authentication repository');
+  final IAuthenticationRepository authenticationRepository =
+      getIt<IAuthenticationRepository>();
+  await authenticationRepository.user.first;
+  // check if role is already chosen
+  logger.i('Authentication repository initialized');
 
   logger.i('Running application');
   runApp(App(authenticationRepository: authenticationRepository));

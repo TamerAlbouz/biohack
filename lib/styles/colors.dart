@@ -11,8 +11,7 @@ class MyColors {
   static const buttonRed = Color(0xffC62E31);
   static const cancel = Color(0xffC62E31);
   static const pending = Color(0xffB29F0F);
-  static const textGreen = Color(0xff026F36);
-  static const confirm = Color(0xff149057);
+  static const green = Color(0xff026F36);
   static const card = Color(0xffF7F3F0);
   static const star = Color(0xffE9C01D);
   static const subtitle = Color(0xff8D8D8D);
@@ -22,4 +21,7 @@ class MyColors {
   static const optionStroke = Color(0xffDEDAD7);
   static const textWhite = Color(0xffffffff);
   static const errorRed = Color(0xffee5a5b);
+  static const textButtonGrey = Color(0xffC0C0C0);
+  static const cardBackground = Color(0xffF9F5F2);
+  static const cardDivider = Color(0xffDEDEDE);
 }

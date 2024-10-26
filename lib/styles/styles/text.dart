@@ -7,7 +7,7 @@ const kButtonHint = TextStyle(
   fontFamily: Font.family,
   color: MyColors.grey,
   fontSize: Font.mediumSmall,
-  fontWeight: FontWeight.bold,
+  fontWeight: FontWeight.normal,
 );
 
 const kButtonText = TextStyle(

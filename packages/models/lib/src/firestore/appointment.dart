@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:models/src/enums/appointment_state.dart';
+import 'package:models/src/enums/appointment_status.dart';
 
 class Appointment extends Equatable {
   const Appointment({
@@ -7,12 +7,10 @@ class Appointment extends Equatable {
     required this.doctorId,
     required this.patientId,
     required this.specialtyId,
-    required this.appointmentStatus,
-    required this.serviceId,
+    required this.status,
     required this.serviceName,
     required this.fee,
-    required this.currency,
-    required this.appointmentTime,
+    required this.appointmentDate,
     required this.duration,
     this.sessionLength,
     this.isConfirmedDoneByPatient = false,
@@ -24,7 +22,9 @@ class Appointment extends Equatable {
     this.callDetails,
     this.notifications,
     this.feedback,
+    this.location,
     required this.createdAt,
+    required this.isCallOnline,
     this.updatedAt,
   });
 
@@ -41,25 +41,19 @@ class Appointment extends Equatable {
   final String specialtyId;
 
   /// Status of the appointment ('confirmed', 'cancelled').
-  final AppointmentState appointmentStatus;
-
-  /// Unique identifier for the service.
-  final String serviceId;
+  final AppointmentStatus status;
 
   /// Name of the service.
   final String serviceName;
 
   /// Fee for the service.
-  final double fee;
-
-  /// Currency of the fee.
-  final String currency;
+  final int fee;
 
   /// Date and time of the appointment.
-  final DateTime appointmentTime;
+  final DateTime appointmentDate;
 
   /// Duration of the appointment in minutes.
-  final int duration;
+  final int? duration;
 
   /// Length of each session in minutes.
   final int? sessionLength;
@@ -97,18 +91,18 @@ class Appointment extends Equatable {
   /// Date and time when the appointment was last updated.
   final DateTime? updatedAt;
 
+  /// If an appointment is online or in-person.
+  final bool isCallOnline;
+
+  /// Location of the appointment.
+  final String? location;
+
   /// Returns a new [Appointment] with updated fields.
   Appointment copyWith({
-    String? appointmentId,
-    String? doctorId,
-    String? patientId,
-    String? specialtyId,
-    AppointmentState? appointmentStatus,
-    String? serviceId,
+    AppointmentStatus? status,
     String? serviceName,
-    double? fee,
-    String? currency,
-    DateTime? appointmentTime,
+    int? fee,
+    DateTime? appointmentDate,
     int? duration,
     int? sessionLength,
     bool? isConfirmedDoneByPatient,
@@ -124,16 +118,16 @@ class Appointment extends Equatable {
     DateTime? updatedAt,
   }) {
     return Appointment(
-      appointmentId: appointmentId ?? this.appointmentId,
-      doctorId: doctorId ?? this.doctorId,
-      patientId: patientId ?? this.patientId,
-      specialtyId: specialtyId ?? this.specialtyId,
-      appointmentStatus: appointmentStatus ?? this.appointmentStatus,
-      serviceId: serviceId ?? this.serviceId,
+      location: location,
+      isCallOnline: isCallOnline,
+      appointmentId: appointmentId,
+      doctorId: doctorId,
+      patientId: patientId,
+      specialtyId: specialtyId,
+      status: status ?? this.status,
       serviceName: serviceName ?? this.serviceName,
       fee: fee ?? this.fee,
-      currency: currency ?? this.currency,
-      appointmentTime: appointmentTime ?? this.appointmentTime,
+      appointmentDate: appointmentDate ?? this.appointmentDate,
       duration: duration ?? this.duration,
       sessionLength: sessionLength ?? this.sessionLength,
       isConfirmedDoneByPatient:
@@ -154,19 +148,19 @@ class Appointment extends Equatable {
   }
 
   /// Converts a [Map<String, dynamic>] to an [Appointment].
-  factory Appointment.fromMap(Map<String, dynamic> data) {
+  factory Appointment.fromMap(String id, Map<String, dynamic> data) {
     return Appointment(
-      appointmentId: data['appointmentId'],
+      appointmentId: id,
       doctorId: data['doctorId'],
       patientId: data['patientId'],
+      location: data['location'],
       specialtyId: data['specialtyId'],
-      appointmentStatus: data['status'],
-      serviceId: data['serviceId'],
+      status: AppointmentStatus.values.byName(data['status']),
       serviceName: data['serviceName'],
       fee: data['fee'],
-      currency: data['currency'],
-      appointmentTime: DateTime.parse(data['appointmentTime']),
+      appointmentDate: data['appointmentDate'].toDate(),
       duration: data['duration'],
+      isCallOnline: data['isCallOnline'],
       sessionLength: data['sessionLength'],
       isConfirmedDoneByPatient: data['isConfirmedDoneByPatient'],
       isConfirmedDoneByDoctor: data['isConfirmedDoneByDoctor'],
@@ -185,25 +179,23 @@ class Appointment extends Equatable {
       feedback: data['feedback'] != null
           ? FeedbackDetails.fromMap(data['feedback'])
           : null,
-      createdAt: DateTime.parse(data['createdAt']),
-      updatedAt:
-          data['updatedAt'] != null ? DateTime.parse(data['updatedAt']) : null,
+      createdAt: data['createdAt'].toDate(),
+      updatedAt: data['updatedAt']?.toDate(),
     );
   }
 
   /// Converts an [Appointment] to a [Map<String, dynamic>].
   Map<String, dynamic> toMap() {
     return {
-      'appointmentId': appointmentId,
       'doctorId': doctorId,
       'patientId': patientId,
       'specialtyId': specialtyId,
-      'status': appointmentStatus,
-      'serviceId': serviceId,
+      'status': status,
       'serviceName': serviceName,
+      'isCallOnline': isCallOnline,
+      'location': location,
       'fee': fee,
-      'currency': currency,
-      'appointmentTime': appointmentTime.toIso8601String(),
+      'appointmentDate': appointmentDate,
       'duration': duration,
       'sessionLength': sessionLength,
       'isConfirmedDoneByPatient': isConfirmedDoneByDoctor,
@@ -215,8 +207,8 @@ class Appointment extends Equatable {
       'callDetails': callDetails?.toMap(),
       'notifications': notifications?.toMap(),
       'feedback': feedback?.toMap(),
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
     };
   }
 
@@ -226,17 +218,17 @@ class Appointment extends Equatable {
         doctorId,
         patientId,
         specialtyId,
-        appointmentStatus,
-        serviceId,
+        status,
         serviceName,
+        isCallOnline,
         fee,
-        currency,
-        appointmentTime,
+        appointmentDate,
         duration,
         sessionLength,
         isConfirmedDoneByPatient,
         isConfirmedDoneByDoctor,
         isPaymentHeldInEscrow,
+        location,
         paymentId,
         disputeRaised,
         disputeDetails,
