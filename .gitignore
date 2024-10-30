@@ -16,6 +16,9 @@ migrate_working_dir/
 *.iws
 .idea/
 
+# exclude all .env files from source control
+*.env
+
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
@@ -36,6 +39,10 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# exclude the API key from version control
+env.g.dart
+env.dart
 
 # Android Studio will place build artifacts here
 /android/app/debug

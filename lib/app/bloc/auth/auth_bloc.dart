@@ -6,6 +6,7 @@ import 'package:models/models.dart';
 import 'package:p_logger/p_logger.dart';
 
 part 'auth_event.dart';
+
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {

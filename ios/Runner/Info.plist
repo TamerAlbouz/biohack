@@ -12,6 +12,10 @@
         <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
+        <key>NSCameraUsageDescription</key>
+        <string>We need camera access to enable video calling</string>
+        <key>NSMicrophoneUsageDescription</key>
+        <string>We need microphone access to enable video calling</string>
         <key>CFBundleName</key>
         <string>BioHack</string>
         <key>CFBundlePackageType</key>

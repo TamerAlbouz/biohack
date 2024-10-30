@@ -4,10 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/loading/screens/loading_screen.dart';
 import 'package:medtalk/login/patient/screens/login_patient_screen.dart';
+import 'package:medtalk/navigation/screens/navigation_patient_screen.dart';
 import 'package:medtalk/styles/themes.dart';
 import 'package:models/models.dart';
 
-import '../../dashboard/patient/screens/dashboard_screen.dart';
 import '../bloc/auth/auth_bloc.dart';
 import 'auth_screen.dart';
 
@@ -91,9 +91,10 @@ class _AppViewState extends State<_AppView> {
             }
 
             if (state is AuthSuccess &&
-                state.status == AuthStatus.authenticated) {
+                (state.status == AuthStatus.authenticated ||
+                    state.status == AuthStatus.firstTimeAuthentication)) {
               AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-                DashboardScreen.route(),
+                NavigationPatient.route(),
                 (route) => false,
               );
             }

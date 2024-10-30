@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medtalk/agora/screens/call.dart';
 import 'package:medtalk/navigation/cubit/navigation_patient_cubit.dart';
 
 import '../../dashboard/patient/screens/dashboard_screen.dart';
@@ -114,7 +115,7 @@ class _Body extends StatelessWidget {
         case NavbarScreenItemsPatient.dashboard:
           return const DashboardScreen();
         case NavbarScreenItemsPatient.search:
-          return const Text('Search Screen');
+          return const VideoCallScreen();
         case NavbarScreenItemsPatient.appointments:
           return const Text('Appointments Screen');
         case NavbarScreenItemsPatient.documents:
