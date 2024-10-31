@@ -1,0 +1,8 @@
+name: skeleton
+description: Dart package which manages the skeleton placeholders for the app.
+publish_to: none
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+dependencies:
+  skeletonizer: ^1.4.2

@@ -27,7 +27,6 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
       paymentIds: (json['paymentIds'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
-      firstTime: json['firstTime'] as bool? ?? true,
       emailVerified: json['emailVerified'] as bool? ?? false,
       biography: json['biography'] as String?,
     );
@@ -44,7 +43,6 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
       'appointments': instance.appointments,
       'tokens': instance.tokens,
       'paymentIds': instance.paymentIds,
-      'firstTime': instance.firstTime,
       'biography': instance.biography,
       'emailVerified': instance.emailVerified,
     };

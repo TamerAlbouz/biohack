@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:medtalk/styles/styles/button.dart';
 import 'package:models/models.dart';
 
 import '../../common/widgets/logo_widget.dart';
+import '../../styles/font.dart';
+import '../../styles/sizes.dart';
 import '../bloc/auth/auth_bloc.dart';
 
 class Auth extends StatelessWidget {
@@ -64,32 +68,57 @@ class _AppViewState extends State<_AppView> {
           }
 
           if (state is AuthChooseRole) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  const LogoWidget(),
-                  const Text(
-                    'Welcome! Are you a doctor or a patient?',
-                    style: TextStyle(fontSize: 24),
-                    textAlign: TextAlign.center,
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                const Padding(
+                  padding: kPaddH42,
+                  child: Column(children: [
+                    kGap128,
+                    LogoWidget(),
+                    kGap14,
+                    Text(
+                      'Welcome! \nAre you a doctor or a patient?',
+                      style: TextStyle(fontSize: Font.mediumLarge),
+                      textAlign: TextAlign.center,
+                    ),
+                  ]),
+                ),
+                kGap68,
+                Padding(
+                  padding: kPaddH42,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<AuthBloc>().add(ChooseRole(Role.doctor));
+                        },
+                        style: kMainButtonStyle,
+                        child: const Text('I am a Doctor'),
+                      ),
+                      kGap14,
+                      ElevatedButton(
+                        onPressed: () async {
+                          context
+                              .read<AuthBloc>()
+                              .add(ChooseRole(Role.patient));
+                        },
+                        style: kMainButtonStyle,
+                        child: const Text('I am a Patient'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<AuthBloc>().add(ChooseRole(Role.doctor));
-                    },
-                    child: const Text('I am a Doctor'),
+                ),
+                Expanded(
+                  child: SvgPicture.asset(
+                    "assets/svgs/Cool-Waves.svg",
+                    fit: BoxFit.contain,
+                    alignment: Alignment.bottomCenter,
+                    width: double.infinity,
                   ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () async {
-                      context.read<AuthBloc>().add(ChooseRole(Role.patient));
-                    },
-                    child: const Text('I am a Patient'),
-                  ),
-                ],
-              ),
+                ),
+              ],
             );
           }
 

@@ -8,12 +8,10 @@ class SignInPasswordInput extends StatelessWidget {
     super.key,
     required this.onChanged,
     this.displayError,
-    this.emptyInput = false,
   });
 
   final void Function(String) onChanged;
   final PasswordValidationError? displayError;
-  final bool emptyInput;
 
   @override
   Widget build(BuildContext context) {
@@ -22,8 +20,7 @@ class SignInPasswordInput extends StatelessWidget {
       hintText: "Password",
       onChanged: onChanged,
       keyboardType: TextInputType.visiblePassword,
-      errorText:
-          displayError != null && !emptyInput ? "Invalid Password" : null,
+      errorText: displayError != null ? "Invalid Password" : null,
     );
   }
 }

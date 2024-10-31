@@ -54,11 +54,23 @@ class DashboardView extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             case PatientLoaded():
               // Load appointment data when patient data is loaded
-              context
-                  .read<AppointmentBloc>()
-                  .add(LoadAppointment(patientState.patient.appointments![0]));
+              if (patientState.patient.appointments?.isEmpty ?? false) {
+                return const Center(
+                    child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('No appointments'),
+                    kGap6,
+                    // _WelcomeMessage(patientName: patient.name),
+                    const _UserId(),
+                    const _LogoutButton(),
+                  ],
+                ));
+              }
+              context.read<AppointmentBloc>().add(
+                  LoadAppointment(patientState.patient.appointments!.first));
               return AppointmentBuilder(
-                  appointmentId: patientState.patient.appointments![0]);
+                  appointmentId: patientState.patient.appointments!.first);
             case PatientError():
               return _DashboardError(message: patientState.message);
             default:

@@ -38,7 +38,7 @@ class PatientRepository extends UserRepository implements IPatientRepository {
   @override
   Future<void> addPatient(Patient patient) {
     try {
-      return _userCollection.doc(patient.uid).set(patient.toJson());
+      return _userCollection.doc(patient.uid).set(patient.toMap);
     } on FirebaseException catch (e) {
       logger.e(e.message);
       rethrow;
@@ -51,7 +51,7 @@ class PatientRepository extends UserRepository implements IPatientRepository {
   @override
   Future<void> updatePatient(Patient patient) {
     try {
-      return _userCollection.doc(patient.uid).update(patient.toJson());
+      return _userCollection.doc(patient.uid).update(patient.toMap);
     } on FirebaseException catch (e) {
       logger.e(e.message);
       // return empty future

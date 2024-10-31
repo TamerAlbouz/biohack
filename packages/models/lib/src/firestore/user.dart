@@ -22,7 +22,6 @@ class User extends Equatable implements IUser {
       this.appointments,
       this.tokens,
       this.paymentIds,
-      this.firstTime = true,
       this.emailVerified = false,
       this.biography});
 
@@ -69,10 +68,6 @@ class User extends Equatable implements IUser {
   @override
   final List<String>? paymentIds;
 
-  /// First time user
-  @override
-  final bool? firstTime;
-
   /// Biography of the user.
   @override
   final String? biography;
@@ -99,10 +94,8 @@ class User extends Equatable implements IUser {
     String? biography,
     List<String>? tokens,
     List<String>? paymentIds,
-    bool? firstTime,
   }) {
     return User(
-      firstTime: firstTime ?? this.firstTime,
       email: email ?? this.email,
       name: name ?? this.name,
       emailVerified: emailVerified ?? this.emailVerified,
@@ -122,7 +115,6 @@ class User extends Equatable implements IUser {
   List<Object?> get props => [
         email,
         uid,
-        firstTime,
         name,
         role,
         profilePictureUrl,

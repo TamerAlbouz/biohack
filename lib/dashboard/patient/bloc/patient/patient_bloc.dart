@@ -24,10 +24,15 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
   Future<void> _onLoadPatient(
       LoadPatient event, Emitter<PatientState> emit) async {
     await emit.onEach(_authRepo.user, onData: (patient) async {
+      emit(PatientLoading());
       if (patient != User.empty) {
         _patient = await _patientRepo.getPatient(patient.uid);
         logger.i('Patient found in database: $_patient');
-        emit(PatientLoaded(_patient!));
+        if (_patient == null) {
+          emit(const PatientError('Patient not found'));
+        } else {
+          emit(PatientLoaded(_patient!));
+        }
       }
     }, onError: (error, stackTrace) {
       addError(error, stackTrace);

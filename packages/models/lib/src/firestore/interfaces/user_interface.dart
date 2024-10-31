@@ -35,9 +35,6 @@ abstract class IUser extends Equatable {
   /// tokens FCM
   List<String>? get tokens;
 
-  /// First time user
-  bool? get firstTime;
-
   /// Payment IDs Payment records for the doctor.
   /// Example: {'transactionId': 'xyz123', 'amount': 100.0, 'currency': 'USD'}
   List<String>? get paymentIds;
@@ -61,7 +58,6 @@ abstract class IUser extends Equatable {
     String? biography,
     List<String>? tokens,
     List<String>? paymentIds,
-    bool? firstTime,
   });
 
   @override
@@ -78,7 +74,6 @@ abstract class IUser extends Equatable {
         tokens,
         paymentIds,
         biography,
-        firstTime,
       ];
 }
 
@@ -95,7 +90,6 @@ class _UserImpl extends IUser {
     this.appointments,
     this.tokens,
     this.paymentIds,
-    this.firstTime = false,
     this.biography,
   });
 
@@ -136,9 +130,6 @@ class _UserImpl extends IUser {
   final String? biography;
 
   @override
-  final bool? firstTime;
-
-  @override
   IUser copyWith({
     String? email,
     String? name,
@@ -149,10 +140,8 @@ class _UserImpl extends IUser {
     String? biography,
     List<String>? tokens,
     List<String>? paymentIds,
-    bool? firstTime,
   }) {
     return _UserImpl(
-      firstTime: firstTime ?? this.firstTime,
       email: email ?? this.email,
       name: name ?? this.name,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
@@ -170,7 +159,6 @@ class _UserImpl extends IUser {
   factory _UserImpl.fromMap(String docId, Map<String, dynamic> data) {
     return _UserImpl(
       email: data['email'],
-      firstTime: data['firstTime'],
       uid: docId,
       name: data['name'],
       role: data['role'],
@@ -187,7 +175,6 @@ class _UserImpl extends IUser {
 
   Map<String, dynamic> get toMap => {
         'email': email,
-        'firstTime': firstTime,
         'name': name,
         'role': role,
         'profilePictureUrl': profilePictureUrl,

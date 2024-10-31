@@ -6,7 +6,6 @@ import 'package:models/models.dart';
 import 'package:p_logger/p_logger.dart';
 
 part 'auth_event.dart';
-
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -64,15 +63,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _handlePatientFlow(
       User user, Emitter<AuthState> emit, Role role) async {
+    emit(AuthLoading());
+
+    // if user signed in anonymously, go straight to a premade workflow
+    // if (user.isAnonymous) {
+    //   logger.i('Anonymous user');
+    //   emit(AuthSuccess(user,
+    //       role: Role.patient, status: AuthStatus.firstTimeAuthentication));
+    //   return;
+    // }
+
     final patient = await _patientRepository.getPatient(user.uid);
 
     if (patient == null) {
       logger.i('Patient not found');
-      emit(AuthSuccess(user,
-          role: Role.patient, status: AuthStatus.firstTimeAuthentication));
-      return;
-    } else if (patient.firstTime == true) {
-      logger.i('Patient first time');
       emit(AuthSuccess(user,
           role: Role.patient, status: AuthStatus.firstTimeAuthentication));
     } else {
@@ -85,8 +89,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   void _onLogoutPressed(
     AuthLogoutPressed event,
     Emitter<AuthState> emit,
-  ) {
-    _userPreferences.clear();
+  ) async {
+    await _userPreferences.clear();
     _authRepo.logOut();
     logger.i('User logged out');
   }
@@ -96,7 +100,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      emit(AuthLoading());
       await _userPreferences.setRole(event.role);
       logger.i('Role chosen: ${event.role}');
       emit(AuthLogin(event.role));

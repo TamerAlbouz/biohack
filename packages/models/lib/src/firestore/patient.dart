@@ -12,7 +12,6 @@ class Patient extends User {
     super.name,
     super.emailVerified,
     required super.role,
-    super.firstTime,
     super.busy,
     super.profilePictureUrl,
     super.createdAt,
@@ -24,7 +23,7 @@ class Patient extends User {
     this.medicalRecords,
     this.recentDoctors,
     this.sex,
-    this.age,
+    this.dateOfBirth,
     this.bloodType,
     this.weight,
     this.height,
@@ -40,7 +39,7 @@ class Patient extends User {
   final String? sex;
 
   /// The current user's age.
-  final int? age;
+  final DateTime? dateOfBirth;
 
   /// The current user's blood type.
   final String? bloodType;
@@ -56,7 +55,6 @@ class Patient extends User {
   Patient copyWith({
     String? email,
     String? name,
-    bool? firstTime,
     bool? emailVerified,
     String? profilePictureUrl,
     DateTime? updatedAt,
@@ -68,7 +66,7 @@ class Patient extends User {
     List<String>? medicalRecords,
     List<String>? recentDoctors,
     String? sex,
-    int? age,
+    DateTime? dateOfBirth,
     String? bloodType,
     double? weight,
     double? height,
@@ -76,7 +74,6 @@ class Patient extends User {
     return Patient(
       email: email ?? this.email,
       uid: uid,
-      firstTime: firstTime ?? this.firstTime,
       emailVerified: emailVerified ?? this.emailVerified,
       name: name ?? this.name,
       role: Role.patient,
@@ -90,7 +87,7 @@ class Patient extends User {
       medicalRecords: medicalRecords ?? this.medicalRecords,
       recentDoctors: recentDoctors ?? this.recentDoctors,
       sex: sex ?? this.sex,
-      age: age ?? this.age,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       bloodType: bloodType ?? this.bloodType,
       weight: weight ?? this.weight,
       height: height ?? this.height,
@@ -103,15 +100,15 @@ class Patient extends User {
     return Patient(
       email: data['email'],
       uid: docId,
-      firstTime: data['firstTime'],
       name: data['name'],
       role: Role.values.byName(data['role']),
       emailVerified: data['emailVerified'],
       profilePictureUrl: data['profilePictureUrl'],
       createdAt: data['createdAt'].toDate(),
       updatedAt: data['updatedAt']?.toDate(),
-      // List dynamic to List String
-      appointments: List<String>.from(data['appointments']),
+      appointments: data['appointments'] != null
+          ? List<String>.from(data['appointments'])
+          : [],
       busy: data['busy'],
       tokens: data['tokens'],
       paymentIds: data['paymentIds'],
@@ -119,7 +116,7 @@ class Patient extends User {
       medicalRecords: data['medicalRecords'],
       recentDoctors: data['recentDoctors'],
       sex: data['sex'],
-      age: data['age'],
+      dateOfBirth: data['dateOfBirth']?.toDate(),
       bloodType: data['bloodType'],
       weight: data['weight'],
       height: data['height'],
@@ -138,14 +135,13 @@ class Patient extends User {
       'updatedAt': updatedAt,
       'appointments': appointments,
       'busy': busy,
-      'firstTime': firstTime,
       'tokens': tokens,
       'paymentIds': paymentIds,
       'biography': biography,
       'medicalRecords': medicalRecords,
       'recentDoctors': recentDoctors,
       'sex': sex,
-      'age': age,
+      'dateOfBirth': dateOfBirth,
       'bloodType': bloodType,
       'weight': weight,
       'height': height,
@@ -168,8 +164,7 @@ class Patient extends User {
         medicalRecords,
         recentDoctors,
         sex,
-        age,
-        firstTime,
+        dateOfBirth,
         bloodType,
         weight,
         height,

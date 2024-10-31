@@ -72,6 +72,8 @@ class LoginForm extends StatelessWidget {
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
+                showCloseIcon: true,
+                // allow overlaying over other widgets
                 content: Text(state.errorMessage ?? 'Authentication Failure'),
               ),
             );
@@ -123,7 +125,9 @@ class LoginForm extends StatelessWidget {
                 ),
                 kGap14,
                 GoogleLoginButton(
-                  onPressed: () => context.read<LoginCubit>().logInWithGoogle(),
+                  onPressed: () {
+                    context.read<LoginCubit>().logInWithGoogle();
+                  },
                 ),
                 kGap14,
                 SignInAsGuest(
@@ -151,9 +155,6 @@ class _SignUp extends StatelessWidget {
             displayError: context.select(
               (LoginCubit cubit) => cubit.state.signUpEmail.displayError,
             ),
-            emptyInput: context.select(
-              (LoginCubit cubit) => cubit.state.signUpEmail.value.isEmpty,
-            ),
             onChanged: (email) =>
                 context.read<LoginCubit>().signUpEmailChanged(email),
           ),
@@ -161,9 +162,6 @@ class _SignUp extends StatelessWidget {
           SignUpPasswordInput(
             displayError: context.select(
               (LoginCubit cubit) => cubit.state.signUpPassword.displayError,
-            ),
-            emptyInput: context.select(
-              (LoginCubit cubit) => cubit.state.signUpPassword.value.isEmpty,
             ),
             onChanged: (password) =>
                 context.read<LoginCubit>().signUpPasswordChanged(password),
@@ -204,12 +202,20 @@ class _SignIn extends StatelessWidget {
         children: [
           kGap14,
           SignInEmailInput(
-              onChanged: (email) =>
-                  context.read<LoginCubit>().signInEmailChanged(email)),
+            onChanged: (email) =>
+                context.read<LoginCubit>().signInEmailChanged(email),
+            displayError: context.select(
+              (LoginCubit cubit) => cubit.state.signInEmail.displayError,
+            ),
+          ),
           kGap14,
           SignInPasswordInput(
-              onChanged: (password) =>
-                  context.read<LoginCubit>().signInPasswordChanged(password)),
+            onChanged: (password) =>
+                context.read<LoginCubit>().signInPasswordChanged(password),
+            displayError: context.select(
+              (LoginCubit cubit) => cubit.state.signInPassword.displayError,
+            ),
+          ),
           kGap14,
           SignInButton(
             status: context.select(

@@ -8,12 +8,10 @@ class SignUpEmailInput extends StatelessWidget {
     super.key,
     required this.onChanged,
     this.displayError,
-    this.emptyInput = false,
   });
 
   final void Function(String) onChanged;
   final EmailValidationError? displayError;
-  final bool emptyInput;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +20,7 @@ class SignUpEmailInput extends StatelessWidget {
       hintText: "Email",
       onChanged: onChanged,
       keyboardType: TextInputType.emailAddress,
-      errorText: displayError != null && !emptyInput ? "Invalid Email" : null,
+      errorText: displayError != null ? "Invalid Email" : null,
     );
   }
 }

@@ -7,11 +7,12 @@ import '../../dashboard/patient/screens/dashboard_screen.dart';
 import '../models/enums/navbar_screen_items_patients.dart';
 import '../widgets/svg_bottom_navbar.dart';
 
-class NavigationPatient extends StatelessWidget {
-  const NavigationPatient({super.key});
+class NavigationPatientScreen extends StatelessWidget {
+  const NavigationPatientScreen({super.key});
 
   static Route<void> route() {
-    return MaterialPageRoute<void>(builder: (_) => const NavigationPatient());
+    return MaterialPageRoute<void>(
+        builder: (_) => const NavigationPatientScreen());
   }
 
   @override

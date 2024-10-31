@@ -12,7 +12,6 @@ Patient _$PatientFromJson(Map<String, dynamic> json) => Patient(
       name: json['name'] as String?,
       emailVerified: json['emailVerified'] as bool? ?? false,
       role: $enumDecodeNullable(_$RoleEnumMap, json['role']),
-      firstTime: json['firstTime'] as bool? ?? true,
       busy: json['busy'] as bool? ?? false,
       profilePictureUrl: json['profilePictureUrl'] as String?,
       createdAt: json['createdAt'] == null
@@ -37,7 +36,9 @@ Patient _$PatientFromJson(Map<String, dynamic> json) => Patient(
           ?.map((e) => e as String)
           .toList(),
       sex: json['sex'] as String?,
-      age: (json['age'] as num?)?.toInt(),
+      dateOfBirth: json['dateOfBirth'] == null
+          ? null
+          : DateTime.parse(json['dateOfBirth'] as String),
       bloodType: json['bloodType'] as String?,
       weight: (json['weight'] as num?)?.toDouble(),
       height: (json['height'] as num?)?.toDouble(),
@@ -55,13 +56,12 @@ Map<String, dynamic> _$PatientToJson(Patient instance) => <String, dynamic>{
       'appointments': instance.appointments,
       'tokens': instance.tokens,
       'paymentIds': instance.paymentIds,
-      'firstTime': instance.firstTime,
       'biography': instance.biography,
       'emailVerified': instance.emailVerified,
       'medicalRecords': instance.medicalRecords,
       'recentDoctors': instance.recentDoctors,
       'sex': instance.sex,
-      'age': instance.age,
+      'dateOfBirth': instance.dateOfBirth?.toIso8601String(),
       'bloodType': instance.bloodType,
       'weight': instance.weight,
       'height': instance.height,

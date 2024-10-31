@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:formz/formz.dart';
 
 import '../../styles/colors.dart';
@@ -23,15 +22,16 @@ class SignInButton extends StatelessWidget {
     if (status.isInProgress) return const CircularProgressIndicator();
 
     if (status.isSuccess) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            const SnackBar(
-                backgroundColor: MyColors.green,
-                content: Text('Successfully Signed In!')),
-          );
-      });
+      // return the button with a green background and a tick icon
+      return ElevatedButton.icon(
+        key: const Key('loginForm_continue_raisedButton'),
+        style: kMainButtonStyle.copyWith(
+          backgroundColor: const WidgetStatePropertyAll(MyColors.buttonGreen),
+        ),
+        onPressed: null,
+        icon: const Icon(Icons.check, color: Colors.white),
+        label: const Text(''),
+      );
     }
 
     return ElevatedButton(

@@ -61,6 +61,7 @@ dependencies:
   stream_transform: ^2.1.0
   intl: ^0.19.0
   envied: ^0.5.4+1
+  skeletonizer: ^1.4.2
 
 dev_dependencies:
   flutter_test:

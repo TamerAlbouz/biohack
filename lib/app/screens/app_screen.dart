@@ -2,6 +2,7 @@ import 'package:firebase/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/common/globals/globals.dart';
+import 'package:medtalk/intro/screens/patient/intro_screen_patient.dart';
 import 'package:medtalk/loading/screens/loading_screen.dart';
 import 'package:medtalk/login/patient/screens/login_patient_screen.dart';
 import 'package:medtalk/navigation/screens/navigation_patient_screen.dart';
@@ -91,10 +92,17 @@ class _AppViewState extends State<_AppView> {
             }
 
             if (state is AuthSuccess &&
-                (state.status == AuthStatus.authenticated ||
-                    state.status == AuthStatus.firstTimeAuthentication)) {
+                state.status == AuthStatus.firstTimeAuthentication) {
               AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-                NavigationPatient.route(),
+                IntroScreenPatient.route(),
+                (route) => false,
+              );
+            }
+
+            if (state is AuthSuccess &&
+                state.status == AuthStatus.authenticated) {
+              AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+                NavigationPatientScreen.route(),
                 (route) => false,
               );
             }
