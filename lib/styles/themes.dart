@@ -10,15 +10,15 @@ ThemeData get darkTheme {
     scaffoldBackgroundColor: MyColors.background,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: MyColors.purple,
-        foregroundColor: MyColors.textWhite,
+        backgroundColor: MyColors.blue,
+        foregroundColor: MyColors.text,
         shape: RoundedRectangleBorder(
           borderRadius: kRadius10,
         ),
       ),
     ),
     buttonTheme: ButtonThemeData(
-      buttonColor: MyColors.purple,
+      buttonColor: MyColors.blue,
       textTheme: ButtonTextTheme.primary,
       shape: RoundedRectangleBorder(
         borderRadius: kRadius10,
@@ -31,90 +31,90 @@ ThemeData get darkTheme {
       bodyLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.large,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
       bodyMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
       bodySmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumSmall,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
       displayLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.largest,
-        color: MyColors.textWhite,
+        color: MyColors.text,
         fontWeight: FontWeight.bold,
       ),
       displayMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.large,
-        color: MyColors.textWhite,
+        color: MyColors.text,
         fontWeight: FontWeight.bold,
       ),
       displaySmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumLarge,
-        color: MyColors.textWhite,
+        color: MyColors.text,
         fontWeight: FontWeight.bold,
       ),
       headlineMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.sectionTitleSize,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
       headlineSmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
       titleLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.largest,
-        color: MyColors.textWhite,
+        color: MyColors.text,
         fontWeight: FontWeight.bold,
       ),
       titleMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.large,
-        color: MyColors.textWhite,
+        color: MyColors.text,
         fontWeight: FontWeight.bold,
       ),
       titleSmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumLarge,
-        color: MyColors.textWhite,
+        color: MyColors.text,
         fontWeight: FontWeight.bold,
       ),
       headlineLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.sectionTitleSize,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
       labelLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
       labelMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumSmall,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
       labelSmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.cardSubTitleSize,
-        color: MyColors.textWhite,
+        color: MyColors.text,
       ),
     ),
     cardTheme: const CardTheme(
       color: MyColors.card,
     ),
     tabBarTheme: const TabBarTheme(
-      labelColor: MyColors.textWhite,
+      labelColor: MyColors.text,
       labelStyle: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
@@ -127,10 +127,10 @@ ThemeData get darkTheme {
       ),
       unselectedLabelColor: MyColors.grey,
       dividerHeight: 0,
-      indicatorColor: MyColors.purple,
+      indicatorColor: MyColors.blue,
     ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
-      color: MyColors.textWhite,
+      color: MyColors.text,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       type: BottomNavigationBarType.fixed,
@@ -153,6 +153,7 @@ ThemeData get darkTheme {
         fontWeight: FontWeight.normal,
       ),
     ),
+    datePickerTheme: datePickerTheme,
   );
 }
 
@@ -240,6 +241,107 @@ ThemeData get cardTextTheme {
         fontFamily: Font.family,
         fontSize: Font.cardSubTitleSize,
         color: MyColors.black,
+      ),
+    ),
+  );
+}
+
+// Date picker theme
+DatePickerThemeData get datePickerTheme {
+  return DatePickerThemeData(
+    backgroundColor: MyColors.textField,
+    cancelButtonStyle: const ButtonStyle(
+      foregroundColor: WidgetStatePropertyAll(MyColors.lightPurple),
+      textStyle: WidgetStatePropertyAll(TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.blue,
+      )),
+    ),
+    confirmButtonStyle: const ButtonStyle(
+      foregroundColor: WidgetStatePropertyAll(MyColors.lightPurple),
+      textStyle: WidgetStatePropertyAll(TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.blue,
+      )),
+    ),
+    dividerColor: MyColors.lineDivider,
+    headerForegroundColor: MyColors.text,
+    headerHeadlineStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.large,
+      color: MyColors.text,
+    ),
+    headerHelpStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.medium,
+      color: MyColors.text,
+    ),
+    dayStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.medium,
+      color: MyColors.text,
+    ),
+    yearStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.medium,
+      color: MyColors.grey,
+    ),
+    weekdayStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.mediumLarge,
+      color: MyColors.text,
+      fontWeight: FontWeight.bold,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: const TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.grey,
+        fontWeight: FontWeight.normal,
+      ),
+      activeIndicatorBorder: const BorderSide(
+        color: MyColors.lightPurple,
+        width: 2,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: MyColors.lightPurple,
+          width: 2,
+        ),
+        borderRadius: kRadius10,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: MyColors.lightPurple,
+          width: 2,
+        ),
+        borderRadius: kRadius10,
+      ),
+      errorStyle: const TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.errorRed,
+      ),
+      helperStyle: const TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.grey,
+      ),
+      labelStyle: const TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumLarge,
+        color: MyColors.lightPurple,
+      ),
+      // inner value style
+      errorMaxLines: 2,
+      errorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: MyColors.errorRed,
+          width: 2,
+        ),
+        borderRadius: kRadius10,
       ),
     ),
   );

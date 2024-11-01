@@ -2,6 +2,8 @@ import 'package:firebase/firebase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/agora/screens/call.dart';
+import 'package:medtalk/common/globals/globals.dart';
 import 'package:models/models.dart';
 
 import '../../../app/bloc/auth/auth_bloc.dart';
@@ -55,17 +57,36 @@ class DashboardView extends StatelessWidget {
             case PatientLoaded():
               // Load appointment data when patient data is loaded
               if (patientState.patient.appointments?.isEmpty ?? false) {
-                return const Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('No appointments'),
-                    kGap6,
-                    // _WelcomeMessage(patientName: patient.name),
-                    _UserId(),
-                    _LogoutButton(),
-                  ],
-                ));
+                return Center(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: kPaddH20,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          const _AppointmentSection(),
+                          kGap6,
+                          AppointmentWidget(
+                            specialty: 'Ophthalmology',
+                            doctor: 'Dr. John Doe',
+                            date: 'Sep 20, 2023',
+                            time: '10:00 AM',
+                            location: 'Room 402',
+                            service: 'Eye Checkup',
+                            fee: '100',
+                            onJoinCall: () =>
+                                AppGlobal.navigatorKey.currentState!.push(
+                              VideoCallScreen.route(),
+                            ),
+                          ),
+                          kGap6,
+                          const _LogoutButton(),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
               }
               context.read<AppointmentBloc>().add(
                   LoadAppointment(patientState.patient.appointments!.first));
@@ -130,26 +151,24 @@ class _AppointmentContent extends StatelessWidget {
             children: [
               const _AppointmentSection(),
               kGap6,
-              AppointmentCard(
-                cardAppointmentInfo: CardAppointmentInfo(
-                  specialty: appointment.specialtyId == "1"
-                      ? "Cardiology"
-                      : "Dentistry",
-                  doctor: "Dr. John Doe",
-                  date: DateFormat('yyyy-MM-dd')
-                      .format(appointment.appointmentDate),
-                  time: DateFormat('HH:mm').format(appointment.appointmentDate),
-                  location: appointment.location ?? "Online Consultation",
-                ),
-                cardAppointmentMetadata: CardAppointmentMetadata(
-                  doctor: "Dr. John Doe",
-                  fee: appointment.fee.toString(),
-                  service: appointment.serviceName,
-                ),
+              AppointmentWidget(
+                date: DateFormat('yyyy-MM-dd')
+                    .format(appointment.appointmentDate),
+                time: DateFormat('HH:mm').format(appointment.appointmentDate),
+                location: appointment.location ?? "Online Consultation",
+                specialty:
+                    appointment.specialtyId == "1" ? "Cardiology" : "Dentistry",
+                doctor: "Dr. John Doe",
+                service: appointment.serviceName,
+                fee: appointment.fee.toString(),
+                onJoinCall: () {
+                  AppGlobal.navigatorKey.currentState!.push(
+                    VideoCallScreen.route(),
+                  );
+                },
               ),
               kGap6,
               // _WelcomeMessage(patientName: patient.name),
-              const _UserId(),
               const _LogoutButton(),
             ],
           ),
@@ -227,14 +246,5 @@ class _LogoutButton extends StatelessWidget {
         // navigate to the auth screen
       },
     );
-  }
-}
-
-class _UserId extends StatelessWidget {
-  const _UserId();
-
-  @override
-  Widget build(BuildContext context) {
-    return Text('UserID: 1', style: Theme.of(context).textTheme.labelSmall);
   }
 }

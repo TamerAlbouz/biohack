@@ -6,7 +6,7 @@ import '../font.dart';
 const kButtonHint = TextStyle(
   fontFamily: Font.family,
   color: MyColors.grey,
-  fontSize: Font.mediumSmall,
+  fontSize: Font.small,
   fontWeight: FontWeight.normal,
 );
 

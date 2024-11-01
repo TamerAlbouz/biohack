@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/styles/sizes.dart';
+import 'package:medtalk/styles/styles/button.dart';
 
 import '../../styles/colors.dart';
-import '../../styles/sizes.dart';
+import '../../styles/font.dart';
 
 class GoogleLoginButton extends StatelessWidget {
   const GoogleLoginButton({super.key, required this.onPressed});
@@ -11,16 +13,27 @@ class GoogleLoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
+    return ElevatedButton.icon(
       key: const Key('loginForm_googleLogin_raisedButton'),
-      style: ElevatedButton.styleFrom(
-        padding: kPadd10,
-        shape: const CircleBorder(),
-        backgroundColor: MyColors.black,
+      style: kMainButtonStyle.copyWith(
+        minimumSize: MaterialStateProperty.all<Size>(const Size(200, 50)),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: kRadiusAll,
+          ),
+        ),
       ),
       onPressed: onPressed,
-      child:
-          const Icon(FontAwesomeIcons.google, color: MyColors.grey, size: 28),
+      icon: const Icon(FontAwesomeIcons.google,
+          color: MyColors.buttonText, size: 28),
+      label: const Text(
+        'Sign in with Google',
+        style: TextStyle(
+          color: MyColors.buttonText,
+          fontSize: Font.medium,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

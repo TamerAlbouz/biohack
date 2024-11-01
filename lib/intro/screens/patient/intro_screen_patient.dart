@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/common/widgets/button/loading_button.dart';
+import 'package:medtalk/common/widgets/button/success_button.dart';
+import 'package:medtalk/common/widgets/custom_drop_down.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/common/widgets/rounded_radio_button.dart';
 import 'package:medtalk/intro/cubit/intro_patient_cubit.dart';
@@ -44,9 +47,9 @@ class IntroScreenPatient extends StatelessWidget {
                         fontSize: Font.largest, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    'Before we continue, we’d like more info about you to assist our doctors',
+                    'Before we continue, we’d like more information about you to assist our doctors',
                     textAlign: TextAlign.start,
-                    style: TextStyle(fontSize: Font.mediumLarge),
+                    style: TextStyle(fontSize: Font.medium),
                   ),
                   kGap10,
                   Divider(color: MyColors.lineDivider),
@@ -94,6 +97,7 @@ class IntroScreenPatient extends StatelessWidget {
                   ),
                   kGap14,
                   _DateOfBirthInput(),
+                  kGap10,
                   _SexInput(),
                   kGap10,
                   _GetStartedButton(),
@@ -116,11 +120,12 @@ class _FullNameInput extends StatelessWidget {
         .select((IntroPatientCubit cubit) => cubit.state.fullName.displayError);
 
     return InputField(
-        hintText: "Full Name",
-        onChanged: (name) =>
-            context.read<IntroPatientCubit>().fullNameChanged(name),
-        keyboardType: TextInputType.name,
-        errorText: displayError != null ? "Invalid Full Name" : null);
+      hintText: "Full Name",
+      onChanged: (name) =>
+          context.read<IntroPatientCubit>().fullNameChanged(name),
+      keyboardType: TextInputType.name,
+      errorText: displayError != null ? "Invalid Full Name" : null,
+    );
   }
 }
 
@@ -152,94 +157,13 @@ class _BloodGroupInput extends StatefulWidget {
 }
 
 class _BloodGroupInputState extends State<_BloodGroupInput> {
-  // @override
-  String _selectedOption = '';
-
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          RoundedRadioButton(
-            label: 'O+',
-            isSelected: _selectedOption == 'O+',
-            onSelected: () => setState(() {
-              _selectedOption = 'O+';
-              _onSelected(_selectedOption);
-            }),
-          ),
-          kGap6,
-          RoundedRadioButton(
-            label: 'O-',
-            isSelected: _selectedOption == 'O-',
-            onSelected: () => setState(() {
-              _selectedOption = 'O-';
-              _onSelected(_selectedOption);
-            }),
-          ),
-          kGap6,
-          RoundedRadioButton(
-            label: 'A+',
-            isSelected: _selectedOption == 'A+',
-            onSelected: () => setState(() {
-              _selectedOption = 'A+';
-              _onSelected(_selectedOption);
-            }),
-          ),
-          kGap6,
-          RoundedRadioButton(
-            label: 'A-',
-            isSelected: _selectedOption == 'A-',
-            onSelected: () => setState(() {
-              _selectedOption = 'A-';
-              _onSelected(_selectedOption);
-            }),
-          ),
-          kGap6,
-          RoundedRadioButton(
-            label: 'B+',
-            isSelected: _selectedOption == 'B+',
-            onSelected: () => setState(() {
-              _selectedOption = 'B+';
-              _onSelected(_selectedOption);
-            }),
-          ),
-          kGap6,
-          RoundedRadioButton(
-            label: 'B-',
-            isSelected: _selectedOption == 'B-',
-            onSelected: () => setState(() {
-              _selectedOption = 'B-';
-              _onSelected(_selectedOption);
-            }),
-          ),
-          kGap6,
-          RoundedRadioButton(
-            label: 'AB+',
-            isSelected: _selectedOption == 'AB+',
-            onSelected: () => setState(() {
-              _selectedOption = 'AB+';
-              _onSelected(_selectedOption);
-            }),
-          ),
-          kGap6,
-          RoundedRadioButton(
-            label: 'AB-',
-            isSelected: _selectedOption == 'AB-',
-            onSelected: () => setState(() {
-              _selectedOption = 'AB-';
-              _onSelected(_selectedOption);
-            }),
-          ),
-        ],
-      ),
+    return RadioButtonGroup(
+      options: const ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'],
+      onChanged: (value) =>
+          context.read<IntroPatientCubit>().bloodGroupChanged(value),
     );
-  }
-
-  void _onSelected(String value) {
-    context.read<IntroPatientCubit>().bloodGroupChanged(_selectedOption);
   }
 }
 
@@ -253,12 +177,13 @@ class _HeightInput extends StatelessWidget {
         .select((IntroPatientCubit cubit) => cubit.state.height.displayError);
 
     return InputField(
-        hintText: "Height",
-        onChanged: (height) =>
-            context.read<IntroPatientCubit>().heightChanged(height),
-        keyboardType: TextInputType.number,
-        trailingWidget: const Text("cm"),
-        errorText: displayError != null ? "Invalid Height" : null);
+      hintText: "Height",
+      onChanged: (height) =>
+          context.read<IntroPatientCubit>().heightChanged(height),
+      keyboardType: TextInputType.number,
+      trailingWidget: const Text("cm"),
+      errorText: displayError != null ? "Invalid Height" : null,
+    );
   }
 }
 
@@ -272,30 +197,19 @@ class _WeightInput extends StatelessWidget {
         .select((IntroPatientCubit cubit) => cubit.state.weight.displayError);
 
     return InputField(
-        hintText: "Weight",
-        onChanged: (weight) =>
-            context.read<IntroPatientCubit>().weightChanged(weight),
-        keyboardType: TextInputType.number,
-        trailingWidget: const Text("kg"),
-        errorText: displayError != null ? "Invalid Weight" : null);
+      hintText: "Weight",
+      onChanged: (weight) =>
+          context.read<IntroPatientCubit>().weightChanged(weight),
+      keyboardType: TextInputType.number,
+      trailingWidget: const Text("kg"),
+      errorText: displayError != null ? "Invalid Weight" : null,
+    );
   }
 }
 
 //age
 class _DateOfBirthInput extends StatelessWidget {
   const _DateOfBirthInput();
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   var displayError = context.select(
-  //       (IntroPatientCubit cubit) => cubit.state.dateOfBirth.displayError);
-  //   return InputField(
-  //       hintText: "Date of Birth",
-  //       onChanged: (dob) =>
-  //           context.read<IntroPatientCubit>().dateOfBirthChanged(dob),
-  //       keyboardType: TextInputType.datetime,
-  //       errorText: displayError != null ? "Invalid Date" : null);
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -315,13 +229,12 @@ class _SexInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var displayError = context
-        .select((IntroPatientCubit cubit) => cubit.state.sex.displayError);
-    return InputField(
-        hintText: "Sex",
-        onChanged: (sex) => context.read<IntroPatientCubit>().sexChanged(sex),
-        keyboardType: TextInputType.text,
-        errorText: displayError != null ? "Invalid Sex" : null);
+    return CustomDropdown(
+      items: const ["Male", "Female"],
+      hint: 'Sex',
+      onChanged: (value) =>
+          context.read<IntroPatientCubit>().sexChanged(value ?? "Male"),
+    );
   }
 }
 
@@ -338,7 +251,7 @@ class _GetStartedButton extends StatelessWidget {
       (IntroPatientCubit cubit) => cubit.state.isValid,
     );
 
-    if (status.isInProgress) return const CircularProgressIndicator();
+    if (status.isInProgress) return const LoadingButton();
 
     if (status.isSuccess) {
       // return the button with a green background and a tick icon
@@ -350,14 +263,7 @@ class _GetStartedButton extends StatelessWidget {
         );
       });
 
-      return ElevatedButton.icon(
-        style: kMainButtonStyle.copyWith(
-          backgroundColor: const WidgetStatePropertyAll(MyColors.buttonGreen),
-        ),
-        onPressed: null,
-        icon: const Icon(Icons.check, color: Colors.white),
-        label: const Text(''),
-      );
+      return const SuccessButton();
     }
 
     return ElevatedButton(

@@ -1,10 +1,15 @@
 import 'dart:ui';
 
 class MyColors {
-  static const background = Color(0xff494949);
-  static const purple = Color(0xff5271FF);
+  // static const background = Color(0xff494949);
+  static const background = Color(0xffE8E4E1);
+
+  static const blue = Color(0xff4264FF);
   static const black = Color(0xff3C3C3C);
-  static const textFieldBlack = Color(0xff3C3C3C);
+
+  // static const textField = Color(0xff3C3C3C);
+  static const textField = Color(0xffF7F3F0);
+
   static const lightPurple = Color(0xff88A7FF);
   static const buttonStroke = Color(0xff88A7FF);
   static const grey = Color(0xffA0A0A0);
@@ -20,10 +25,14 @@ class MyColors {
   static const reviewBar = Color(0xff5271FF);
   static const reviewBarEmpty = Color(0xffC7C7C7);
   static const optionStroke = Color(0xffDEDAD7);
-  static const textWhite = Color(0xffffffff);
+  static const text = Color(0xff000000);
   static const errorRed = Color(0xffee5a5b);
-  static const textButtonGrey = Color(0xffC0C0C0);
+  static const textButtonGrey = Color(0xff808080);
   static const cardBackground = Color(0xffF9F5F2);
   static const cardDivider = Color(0xffDEDEDE);
   static const lineDivider = Color(0xff6F6F6F);
+  static const dropdown = Color(0xffF7F3F0);
+  static const buttonText = Color(0xffFFFFFF);
+
+  static const tagText = Color(0xffFFFFFF);
 }

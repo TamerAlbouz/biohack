@@ -12,7 +12,7 @@ class AppointmentRepository implements IAppointmentRepository {
   late final CollectionReference _appointmentCollection;
 
   AppointmentRepository(this._firestore) {
-    _appointmentCollection = _firestore.collection('apppointments');
+    _appointmentCollection = _firestore.collection('appointments');
   }
 
   @override

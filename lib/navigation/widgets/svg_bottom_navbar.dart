@@ -42,7 +42,8 @@ class SvgBottomNavBar<T extends Cubit<S>, S extends NavbarStateBase>
                 currentIndex: state.index,
                 items: items,
                 onTap: (index) => onTap(index),
-                iconSize: 40,
+                iconSize: 34,
+                enableFeedback: false,
               ),
             ),
           );

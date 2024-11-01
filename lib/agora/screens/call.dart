@@ -1,5 +1,6 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medtalk/env/env.dart';
 import 'package:p_logger/p_logger.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -106,11 +107,14 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // navigate to previous screen
+      // appBar: AppBar(
+      //   automaticallyImplyLeading: true,
+      // ),
       body: Stack(
+        alignment: Alignment.center,
         children: [
-          Center(
-            child: _remoteVideo(),
-          ),
+          Center(child: _remoteVideo()),
           Align(
             alignment: Alignment.topLeft,
             child: SizedBox(
@@ -126,6 +130,17 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
                       )
                     : const CircularProgressIndicator(),
               ),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SvgPicture.asset(
+              'assets/svgs/BottomBarCalls.svg',
+              fit: BoxFit.contain,
+              alignment: Alignment.bottomCenter,
+              width: double.infinity,
+              placeholderBuilder: (context) =>
+                  const CircularProgressIndicator(),
             ),
           ),
         ],

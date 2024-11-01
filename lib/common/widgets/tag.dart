@@ -15,9 +15,14 @@ class Tag extends StatelessWidget {
         color: MyColors.green,
         borderRadius: kRadiusAll,
       ),
-      child: const Text('Confirmed',
-          style: TextStyle(
-              fontSize: Font.extraSmall, fontWeight: FontWeight.bold)),
+      child: const Text(
+        'Confirmed',
+        style: TextStyle(
+          color: MyColors.tagText,
+          fontSize: Font.extraSmall,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

@@ -6,15 +6,27 @@ import 'package:medtalk/styles/sizes.dart';
 import '../../styles/colors.dart';
 import '../../styles/font.dart';
 
-class AppointmentCard extends StatelessWidget {
-  const AppointmentCard({
+class AppointmentWidget extends StatelessWidget {
+  const AppointmentWidget({
     super.key,
-    required this.cardAppointmentInfo,
-    required this.cardAppointmentMetadata,
+    required this.specialty,
+    required this.doctor,
+    required this.date,
+    required this.time,
+    required this.location,
+    required this.service,
+    required this.fee,
+    required this.onJoinCall,
   });
 
-  final CardAppointmentInfo cardAppointmentInfo;
-  final CardAppointmentMetadata cardAppointmentMetadata;
+  final String specialty;
+  final String doctor;
+  final String date;
+  final String time;
+  final String location;
+  final String service;
+  final String fee;
+  final void Function() onJoinCall;
 
   @override
   Widget build(BuildContext context) {
@@ -27,29 +39,101 @@ class AppointmentCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          cardAppointmentInfo,
+          _AppointmentCard(
+            specialty: specialty,
+            doctor: doctor,
+            date: date,
+            time: time,
+            location: location,
+            onJoinCall: onJoinCall,
+          ),
           kGap4,
-          cardAppointmentMetadata,
+          _CardAppointmentMetadata(
+            doctor: doctor,
+            service: service,
+            fee: fee,
+          ),
         ],
       ),
     );
   }
 }
 
-class CardAppointmentInfo extends StatelessWidget {
-  const CardAppointmentInfo(
+class _AppointmentCard extends StatelessWidget {
+  /// Displays primary details about the appointment, such as specialty, doctor name, date, time, and location.
+  ///
+  /// [CardAppointmentInfo] is a part of the [AppointmentWidget] that shows essential information
+  /// along with a "Join Call" button for easy access.
+  ///
+  /// ### Properties:
+  ///
+  /// * [specialty] (required): The medical specialty of the appointment (e.g., 'Cardiology').
+  /// * [doctor] (required): The name of the doctor (e.g., 'Dr. Smith').
+  /// * [date] (required): The date of the appointment (e.g., 'Sep 20, 2023').
+  /// * [time] (required): The time of the appointment (e.g., '10:00 AM').
+  /// * [location] (required): The location of the appointment (e.g., 'Room 202').
+  ///
+  /// ### Build Method:
+  ///
+  /// The main information is arranged in a column with labels and a button to join the call.
+  const _AppointmentCard(
       {super.key,
       required this.specialty,
       required this.doctor,
       required this.date,
       required this.time,
-      required this.location});
+      required this.location,
+      required this.onJoinCall});
 
+  /// The medical specialty of the appointment (e.g., 'Cardiology').
+  ///
+  /// Example:
+  /// ```dart
+  /// 'Cardiology'
+  /// ```
   final String specialty;
+
+  /// The name of the doctor.
+  ///
+  /// Example:
+  /// ```dart
+  /// 'Dr. Smith'
+  /// ```
   final String doctor;
+
+  /// The date of the appointment.
+  ///
+  /// Example:
+  /// ```dart
+  /// 'Sep 20, 2023'
+  /// ```
   final String date;
+
+  /// The time of the appointment.
+  ///
+  /// Example:
+  /// ```dart
+  /// '10:00 AM'
+  /// ```
   final String time;
+
+  /// The location of the appointment.
+  ///
+  /// Example:
+  /// ```dart
+  /// 'Room 202'
+  /// ```
   final String location;
+
+  /// The action to take when the user taps the "Join Call" button.
+  ///
+  /// Example:
+  /// ```dart
+  /// () {
+  ///  Navigator.of(context).push(AppointmentScreen.route());
+  /// }
+  /// ```
+  final void Function() onJoinCall;
 
   @override
   Widget build(BuildContext context) {
@@ -67,9 +151,9 @@ class CardAppointmentInfo extends StatelessWidget {
           borderRadius: kRadius20,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              offset: const Offset(0, 2),
-              blurRadius: 16,
+              color: Colors.black.withOpacity(0.12),
+              offset: const Offset(0, 8),
+              blurRadius: 12,
               spreadRadius: 0,
             ),
           ],
@@ -82,7 +166,7 @@ class CardAppointmentInfo extends StatelessWidget {
                 Text(specialty,
                     style: const TextStyle(
                         fontSize: Font.medium,
-                        color: MyColors.purple,
+                        color: MyColors.blue,
                         fontWeight: FontWeight.bold)),
                 const Spacer(),
                 const Tag(),
@@ -105,13 +189,11 @@ class CardAppointmentInfo extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // Navigator.of(context).push(AppointmentScreen.route());
-                },
+                onPressed: onJoinCall,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(32),
                   // Adjust the height as needed
-                  backgroundColor: MyColors.purple,
+                  backgroundColor: MyColors.blue,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: kRadiusAll,
@@ -122,7 +204,7 @@ class CardAppointmentInfo extends StatelessWidget {
                   style: TextStyle(
                     fontSize: Font.extraSmall,
                     fontWeight: FontWeight.bold,
-                    color: MyColors.textWhite,
+                    color: MyColors.buttonText,
                   ),
                 ),
               ),
@@ -134,16 +216,51 @@ class CardAppointmentInfo extends StatelessWidget {
   }
 }
 
-class CardAppointmentMetadata extends StatelessWidget {
-  const CardAppointmentMetadata({
+class _CardAppointmentMetadata extends StatelessWidget {
+  /// Displays additional metadata for the appointment, including the service type, fee, and doctor’s experience.
+  ///
+  /// [CardAppointmentMetadata] is a component of [AppointmentWidget] that provides extra information
+  /// like the service type and fee, along with a short bio of the doctor’s experience and specialties.
+  ///
+  /// ### Properties:
+  ///
+  /// * [doctor] (required): The name of the doctor (used in informational text).
+  /// * [service] (required): The type of service provided in the appointment (e.g., 'Consultation').
+  /// * [fee] (required): The fee for the service (e.g., '100').
+  ///
+  /// ### Build Method:
+  ///
+  /// This section is displayed below the main appointment information and includes metadata items such as service and fee,
+  /// followed by an informational section on the doctor’s background.
+  const _CardAppointmentMetadata({
     super.key,
     required this.doctor,
     required this.service,
     required this.fee,
   });
 
+  /// The name of the doctor (used in informational text).
+  ///
+  /// Example:
+  /// ```dart
+  /// 'Dr. John Doe'
+  /// ```
   final String doctor;
+
+  /// The type of service provided in the appointment.
+  ///
+  /// Example:
+  /// ```dart
+  /// 'Consultation'
+  /// ```
   final String service;
+
+  /// The fee for the service.
+  ///
+  /// Example:
+  /// ```dart
+  /// '100'
+  /// ```
   final String fee;
 
   @override
@@ -153,12 +270,12 @@ class CardAppointmentMetadata extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CardAppointMetaInfo(
+          _CardAppointMetaInfo(
             svgAssetPath: 'assets/svgs/Tick.svg',
             title: service,
             text: '\$$fee',
           ),
-          const CardAppointMetaInfo(
+          const _CardAppointMetaInfo(
             svgAssetPath: 'assets/svgs/Profile.svg',
             title: 'Doctor',
             text: 'First-Time',
@@ -192,12 +309,45 @@ class CardAppointmentMetadata extends StatelessWidget {
   }
 }
 
-class CardAppointMetaInfo extends StatelessWidget {
+class _CardAppointMetaInfo extends StatelessWidget {
+  /// Path to the SVG asset for the icon.
+  ///
+  /// Example:
+  /// ```dart
+  /// 'assets/svgs/Tick.svg'
+  /// ```
   final String svgAssetPath;
+
+  /// Title for the row, such as 'Service'.
+  ///
+  /// Example:
+  /// ```dart
+  /// 'Service'
+  /// ```
   final String title;
+
+  /// Descriptive text for the row, such as the service fee or experience level.
+  ///
+  /// Example:
+  /// ```dart
+  /// '\$100'
+  /// ```
   final String text;
 
-  const CardAppointMetaInfo({
+  /// A reusable widget to display a metadata row with an icon, title, and text.
+  ///
+  /// [CardAppointMetaInfo] is used in [CardAppointmentMetadata] to provide a formatted row with an SVG icon, title text, and description.
+  ///
+  /// ### Properties:
+  ///
+  /// * [svgAssetPath] (required): Path to the SVG asset for the icon (e.g., 'assets/svgs/Tick.svg').
+  /// * [title] (required): Title for the row, such as 'Service'.
+  /// * [text] (required): Descriptive text for the row, such as the service fee or experience level.
+  ///
+  /// ### Build Method:
+  ///
+  /// Each row contains an SVG icon and two texts arranged horizontally, with the title aligned to the left and the text to the right.
+  const _CardAppointMetaInfo({
     super.key,
     required this.svgAssetPath,
     required this.title,

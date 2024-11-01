@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:medtalk/agora/screens/call.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/navigation/cubit/navigation_patient_cubit.dart';
 
 import '../../dashboard/patient/screens/dashboard_screen.dart';
@@ -40,33 +40,23 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
           SvgBottomNavBar<NavigationPatientCubit, NavigationPatientState>(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.health_and_safety,
-            ),
+            icon: Icon(FontAwesomeIcons.heartPulse, size: 36),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.person_search_rounded,
-            ),
+            icon: Icon(FontAwesomeIcons.magnifyingGlass, size: 34),
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.calendar_month,
-            ),
+            icon: Icon(FontAwesomeIcons.solidComments, size: 34),
             label: 'Appointment',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.document_scanner,
-            ),
+            icon: Icon(FontAwesomeIcons.folderOpen, size: 34),
             label: 'Documents',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.settings,
-            ),
+            icon: Icon(FontAwesomeIcons.gear, size: 34),
             label: 'Settings',
           ),
         ],
@@ -116,7 +106,7 @@ class _Body extends StatelessWidget {
         case NavbarScreenItemsPatient.dashboard:
           return const DashboardScreen();
         case NavbarScreenItemsPatient.search:
-          return const VideoCallScreen();
+          return const Text('Search Screen');
         case NavbarScreenItemsPatient.appointments:
           return const Text('Appointments Screen');
         case NavbarScreenItemsPatient.documents:

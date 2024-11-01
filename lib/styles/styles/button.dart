@@ -5,8 +5,8 @@ import 'package:medtalk/styles/font.dart';
 import '../sizes.dart';
 
 final kMainButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: MyColors.purple,
-  foregroundColor: MyColors.textWhite,
+  backgroundColor: MyColors.blue,
+  foregroundColor: MyColors.buttonText,
   elevation: 0,
   shape: RoundedRectangleBorder(
     borderRadius: kRadius10,

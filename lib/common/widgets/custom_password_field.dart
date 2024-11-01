@@ -40,7 +40,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
         Container(
           decoration: BoxDecoration(
             borderRadius: kRadius10,
-            color: MyColors.textFieldBlack,
+            color: MyColors.textField,
           ),
           padding: kPaddL24R12T2,
           height: 50,
@@ -51,7 +51,7 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
             keyboardType: widget.keyboardType,
             cursorColor: MyColors.lightPurple,
             style: const TextStyle(
-              color: MyColors.textWhite,
+              color: MyColors.text,
               fontSize: 16,
             ),
             decoration: InputDecoration(

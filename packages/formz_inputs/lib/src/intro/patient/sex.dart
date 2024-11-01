@@ -8,7 +8,7 @@ class Sex extends FormzInput<String, SexValidationError> {
   const Sex.dirty([super.value = '']) : super.dirty();
 
   static final RegExp _sexRegExp = RegExp(
-    r'^(Male|Female|male|female)$',
+    r'^(Male|Female)$',
   );
 
   @override
