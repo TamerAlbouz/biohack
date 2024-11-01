@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:firebase/firebase.dart';
 import 'package:formz/formz.dart';
 import 'package:formz_inputs/formz_inputs.dart';
+import 'package:intl/intl.dart';
 import 'package:models/models.dart';
 import 'package:p_logger/p_logger.dart';
 
@@ -68,7 +69,7 @@ class IntroPatientCubit extends Cubit<IntroPatientState> {
     );
   }
 
-  void heightChanged(double value) {
+  void heightChanged(String value) {
     final height = Height.dirty(value);
     emit(
       state.copyWith(
@@ -104,7 +105,7 @@ class IntroPatientCubit extends Cubit<IntroPatientState> {
     );
   }
 
-  void weightChanged(double value) {
+  void weightChanged(String value) {
     final weight = Weight.dirty(value);
     emit(
       state.copyWith(
@@ -134,7 +135,7 @@ class IntroPatientCubit extends Cubit<IntroPatientState> {
           state.height,
           state.dateOfBirth,
           state.weight,
-          state.sex,
+          sex,
         ]),
       ),
     );
@@ -142,15 +143,16 @@ class IntroPatientCubit extends Cubit<IntroPatientState> {
 
   Future<void> createPatient(String email, String uid) async {
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
+    DateFormat formatter = DateFormat('dd/MM/yyyy');
     try {
       Patient patient = Patient(
         email: email,
         name: state.fullName.value,
         biography: state.biography.value,
         bloodType: state.bloodGroup.value,
-        height: state.height.value,
-        dateOfBirth: DateTime.parse(state.dateOfBirth.value),
-        weight: state.weight.value,
+        height: double.parse(state.height.value),
+        dateOfBirth: formatter.parse(state.dateOfBirth.value),
+        weight: double.parse(state.weight.value),
         sex: state.sex.value,
         role: Role.patient,
         uid: uid,

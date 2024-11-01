@@ -24,7 +24,6 @@ class SignInButton extends StatelessWidget {
     if (status.isSuccess) {
       // return the button with a green background and a tick icon
       return ElevatedButton.icon(
-        key: const Key('loginForm_continue_raisedButton'),
         style: kMainButtonStyle.copyWith(
           backgroundColor: const WidgetStatePropertyAll(MyColors.buttonGreen),
         ),

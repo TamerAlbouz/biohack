@@ -2,18 +2,18 @@ import 'package:formz/formz.dart';
 
 enum HeightValidationError { invalid }
 
-class Height extends FormzInput<double, HeightValidationError> {
-  const Height.pure() : super.pure(0);
+class Height extends FormzInput<String, HeightValidationError> {
+  const Height.pure() : super.pure('');
 
-  const Height.dirty([super.value = 0]) : super.dirty();
+  const Height.dirty([super.value = '']) : super.dirty();
 
   static final RegExp _heightRegExp = RegExp(
-    r'^(?:1[0-9][0-9]|[1-9]?[0-9]|200)$',
+    r'^(?:[1-9]\d?|[12]\d{2}|300)$',
   );
 
   @override
-  HeightValidationError? validator(double? value) {
-    return _heightRegExp.hasMatch(value.toString())
+  HeightValidationError? validator(String? value) {
+    return _heightRegExp.hasMatch(value ?? '')
         ? null
         : HeightValidationError.invalid;
   }

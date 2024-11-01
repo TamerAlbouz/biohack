@@ -22,7 +22,7 @@ class AppointmentBloc extends Bloc<AppointmentEvent, AppointmentState> {
     try {
       _appointment = await _appointmentRepo.getAppointment(event.appointmentId);
       emit(AppointmentLoaded(_appointment!));
-    } catch (e, stackTrace) {
+    } catch (e) {
       emit(AppointmentError(e.toString()));
     }
   }

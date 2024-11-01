@@ -85,6 +85,7 @@ class _UserImpl extends IUser {
     this.name,
     this.busy = false,
     this.profilePictureUrl,
+    // ignore: unused_element
     this.createdAt,
     this.updatedAt,
     this.appointments,
@@ -153,23 +154,6 @@ class _UserImpl extends IUser {
       paymentIds: paymentIds ?? this.paymentIds,
       role: role,
       uid: uid,
-    );
-  }
-
-  factory _UserImpl.fromMap(String docId, Map<String, dynamic> data) {
-    return _UserImpl(
-      email: data['email'],
-      uid: docId,
-      name: data['name'],
-      role: data['role'],
-      profilePictureUrl: data['profilePictureUrl'],
-      createdAt: data['createdAt'],
-      updatedAt: data['updatedAt'],
-      appointments: data['appointments'],
-      busy: data['busy'],
-      tokens: data['tokens'],
-      paymentIds: data['paymentIds'],
-      biography: data['biography'],
     );
   }
 

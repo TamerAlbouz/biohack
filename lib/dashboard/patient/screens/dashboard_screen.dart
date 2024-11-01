@@ -62,8 +62,8 @@ class DashboardView extends StatelessWidget {
                     Text('No appointments'),
                     kGap6,
                     // _WelcomeMessage(patientName: patient.name),
-                    const _UserId(),
-                    const _LogoutButton(),
+                    _UserId(),
+                    _LogoutButton(),
                   ],
                 ));
               }

@@ -60,7 +60,5 @@ class PatientRepository extends UserRepository implements IPatientRepository {
       logger.e(e);
       rethrow;
     }
-
-    return Future.value();
   }
 }

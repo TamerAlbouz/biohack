@@ -2,18 +2,18 @@ import 'package:formz/formz.dart';
 
 enum WeightValidationError { invalid }
 
-class Weight extends FormzInput<double, WeightValidationError> {
-  const Weight.pure() : super.pure(0);
+class Weight extends FormzInput<String, WeightValidationError> {
+  const Weight.pure() : super.pure('');
 
-  const Weight.dirty([super.value = 0]) : super.dirty();
+  const Weight.dirty([super.value = '']) : super.dirty();
 
   static final RegExp _weightRegExp = RegExp(
-    r'^[0-9]+(\.[0-9]+)?$',
+    r'^(?:[1-9]\d?|[12]\d{2}|300)$',
   );
 
   @override
-  WeightValidationError? validator(double? value) {
-    return _weightRegExp.hasMatch(value.toString())
+  WeightValidationError? validator(String? value) {
+    return _weightRegExp.hasMatch(value ?? '')
         ? null
         : WeightValidationError.invalid;
   }

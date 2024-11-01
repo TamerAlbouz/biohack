@@ -105,35 +105,30 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   // Build UI to display local view and remote view
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Agora Video Call'),
-        ),
-        body: Stack(
-          children: [
-            Center(
-              child: _remoteVideo(),
-            ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: SizedBox(
-                width: 100,
-                height: 150,
-                child: Center(
-                  child: _localUserJoined
-                      ? AgoraVideoView(
-                          controller: VideoViewController(
-                            rtcEngine: _engine,
-                            canvas: const VideoCanvas(uid: 0),
-                          ),
-                        )
-                      : const CircularProgressIndicator(),
-                ),
+    return Scaffold(
+      body: Stack(
+        children: [
+          Center(
+            child: _remoteVideo(),
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 100,
+              height: 150,
+              child: Center(
+                child: _localUserJoined
+                    ? AgoraVideoView(
+                        controller: VideoViewController(
+                          rtcEngine: _engine,
+                          canvas: const VideoCanvas(uid: 0),
+                        ),
+                      )
+                    : const CircularProgressIndicator(),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
