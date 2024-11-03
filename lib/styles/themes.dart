@@ -3,7 +3,7 @@ import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
 
-ThemeData get darkTheme {
+ThemeData get lightTheme {
   return ThemeData(
     fontFamily: Font.family,
     fontFamilyFallback: const [Font.family],
@@ -11,7 +11,7 @@ ThemeData get darkTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: MyColors.blue,
-        foregroundColor: MyColors.text,
+        foregroundColor: MyColors.buttonText,
         shape: RoundedRectangleBorder(
           borderRadius: kRadius10,
         ),

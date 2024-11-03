@@ -12,6 +12,7 @@ const kGap8 = Gap(8);
 const kGap28 = Gap(28);
 const kGap20 = Gap(20);
 const kGap68 = Gap(68);
+const kGap100 = Gap(100);
 const kGap128 = Gap(128);
 final kRadius20 = BorderRadius.circular(20);
 final kRadius10 = BorderRadius.circular(10);

@@ -6,7 +6,7 @@ import 'package:medtalk/agora/screens/call.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:models/models.dart';
 
-import '../../../app/bloc/auth/auth_bloc.dart';
+import '../../../app/bloc/auth/route_bloc.dart';
 import '../../../common/widgets/appointment_card.dart';
 import '../../../styles/colors.dart';
 import '../../../styles/font.dart';
@@ -200,6 +200,8 @@ class _DashboardError extends StatelessWidget {
             },
             child: const Text('Retry'),
           ),
+          kGap6,
+          const _LogoutButton(),
         ],
       ),
     );
@@ -242,7 +244,7 @@ class _LogoutButton extends StatelessWidget {
     return ElevatedButton(
       child: const Text('Logout'),
       onPressed: () {
-        context.read<AuthBloc>().add(AuthLogoutPressed());
+        context.read<RouteBloc>().add(AuthLogoutPressed());
         // navigate to the auth screen
       },
     );

@@ -22,7 +22,7 @@ void main() async {
   logger.i('Bloc observer assigned');
 
   logger.i('Setting system chrome');
-  SystemChrome.setSystemUIOverlayStyle(kStatusBarLight);
+  SystemChrome.setSystemUIOverlayStyle(kStatusBarDark);
   logger.i('System chrome set');
 
   logger.i('Configuring dependencies');

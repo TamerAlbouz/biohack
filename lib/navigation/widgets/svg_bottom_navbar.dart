@@ -20,9 +20,7 @@ class SvgBottomNavBar<T extends Cubit<S>, S extends NavbarStateBase>
     return Stack(alignment: Alignment.bottomCenter, children: [
       SvgPicture.asset(
         'assets/svgs/Cool-Waves-Nav.svg',
-        fit: BoxFit.cover,
-        allowDrawingOutsideViewBox: true,
-        width: MediaQuery.of(context).size.width + 20,
+        fit: BoxFit.contain,
         alignment: Alignment.bottomCenter,
         clipBehavior: Clip.none,
         placeholderBuilder: (context) => const SizedBox.shrink(),
@@ -42,7 +40,7 @@ class SvgBottomNavBar<T extends Cubit<S>, S extends NavbarStateBase>
                 currentIndex: state.index,
                 items: items,
                 onTap: (index) => onTap(index),
-                iconSize: 34,
+                iconSize: 28,
                 enableFeedback: false,
               ),
             ),

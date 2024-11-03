@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/styles/styles/button.dart';
 import 'package:models/models.dart';
 
 import '../../common/widgets/logo_widget.dart';
 import '../../styles/font.dart';
 import '../../styles/sizes.dart';
-import '../bloc/auth/auth_bloc.dart';
+import '../bloc/auth/route_bloc.dart';
 
 class Auth extends StatelessWidget {
   const Auth({
@@ -36,9 +37,9 @@ class _AppViewState extends State<_AppView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<AuthBloc, AuthState>(
+      body: BlocBuilder<RouteBloc, RouteState>(
         builder: (context, state) {
-          if (state is AuthInitial ||
+          if (state is RouteInitial ||
               state is AuthLoading ||
               state is AuthLogin) {
             return const Center(child: CircularProgressIndicator());
@@ -58,7 +59,9 @@ class _AppViewState extends State<_AppView> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      context.read<AuthBloc>().add(AuthSubscriptionRequested());
+                      context
+                          .read<RouteBloc>()
+                          .add(AuthSubscriptionRequested());
                     },
                     child: const Text('Retry'),
                   ),
@@ -68,49 +71,59 @@ class _AppViewState extends State<_AppView> {
           }
 
           if (state is AuthChooseRole) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Stack(
               children: <Widget>[
                 const Padding(
                   padding: kPaddH42,
                   child: Column(children: [
-                    kGap128,
+                    kGap100,
                     LogoWidget(),
                     kGap14,
                     Text(
-                      'Welcome! \nAre you a doctor or a patient?',
-                      style: TextStyle(fontSize: Font.mediumLarge),
+                      'Welcome!',
+                      style: TextStyle(
+                          fontSize: Font.mediumLarge,
+                          fontWeight: FontWeight.normal),
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      'Who are you?',
+                      style: TextStyle(fontSize: Font.medium),
                       textAlign: TextAlign.center,
                     ),
                   ]),
                 ),
-                kGap68,
                 Padding(
                   padding: kPaddH42,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         onPressed: () {
-                          context.read<AuthBloc>().add(ChooseRole(Role.doctor));
+                          context
+                              .read<RouteBloc>()
+                              .add(ChooseRole(Role.doctor));
                         },
                         style: kMainButtonStyle,
-                        child: const Text('I am a Doctor'),
+                        icon: const Icon(FontAwesomeIcons.userDoctor),
+                        label: const Text('I am a Doctor'),
                       ),
-                      kGap14,
-                      ElevatedButton(
+                      kGap20,
+                      ElevatedButton.icon(
                         onPressed: () async {
                           context
-                              .read<AuthBloc>()
+                              .read<RouteBloc>()
                               .add(ChooseRole(Role.patient));
                         },
                         style: kMainButtonStyle,
-                        child: const Text('I am a Patient'),
+                        icon: const Icon(FontAwesomeIcons.userInjured),
+                        label: const Text('I am a Patient'),
                       ),
                     ],
                   ),
                 ),
-                Expanded(
+                Align(
+                  alignment: Alignment.bottomCenter,
                   child: SvgPicture.asset(
                     "assets/svgs/Cool-Waves.svg",
                     fit: BoxFit.contain,

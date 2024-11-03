@@ -9,7 +9,7 @@ import 'package:medtalk/styles/themes.dart';
 import 'package:models/models.dart';
 
 import '../../login/screens/patient/login_patient_screen.dart';
-import '../bloc/auth/auth_bloc.dart';
+import '../bloc/auth/route_bloc.dart';
 import 'auth_screen.dart';
 
 class App extends StatelessWidget {
@@ -40,7 +40,7 @@ class App extends StatelessWidget {
         providers: [
           BlocProvider(
             lazy: false,
-            create: (_) => AuthBloc(
+            create: (_) => RouteBloc(
               authRepo: _authenticationRepository,
               userPreferences: getIt<UserPreferences>(),
               patientRepository: getIt<IPatientRepository>(),
@@ -64,11 +64,11 @@ class _AppViewState extends State<_AppView> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      themeMode: ThemeMode.dark,
+      themeMode: ThemeMode.light,
       debugShowCheckedModeBanner: false,
       navigatorKey: AppGlobal.navigatorKey,
       builder: (context, child) {
-        return BlocListener<AuthBloc, AuthState>(
+        return BlocListener<RouteBloc, RouteState>(
           listener: (context, state) {
             if (state is AuthFailure) {
               ScaffoldMessenger.of(context)
@@ -91,27 +91,36 @@ class _AppViewState extends State<_AppView> {
               _navigateByRoleUnauthenticated(state);
             }
 
-            if (state is AuthSuccess &&
-                state.status == AuthStatus.firstTimeAuthentication) {
-              AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-                IntroScreenPatient.route(),
-                (route) => false,
-              );
-            }
-
-            if (state is AuthSuccess &&
-                state.status == AuthStatus.authenticated) {
-              AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-                NavigationPatientScreen.route(),
-                (route) => false,
-              );
+            if (state is AuthSuccess) {
+              switch (state.status) {
+                case AuthStatus.authenticated:
+                  AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+                    NavigationPatientScreen.route(),
+                    (route) => false,
+                  );
+                  break;
+                case AuthStatus.firstTimeAuthentication:
+                  AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+                    IntroScreenPatient.route(),
+                    (route) => false,
+                  );
+                  break;
+                case AuthStatus.anonymous:
+                  AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+                    NavigationPatientScreen.route(),
+                    (route) => false,
+                  );
+                  break;
+                case AuthStatus.unauthenticated:
+                  break;
+              }
             }
           },
           child: child,
         );
       },
       onGenerateRoute: (_) => LoadingScreen.route(),
-      theme: darkTheme,
+      theme: lightTheme,
     );
   }
 

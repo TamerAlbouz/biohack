@@ -40,23 +40,23 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
           SvgBottomNavBar<NavigationPatientCubit, NavigationPatientState>(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.heartPulse, size: 36),
+            icon: Icon(FontAwesomeIcons.heartPulse),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.magnifyingGlass, size: 34),
+            icon: Icon(FontAwesomeIcons.magnifyingGlass),
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.solidComments, size: 34),
+            icon: Icon(FontAwesomeIcons.solidMessage),
             label: 'Appointment',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.folderOpen, size: 34),
+            icon: Icon(FontAwesomeIcons.folderOpen),
             label: 'Documents',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.gear, size: 34),
+            icon: Icon(FontAwesomeIcons.gear),
             label: 'Settings',
           ),
         ],

@@ -5,18 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:p_logger/p_logger.dart';
 
-part 'auth_event.dart';
-part 'auth_state.dart';
+part 'route_event.dart';
+part 'route_state.dart';
 
-class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc({
+class RouteBloc extends Bloc<RouteEvent, RouteState> {
+  RouteBloc({
     required IAuthenticationRepository authRepo,
     required UserPreferences userPreferences,
     required IPatientRepository patientRepository,
   })  : _authRepo = authRepo,
         _userPreferences = userPreferences,
         _patientRepository = patientRepository,
-        super(AuthInitial(user: authRepo.currentUser)) {
+        super(RouteInitial(user: authRepo.currentUser)) {
     on<AuthSubscriptionRequested>(_onSubscriptionRequested);
     on<AuthLogoutPressed>(_onLogoutPressed);
     on<ChooseRole>(_onChooseRole);
@@ -28,7 +28,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onSubscriptionRequested(
     AuthSubscriptionRequested event,
-    Emitter<AuthState> emit,
+    Emitter<RouteState> emit,
   ) {
     return emit.onEach(
       _authRepo.user,
@@ -62,16 +62,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _handlePatientFlow(
-      User user, Emitter<AuthState> emit, Role role) async {
+      User user, Emitter<RouteState> emit, Role role) async {
     emit(AuthLoading());
 
     // if user signed in anonymously, go straight to a premade workflow
-    // if (user.isAnonymous) {
-    //   logger.i('Anonymous user');
-    //   emit(AuthSuccess(user,
-    //       role: Role.patient, status: AuthStatus.firstTimeAuthentication));
-    //   return;
-    // }
+    if (_authRepo.isAnonymous) {
+      logger.i('Anonymous user');
+      emit(AuthSuccess(user, role: Role.patient, status: AuthStatus.anonymous));
+      return;
+    }
 
     final patient = await _patientRepository.getPatient(user.uid);
 
@@ -88,7 +87,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   void _onLogoutPressed(
     AuthLogoutPressed event,
-    Emitter<AuthState> emit,
+    Emitter<RouteState> emit,
   ) async {
     await _userPreferences.clear();
     _authRepo.logOut();
@@ -97,7 +96,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onChooseRole(
     ChooseRole event,
-    Emitter<AuthState> emit,
+    Emitter<RouteState> emit,
   ) async {
     try {
       await _userPreferences.setRole(event.role);

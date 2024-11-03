@@ -37,6 +37,13 @@ class AuthenticationRepository implements IAuthenticationRepository {
     return _firebaseAuth.currentUser?.toUser ?? User.empty;
   }
 
+  /// Returns if the user is anonymous.
+  /// Defaults to false if there is no user.
+  @override
+  bool get isAnonymous {
+    return _firebaseAuth.currentUser?.isAnonymous ?? false;
+  }
+
   /// Creates a new user with the provided [email] and [password].
   ///
   /// Throws a [SignUpWithEmailAndPasswordFailure] if an exception occurs.

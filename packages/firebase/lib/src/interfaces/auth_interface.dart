@@ -11,6 +11,10 @@ abstract class IAuthenticationRepository {
   /// Defaults to [User.empty] if there is no user.
   User get currentUser;
 
+  /// Returns if the user is anonymous.
+  /// Defaults to false if there is no user.
+  bool get isAnonymous;
+
   /// Creates a new user with the provided [email] and [password].
   ///
   /// Throws a [SignUpWithEmailAndPasswordFailure] if an exception occurs.

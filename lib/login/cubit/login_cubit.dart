@@ -128,7 +128,6 @@ class LoginCubit extends Cubit<LoginState> {
         ),
       );
     } on LogInWithGoogleFailure catch (e) {
-      await _authenticationRepository.logOut();
       logger.e(e.message);
       emit(
         state.copyWith(

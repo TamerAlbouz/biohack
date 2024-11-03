@@ -1,30 +1,30 @@
-part of 'auth_bloc.dart';
+part of 'route_bloc.dart';
 
-final class AuthState extends Equatable {
+final class RouteState extends Equatable {
   @override
   List<Object> get props => [];
 }
 
-final class AuthInitial extends AuthState {
+final class RouteInitial extends RouteState {
   final User user;
 
-  AuthInitial({required this.user});
+  RouteInitial({required this.user});
 
   @override
   List<Object> get props => [user];
 }
 
-final class AuthChooseRole extends AuthState {
+final class AuthChooseRole extends RouteState {
   @override
   List<Object> get props => [];
 }
 
-final class AuthLoading extends AuthState {
+final class AuthLoading extends RouteState {
   @override
   List<Object> get props => [];
 }
 
-final class AuthSuccess extends AuthState {
+final class AuthSuccess extends RouteState {
   final User user;
   final Role role;
   final AuthStatus status;
@@ -36,7 +36,7 @@ final class AuthSuccess extends AuthState {
   List<Object> get props => [user, role, status];
 }
 
-final class AuthLogin extends AuthState {
+final class AuthLogin extends RouteState {
   final Role role;
 
   AuthLogin(this.role);
@@ -45,7 +45,7 @@ final class AuthLogin extends AuthState {
   List<Object> get props => [role];
 }
 
-final class AuthFailure extends AuthState {
+final class AuthFailure extends RouteState {
   final String message;
 
   AuthFailure(this.message);
