@@ -16,6 +16,7 @@ exports.handleBillingAlert = onMessagePublished(
     logger.debug(`Billing data received: ${JSON.stringify(message)}`);
 
     const budgetExceeded = message.costAmount >= message.budgetAmount;
+    // const budgetExceeded = message.costAmount >= message.budgetAmount;
 
     if (budgetExceeded) {
       logger.info(
