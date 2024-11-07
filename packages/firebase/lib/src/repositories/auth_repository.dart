@@ -78,7 +78,7 @@ class AuthenticationRepository implements IAuthenticationRepository {
       await _firebaseAuth.signInWithCredential(credential);
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw LogInWithGoogleFailure.fromCode(e.code);
-    } catch (_) {
+    } catch (e) {
       throw LogInWithGoogleFailure.fromCode(
           GoogleSignInAccount.kFailedToRecoverAuthError);
     }

@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "295625806851",
     "project_id": "medtalk-aefa8",
-    "storage_bucket": "medtalk-aefa8.appspot.com"
+    "storage_bucket": "medtalk-aefa8.firebasestorage.app"
   },
   "client": [
     {
@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "295625806851-oqstgndus5appehq5phes8duenpf2p7g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.medtalk.tamer",
+            "certificate_hash": "2b3d5cc2370a8bb75b13f62680faf19e1f716afb"
+          }
+        },
+        {
           "client_id": "295625806851-idui8k1c7s2i1oae85p5qmm41rgr3uk8.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -37,6 +45,13 @@
             {
               "client_id": "295625806851-idui8k1c7s2i1oae85p5qmm41rgr3uk8.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "295625806851-atina02c33nbbq3mgbkoma3jt2ngjf40.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.medtalk.tamer"
+              }
             }
           ]
         }
