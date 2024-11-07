@@ -1,9 +1,10 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:medtalk/env/env.dart';
 import 'package:p_logger/p_logger.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../common/env/env.dart';
 
 class VideoCallScreen extends StatefulWidget {
   const VideoCallScreen({super.key});
@@ -72,7 +73,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
     await _engine.startPreview();
     // Join a channel using a temporary token and channel name
     await _engine.joinChannel(
-      token: Env.agoraToken,
+      token: "Env.agoraToken",
       channelId: "tamer",
       options: const ChannelMediaOptions(
           // Automatically subscribe to all video streams
