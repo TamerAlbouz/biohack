@@ -56,6 +56,15 @@ class InputField extends StatelessWidget {
   /// ```
   final Widget? trailingWidget;
 
+  /// Controls the border radius of the input field.
+  /// Defaults to 10.
+  ///
+  /// Example:
+  /// ```dart
+  /// borderRadius: BorderRadius.circular(20),
+  /// ```
+  final BorderRadius? borderRadius;
+
   /// A custom input field with styling options, error message display, and an optional trailing widget.
   ///
   /// [InputField] provides a styled text input field with a hint, customizable keyboard type,
@@ -72,6 +81,8 @@ class InputField extends StatelessWidget {
   ///   keyboardType: TextInputType.emailAddress,
   ///   errorText: 'Invalid email format',
   ///   trailingWidget: Icon(Icons.email),
+  ///   height: 50,
+  ///   borderRadius: BorderRadius.circular(20),
   /// )
   /// ```
   ///
@@ -83,6 +94,7 @@ class InputField extends StatelessWidget {
   /// * [errorText]: Optional error message displayed below the input field. If null, no error message is shown.
   /// * [height]: Height of the input field container, in pixels. Defaults to 50.
   /// * [trailingWidget]: An optional widget displayed at the end of the input field, typically for additional actions or icons.
+  /// * [borderRadius]: Controls the border radius of the input field. Defaults to 10.
   ///
   /// ### Build Method:
   ///
@@ -97,6 +109,7 @@ class InputField extends StatelessWidget {
     required this.errorText,
     this.trailingWidget,
     this.height = 50,
+    this.borderRadius,
   });
 
   @override
@@ -106,7 +119,7 @@ class InputField extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
-            borderRadius: kRadius10,
+            borderRadius: borderRadius ?? kRadius10,
             color: MyColors.textField,
           ),
           padding: kPaddH20,

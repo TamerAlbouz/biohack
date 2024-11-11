@@ -36,3 +36,7 @@ const kPaddH10V3 = EdgeInsets.symmetric(horizontal: 10, vertical: 3);
 const kPaddH42V68 = EdgeInsets.symmetric(horizontal: 42, vertical: 68);
 const kPaddL20R20T68B20 =
     EdgeInsets.only(left: 20, right: 20, top: 68, bottom: 20);
+const kPaddH20T10 = EdgeInsets.only(top: 10, left: 20, right: 20);
+const kPaddH20V10 = EdgeInsets.symmetric(horizontal: 20, vertical: 10);
+const kPaddR15 = EdgeInsets.only(right: 15);
+const kPaddH16V12 = EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0);

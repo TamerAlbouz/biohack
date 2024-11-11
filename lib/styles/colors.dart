@@ -21,18 +21,20 @@ class MyColors {
   static const card = Color(0xffF7F3F0);
   static const star = Color(0xffE9C01D);
   static const subtitle = Color(0xff8D8D8D);
+  static const subtitleDark = Color(0xff6F6F6F);
   static const starEmpty = Color(0xffC7C7C7);
   static const reviewBar = Color(0xff5271FF);
   static const reviewBarEmpty = Color(0xffC7C7C7);
   static const optionStroke = Color(0xffDEDAD7);
   static const text = Color(0xff000000);
+  static const textWhite = Color(0xffFFFFFF);
   static const errorRed = Color(0xffee5a5b);
-  static const textButtonGrey = Color(0xff808080);
+  static const textGrey = Color(0xff808080);
   static const cardBackground = Color(0xffF9F5F2);
   static const cardDivider = Color(0xffDEDEDE);
   static const lineDivider = Color(0xff6F6F6F);
   static const dropdown = Color(0xffF7F3F0);
   static const buttonText = Color(0xffFFFFFF);
-
   static const tagText = Color(0xffFFFFFF);
+  static const dropDownSearchField = Color(0xff5c78f7);
 }

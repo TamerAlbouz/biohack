@@ -27,6 +27,18 @@ ThemeData get lightTheme {
         ),
       ),
     ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: MyColors.background,
+      elevation: 0,
+      toolbarHeight: 15,
+      iconTheme: IconThemeData(color: MyColors.text),
+      titleTextStyle: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.large,
+        color: MyColors.text,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(
         fontFamily: Font.family,

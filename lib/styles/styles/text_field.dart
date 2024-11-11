@@ -6,7 +6,7 @@ import '../sizes.dart';
 
 final kTextFieldButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: MyColors.textField,
-  foregroundColor: MyColors.textButtonGrey,
+  foregroundColor: MyColors.textGrey,
   elevation: 0,
   padding: kPaddH20,
   shape: RoundedRectangleBorder(

@@ -24,6 +24,15 @@ class DatePicker extends StatefulWidget {
   /// ```
   final int height;
 
+  /// The hint text to display when no date is selected.
+  /// Defaults to 'Select Date'.
+  ///
+  /// Example:
+  /// ```dart
+  /// hint: 'Select Date',
+  /// ```
+  final String hint;
+
   /// A customizable date picker widget that allows users to select a date using a calendar interface.
   ///
   /// The [DatePicker] widget provides a button that opens a date selection dialog,
@@ -33,6 +42,7 @@ class DatePicker extends StatefulWidget {
   ///
   /// * [onSelected]: A callback function that triggers when a date is selected, passing the selected [DateTime].
   /// * [height]: The height of the button. Defaults to 50.
+  /// * [hint]: The hint text to display when no date is selected. Defaults to 'Select Date'.
   ///
   /// ### Example usage:
   /// ```dart
@@ -41,24 +51,13 @@ class DatePicker extends StatefulWidget {
   ///     print('Selected date: $date');
   ///   },
   ///   height: 60,
+  ///   hint: 'Select Date',
   /// );
   /// ```
-  ///
-  /// ### Features:
-  /// - Opens a calendar dialog with a dark theme and custom colors for date selection.
-  /// - Uses [DateFormat] to format the date in `dd/MM/yyyy` format.
-  /// - Displays 'Select Date' text initially, which updates to the selected date.
-  ///
-  /// ### Build Method:
-  ///
-  /// The widget builds an [ElevatedButton] that opens the date picker dialog upon pressing.
-  /// Inside the button, the chosen date (or a placeholder text) and a calendar icon are displayed.
-  ///
-  /// - The date picker dialog is themed with a dark color scheme and custom button colors.
-  /// - After a date is selected, it updates the displayed date and triggers the [onSelected] callback.
   const DatePicker({
     super.key,
     this.onSelected,
+    this.hint = 'Select Date',
     this.height = 50,
   });
 
@@ -118,7 +117,7 @@ class _DatePickerState extends State<DatePicker> {
           Text(
             selectedDate != null
                 ? formatter.format(selectedDate!)
-                : 'Select Date',
+                : widget.hint,
             textAlign: TextAlign.left,
             style: selectedDate != null
                 ? kButtonHint.copyWith(color: MyColors.text)
