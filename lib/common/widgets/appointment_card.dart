@@ -77,8 +77,7 @@ class _AppointmentCard extends StatelessWidget {
   ///
   /// The main information is arranged in a column with labels and a button to join the call.
   const _AppointmentCard(
-      {super.key,
-      required this.specialty,
+      {required this.specialty,
       required this.doctor,
       required this.date,
       required this.time,
@@ -233,7 +232,6 @@ class _CardAppointmentMetadata extends StatelessWidget {
   /// This section is displayed below the main appointment information and includes metadata items such as service and fee,
   /// followed by an informational section on the doctor’s background.
   const _CardAppointmentMetadata({
-    super.key,
     required this.doctor,
     required this.service,
     required this.fee,
@@ -348,7 +346,6 @@ class _CardAppointMetaInfo extends StatelessWidget {
   ///
   /// Each row contains an SVG icon and two texts arranged horizontally, with the title aligned to the left and the text to the right.
   const _CardAppointMetaInfo({
-    super.key,
     required this.svgAssetPath,
     required this.title,
     required this.text,
