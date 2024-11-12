@@ -46,7 +46,7 @@ class _LoginPatientScreenState extends State<LoginPatientScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       body: BlocProvider(
         create: (_) => LoginCubit(context.read<IAuthenticationRepository>()),
         child: LoginForm(tabController: _tabController),
@@ -82,62 +82,71 @@ class LoginForm extends StatelessWidget {
           context.read<LoginCubit>().resetStatus();
         }
       },
-      child: Padding(
-        padding: kPaddL42R42T42,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Column(
-              children: [
-                const LogoWidget(),
-                kGap28,
-                TabBar(
-                  controller: tabController,
-                  tabs: const [
-                    Tab(text: 'Sign In'),
-                    Tab(text: 'Sign Up'),
+      child: SafeArea(
+        child: Padding(
+          padding: kPaddL42R42T42,
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        const LogoWidget(),
+                        kGap28,
+                        TabBar(
+                          controller: tabController,
+                          tabs: const [
+                            Tab(text: 'Sign In'),
+                            Tab(text: 'Sign Up'),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 300,
+                          child: TabBarView(
+                            controller: tabController,
+                            children: [
+                              _SignIn(),
+                              _SignUp(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      children: [
+                        const Text(
+                          'Or',
+                          style: TextStyle(
+                            fontFamily: Font.family,
+                            color: Colors.grey,
+                            fontSize: Font.medium,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        kGap14,
+                        GoogleLoginButton(
+                          onPressed: () {
+                            context.read<LoginCubit>().logInWithGoogle();
+                          },
+                        ),
+                        kGap14,
+                        SignInAsGuest(
+                          onPressed: () =>
+                              context.read<LoginCubit>().logInAnonymously(),
+                        ),
+                        kGap14,
+                      ],
+                    ),
                   ],
                 ),
-                SizedBox(
-                  height: 300,
-                  child: TabBarView(
-                    controller: tabController,
-                    children: [
-                      _SignIn(),
-                      _SignUp(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Column(
-              children: [
-                const Text(
-                  'Or',
-                  style: TextStyle(
-                    fontFamily: Font.family,
-                    color: Colors.grey,
-                    fontSize: Font.medium,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                kGap14,
-                GoogleLoginButton(
-                  onPressed: () {
-                    context.read<LoginCubit>().logInWithGoogle();
-                  },
-                ),
-                kGap14,
-                SignInAsGuest(
-                  onPressed: () =>
-                      context.read<LoginCubit>().logInAnonymously(),
-                ),
-                kGap14,
-              ],
-            ),
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

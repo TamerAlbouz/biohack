@@ -52,17 +52,21 @@ class DoctorCard extends StatelessWidget {
                 ),
               ],
             ),
-            kGap10,
+            kGap14,
             RadioButtonGroup(
               options: timeSlots,
               decoration: BoxDecoration(
                 color: MyColors.blue,
                 borderRadius: kRadiusAll,
               ),
-              contentPadding: kPaddH10V3,
+              contentPadding: kPaddH10V2,
               selectedColor: MyColors.blue,
               unselectedColor: MyColors.blue,
               unselectedTextColor: Colors.white,
+              textStyle: const TextStyle(
+                color: Colors.white,
+                fontSize: Font.extraSmall,
+              ),
               onSelected: (index) {},
             ),
           ],

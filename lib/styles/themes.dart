@@ -150,13 +150,15 @@ ThemeData get lightTheme {
       enableFeedback: true,
       backgroundColor: Colors.transparent,
       showUnselectedLabels: false,
-      unselectedIconTheme: IconThemeData(color: Colors.white54),
+      unselectedIconTheme: IconThemeData(color: Colors.white),
       selectedIconTheme: IconThemeData(color: Colors.white),
       elevation: 0,
-      showSelectedLabels: false,
+      selectedItemColor: MyColors.textWhite,
+      showSelectedLabels: true,
       selectedLabelStyle: TextStyle(
         fontFamily: Font.family,
-        fontSize: Font.medium,
+        fontSize: Font.extraSmall,
+        color: MyColors.textWhite,
         fontWeight: FontWeight.bold,
       ),
       unselectedLabelStyle: TextStyle(

@@ -69,6 +69,18 @@ class RadioButtonGroup extends StatefulWidget {
   /// ```
   final Color? unselectedTextColor;
 
+  /// Text style for the radio button group.
+  ///
+  /// Example:
+  /// ```dart
+  /// TextStyle(
+  ///  color: MyColors.black,
+  ///  fontSize: Font.small,
+  ///  fontWeight: FontWeight.normal,
+  ///  )
+  /// ```
+  final TextStyle? textStyle;
+
   /// A horizontal, scrollable group of radio-style buttons, allowing users to select one option at a time.
   ///
   /// [RadioButtonGroup] displays a list of options horizontally as rounded radio buttons.
@@ -98,6 +110,8 @@ class RadioButtonGroup extends StatefulWidget {
   /// * [selectedColor]: Selected color for the radio button. Defaults to [MyColors.buttonGreen].
   /// * [unselectedColor]: Unselected color for the radio button. Defaults to [MyColors.textField].
   /// * [contentPadding]: Padding in the radio button.
+  /// * [unselectedTextColor]: Text color when the button is unselected.
+  /// * [textStyle]: Text style for the radio button group.
   ///
   /// ### State Management:
   ///
@@ -118,6 +132,7 @@ class RadioButtonGroup extends StatefulWidget {
     this.unselectedColor = MyColors.textField,
     this.contentPadding,
     this.unselectedTextColor,
+    this.textStyle,
   });
 
   @override
@@ -145,6 +160,7 @@ class _RadioButtonGroupState extends State<RadioButtonGroup> {
               unselectedColor: widget.unselectedColor,
               contentPadding: widget.contentPadding,
               unselectedTextColor: widget.unselectedTextColor,
+              textStyle: widget.textStyle,
               onSelected: () {
                 setState(() {
                   _selectedOption = widget.options[i];
@@ -208,7 +224,19 @@ class RoundedRadioButton extends StatelessWidget {
   /// ```dart
   /// Colors.white
   /// ```
-  final Color textColor;
+  final Color selectedTextColor;
+
+  /// Text style for the radio button group.
+  ///
+  /// Example:
+  /// ```dart
+  /// TextStyle(
+  /// color: MyColors.black,
+  /// fontSize: Font.small,
+  /// fontWeight: FontWeight.normal,
+  /// )
+  /// ```
+  final TextStyle? textStyle;
 
   /// Custom decoration for the radio button.
   ///
@@ -261,6 +289,7 @@ class RoundedRadioButton extends StatelessWidget {
   ///   border: Border.all(color: MyColors.grey),
   ///   boxShadow: kBoxShadow,
   ///   ),
+  ///   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
   /// )
   /// ```
   ///
@@ -274,6 +303,8 @@ class RoundedRadioButton extends StatelessWidget {
   /// * [textColor]: Text color when the button is selected. Defaults to [Colors.white].
   /// * [decoration]: Custom decoration for the radio button.
   /// * [contentPadding]: Padding in the radio button.
+  /// * [unselectedTextColor]: Text color when the button is unselected.
+  /// * [textStyle]: Text style for the radio button group.
   ///
   /// ### Build Method:
   ///
@@ -288,9 +319,10 @@ class RoundedRadioButton extends StatelessWidget {
     this.selectedColor = MyColors.buttonGreen,
     this.unselectedColor = MyColors.textField,
     this.unselectedTextColor,
-    this.textColor = Colors.white,
+    this.selectedTextColor = Colors.white,
     this.decoration,
     this.contentPadding,
+    this.textStyle,
   });
 
   @override
@@ -309,12 +341,18 @@ class RoundedRadioButton extends StatelessWidget {
             ),
         child: Text(
           label,
-          style: TextStyle(
-            color:
-                isSelected ? textColor : unselectedTextColor ?? MyColors.grey,
-            fontWeight: FontWeight.normal,
-            fontSize: Font.small,
-          ),
+          style: textStyle?.copyWith(
+                color: isSelected
+                    ? selectedTextColor
+                    : unselectedTextColor ?? MyColors.grey,
+              ) ??
+              TextStyle(
+                color: isSelected
+                    ? selectedTextColor
+                    : unselectedTextColor ?? MyColors.grey,
+                fontWeight: FontWeight.normal,
+                fontSize: Font.small,
+              ),
         ),
       ),
     );

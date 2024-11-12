@@ -31,7 +31,7 @@ class SvgBottomNavBar<T extends Cubit<S>, S extends NavbarStateBase>
           return Container(
             padding: kPaddH10,
             alignment: Alignment.bottomCenter,
-            height: 95,
+            height: 80,
             child: Theme(
               data: Theme.of(context).copyWith(
                 splashFactory:
@@ -41,7 +41,9 @@ class SvgBottomNavBar<T extends Cubit<S>, S extends NavbarStateBase>
                 currentIndex: state.index,
                 items: items,
                 onTap: (index) => onTap(index),
-                iconSize: 28,
+                iconSize: 26,
+                selectedIconTheme:
+                    const IconThemeData(size: 30, color: Colors.white),
                 enableFeedback: false,
               ),
             ),

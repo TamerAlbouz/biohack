@@ -281,154 +281,165 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
     var size = renderBox.size;
 
     return OverlayEntry(
-      builder: (context) => Positioned(
-        width: size.width,
-        child: CompositedTransformFollower(
-          link: _layerLink,
-          showWhenUnlinked: false,
-          offset: Offset(0.0, size.height + 5.0),
-          child: Material(
-            elevation: 4.0,
-            shadowColor: Colors.black26,
-            borderRadius: kRadius10,
-            color: widget.dropdownColor,
-            child: StatefulBuilder(
-              // Add StatefulBuilder here
-              builder: (context, setStateOverlay) {
-                return AnimatedBuilder(
-                  animation: _expandAnimation,
-                  builder: (context, child) {
-                    return ClipRect(
-                      child: Align(
-                        heightFactor: _expandAnimation.value,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                          ),
-                          color: widget.searchFieldColor ??
-                              MyColors.dropDownSearchField,
-                        ),
-                        child: Focus(
-                          focusNode: _focusNode,
-                          child: TextField(
-                            style: kTextFieldDropdown,
-                            decoration: const InputDecoration(
-                              hintText: 'Search',
-                              hintStyle: kTextFieldDropdown,
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: MyColors.textWhite,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: kPaddH16V12,
+      builder: (context) => GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          // check if the element we're clicking is another dropdown,
+        },
+        child: Stack(
+          children: [
+            Positioned(
+              width: size.width,
+              child: CompositedTransformFollower(
+                link: _layerLink,
+                showWhenUnlinked: false,
+                offset: Offset(0.0, size.height + 5.0),
+                child: Material(
+                  elevation: 4.0,
+                  shadowColor: Colors.black26,
+                  borderRadius: kRadius10,
+                  color: widget.dropdownColor,
+                  child: StatefulBuilder(
+                    // Add StatefulBuilder here
+                    builder: (context, setStateOverlay) {
+                      return AnimatedBuilder(
+                        animation: _expandAnimation,
+                        builder: (context, child) {
+                          return ClipRect(
+                            child: Align(
+                              heightFactor: _expandAnimation.value,
+                              child: child,
                             ),
-                            cursorColor: MyColors.textWhite,
-                            onChanged:
-                                _filterItems, // Use the new filter method
-                          ),
-                        ),
-                      ),
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: kRadius10,
-                          color: widget.dropdownColor,
-                        ),
+                          );
+                        },
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            InkWell(
-                              onTap: () {
-                                setState(() {
-                                  selectedValue = widget.defaultOption;
-                                });
-                                widget.onChanged(widget.defaultOption);
-                                _toggleDropdown();
-                              },
-                              child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12.0,
-                                  horizontal: 16.0,
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(10),
+                                  topRight: Radius.circular(10),
                                 ),
-                                child: Text(
-                                  widget.defaultOption,
-                                  style: kButtonHint.copyWith(
-                                      color: MyColors.text),
+                                color: widget.searchFieldColor ??
+                                    MyColors.dropDownSearchField,
+                              ),
+                              child: Focus(
+                                focusNode: _focusNode,
+                                child: TextField(
+                                  style: kTextFieldDropdown,
+                                  decoration: const InputDecoration(
+                                    hintText: 'Search',
+                                    hintStyle: kTextFieldDropdown,
+                                    prefixIcon: Icon(
+                                      Icons.search,
+                                      color: MyColors.textWhite,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: kPaddH16V12,
+                                  ),
+                                  cursorColor: MyColors.textWhite,
+                                  onChanged:
+                                      _filterItems, // Use the new filter method
                                 ),
                               ),
                             ),
-                            Divider(
-                              height: 1,
-                              thickness: 1,
-                              color: Colors.grey[300],
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: kRadius10,
+                                color: widget.dropdownColor,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        selectedValue = widget.defaultOption;
+                                      });
+                                      widget.onChanged(widget.defaultOption);
+                                      _toggleDropdown();
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 12.0,
+                                        horizontal: 16.0,
+                                      ),
+                                      child: Text(
+                                        widget.defaultOption,
+                                        style: kButtonHint.copyWith(
+                                            color: MyColors.text),
+                                      ),
+                                    ),
+                                  ),
+                                  Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                    color: Colors.grey[300],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              constraints: BoxConstraints(
+                                  maxHeight: widget.maxMenuHeight),
+                              child: ListView(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                children: filteredItems
+                                    .where(
+                                        (item) => item != widget.defaultOption)
+                                    .map((String item) {
+                                  return TweenAnimationBuilder<double>(
+                                    duration: Duration(
+                                        milliseconds: 200 +
+                                            filteredItems.indexOf(item) * 40),
+                                    tween: Tween(begin: 0.0, end: 1.0),
+                                    builder: (context, value, child) {
+                                      return Transform.translate(
+                                        offset: Offset(0, -20 * (1 - value)),
+                                        child: Opacity(
+                                          opacity: value,
+                                          child: child,
+                                        ),
+                                      );
+                                    },
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          selectedValue = item;
+                                        });
+                                        widget.onChanged(item);
+                                        _toggleDropdown();
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 12.0,
+                                          horizontal: 16.0,
+                                        ),
+                                        child: Text(
+                                          item,
+                                          style: kButtonHint.copyWith(
+                                              color: MyColors.text),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      Container(
-                        constraints:
-                            BoxConstraints(maxHeight: widget.maxMenuHeight),
-                        child: ListView(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          children: filteredItems
-                              .where((item) => item != widget.defaultOption)
-                              .map((String item) {
-                            return TweenAnimationBuilder<double>(
-                              duration: Duration(
-                                  milliseconds:
-                                      200 + filteredItems.indexOf(item) * 40),
-                              tween: Tween(begin: 0.0, end: 1.0),
-                              builder: (context, value, child) {
-                                return Transform.translate(
-                                  offset: Offset(0, -20 * (1 - value)),
-                                  child: Opacity(
-                                    opacity: value,
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    selectedValue = item;
-                                  });
-                                  widget.onChanged(item);
-                                  _toggleDropdown();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 12.0,
-                                    horizontal: 16.0,
-                                  ),
-                                  child: Text(
-                                    item,
-                                    style: kButtonHint.copyWith(
-                                        color: MyColors.text),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -444,7 +455,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
           focusNode: _focusNode,
           child: Container(
             width: widget.width,
-            padding: widget.padding ?? kPaddH20V10,
+            padding: widget.padding ?? kPaddH20V8,
             decoration: BoxDecoration(
               color: widget.backgroundColor,
               borderRadius: widget.borderRadius ?? kRadius10,

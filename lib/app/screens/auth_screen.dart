@@ -72,55 +72,69 @@ class _AppViewState extends State<_AppView> {
 
           if (state is AuthChooseRole) {
             return Stack(
+              alignment: Alignment.bottomCenter,
               children: <Widget>[
-                const Padding(
-                  padding: kPaddH42,
-                  child: Column(children: [
-                    kGap100,
-                    LogoWidget(),
-                    kGap14,
-                    Text(
-                      'Welcome!',
-                      style: TextStyle(
-                          fontSize: Font.mediumLarge,
-                          fontWeight: FontWeight.normal),
-                      textAlign: TextAlign.center,
-                    ),
-                    Text(
-                      'Who are you?',
-                      style: TextStyle(fontSize: Font.medium),
-                      textAlign: TextAlign.center,
-                    ),
-                  ]),
-                ),
-                Padding(
-                  padding: kPaddH42,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          context
-                              .read<RouteBloc>()
-                              .add(ChooseRole(Role.doctor));
-                        },
-                        style: kMainButtonStyle,
-                        icon: const Icon(FontAwesomeIcons.userDoctor),
-                        label: const Text('I am a Doctor'),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Flexible(
+                      flex: 2,
+                      child: Padding(
+                        padding: kPaddH42,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              LogoWidget(),
+                              kGap14,
+                              Text(
+                                'Welcome!',
+                                style: TextStyle(
+                                    fontSize: Font.mediumLarge,
+                                    fontWeight: FontWeight.normal),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                'Who are you?',
+                                style: TextStyle(fontSize: Font.medium),
+                                textAlign: TextAlign.center,
+                              ),
+                            ]),
                       ),
-                      kGap20,
-                      ElevatedButton.icon(
-                        onPressed: () async {
-                          context
-                              .read<RouteBloc>()
-                              .add(ChooseRole(Role.patient));
-                        },
-                        style: kMainButtonStyle,
-                        icon: const Icon(FontAwesomeIcons.userInjured),
-                        label: const Text('I am a Patient'),
+                    ),
+                    kGap28,
+                    Flexible(
+                      flex: 3,
+                      child: Padding(
+                        padding: kPaddH42,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                context
+                                    .read<RouteBloc>()
+                                    .add(ChooseRole(Role.doctor));
+                              },
+                              style: kMainButtonStyle,
+                              icon: const Icon(FontAwesomeIcons.userDoctor),
+                              label: const Text('I am a Doctor'),
+                            ),
+                            kGap20,
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                context
+                                    .read<RouteBloc>()
+                                    .add(ChooseRole(Role.patient));
+                              },
+                              style: kMainButtonStyle,
+                              icon: const Icon(FontAwesomeIcons.userInjured),
+                              label: const Text('I am a Patient'),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
                 Align(
                   alignment: Alignment.bottomCenter,

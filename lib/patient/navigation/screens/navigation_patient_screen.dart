@@ -50,7 +50,7 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
           ),
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.solidMessage),
-            label: 'Appointment',
+            label: 'Chats',
           ),
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.folderOpen),
