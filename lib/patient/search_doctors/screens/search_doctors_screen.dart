@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/common/widgets/custom_divider.dart';
 import 'package:medtalk/common/widgets/dropdown/custom_complex_dropdown.dart';
+import 'package:medtalk/patient/intro/screens/intro_screen_patient.dart';
 import 'package:medtalk/styles/sizes.dart';
 
 import '../../../common/widgets/cards/doctor_card.dart';
@@ -135,9 +137,39 @@ class SearchDoctorsScreen extends StatelessWidget {
                 ],
               ),
               kGap10,
-              const DoctorCard(
+              DoctorCard(
                 name: 'Dr. Jane Clarisa',
                 specialty: 'Dermatologist',
+                availability: 'Available Tomorrow',
+                timeSlots: const [
+                  '9:00 AM',
+                  '10:00 AM',
+                  '11:00 AM',
+                  '12:00 PM',
+                  '1:00 PM'
+                ],
+                onCardTap: () {
+                  AppGlobal.navigatorKey.currentState
+                      ?.push<void>(IntroScreenPatient.route());
+                },
+              ),
+              kGap10,
+              const DoctorCard(
+                name: 'Dr. Sam Wilson',
+                specialty: 'General Practice',
+                availability: 'Available Today',
+                timeSlots: [
+                  '9:00 AM',
+                  '10:00 AM',
+                  '11:00 AM',
+                  '12:00 PM',
+                  '1:00 PM'
+                ],
+              ),
+              kGap10,
+              const DoctorCard(
+                name: 'Dr. Sarah Jane',
+                specialty: 'Pediatrician',
                 availability: 'Available Tomorrow',
                 timeSlots: [
                   '9:00 AM',
@@ -149,8 +181,60 @@ class SearchDoctorsScreen extends StatelessWidget {
               ),
               kGap10,
               const DoctorCard(
-                name: 'Dr. Sam Wilson',
-                specialty: 'General Practice',
+                name: 'Dr. John Doe',
+                specialty: 'Cardiologist',
+                availability: 'Available Today',
+                timeSlots: [
+                  '9:00 AM',
+                  '10:00 AM',
+                  '11:00 AM',
+                  '12:00 PM',
+                  '1:00 PM'
+                ],
+              ),
+              kGap10,
+              const DoctorCard(
+                name: 'Dr. John Doe',
+                specialty: 'Cardiologist',
+                availability: 'Available Today',
+                timeSlots: [
+                  '9:00 AM',
+                  '10:00 AM',
+                  '11:00 AM',
+                  '12:00 PM',
+                  '1:00 PM'
+                ],
+              ),
+              kGap10,
+              const DoctorCard(
+                name: 'Dr. John Doe',
+                specialty: 'Cardiologist',
+                availability: 'Available Today',
+                timeSlots: [
+                  '9:00 AM',
+                  '10:00 AM',
+                  '11:00 AM',
+                  '12:00 PM',
+                  '1:00 PM'
+                ],
+              ),
+              kGap10,
+              const DoctorCard(
+                name: 'Dr. John Doe',
+                specialty: 'Cardiologist',
+                availability: 'Available Today',
+                timeSlots: [
+                  '9:00 AM',
+                  '10:00 AM',
+                  '11:00 AM',
+                  '12:00 PM',
+                  '1:00 PM'
+                ],
+              ),
+              kGap10,
+              const DoctorCard(
+                name: 'Dr. John Doe',
+                specialty: 'Cardiologist',
                 availability: 'Available Today',
                 timeSlots: [
                   '9:00 AM',

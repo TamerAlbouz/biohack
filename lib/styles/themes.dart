@@ -31,6 +31,7 @@ ThemeData get lightTheme {
       backgroundColor: MyColors.background,
       elevation: 0,
       toolbarHeight: 15,
+      scrolledUnderElevation: 0,
       iconTheme: IconThemeData(color: MyColors.text),
       titleTextStyle: TextStyle(
         fontFamily: Font.family,

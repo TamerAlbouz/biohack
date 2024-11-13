@@ -11,6 +11,8 @@ class DoctorCard extends StatelessWidget {
   final String specialty;
   final String availability;
   final List<String> timeSlots;
+  final Function()? onCardTap;
+  final void Function(String)? onTimeSlotSelected;
 
   const DoctorCard({
     super.key,
@@ -18,58 +20,63 @@ class DoctorCard extends StatelessWidget {
     required this.specialty,
     required this.availability,
     required this.timeSlots,
+    this.onCardTap,
+    this.onTimeSlotSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: kPadd0,
-      shape: RoundedRectangleBorder(
-        borderRadius: kRadius20,
-      ),
-      elevation: 0,
-      child: Padding(
-        padding: kPaddH20V15,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              // space between
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                const _ProfilePicture(),
-                kGap20,
-                _DoctorInfo(
-                  name: name,
-                  specialty: specialty,
-                  availability: availability,
-                ),
-                const Spacer(),
-                // faicon right arrow
-                const FaIcon(
-                  FontAwesomeIcons.chevronRight,
-                  color: Colors.black,
-                ),
-              ],
-            ),
-            kGap14,
-            RadioButtonGroup(
-              options: timeSlots,
-              decoration: BoxDecoration(
-                color: MyColors.blue,
-                borderRadius: kRadiusAll,
+    return GestureDetector(
+      onTap: onCardTap,
+      child: Card(
+        margin: kPadd0,
+        shape: RoundedRectangleBorder(
+          borderRadius: kRadius20,
+        ),
+        elevation: 0,
+        child: Padding(
+          padding: kPaddH20V15,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                // space between
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const _ProfilePicture(),
+                  kGap20,
+                  _DoctorInfo(
+                    name: name,
+                    specialty: specialty,
+                    availability: availability,
+                  ),
+                  const Spacer(),
+                  // faicon right arrow
+                  const FaIcon(
+                    FontAwesomeIcons.chevronRight,
+                    color: Colors.black,
+                  ),
+                ],
               ),
-              contentPadding: kPaddH10V2,
-              selectedColor: MyColors.blue,
-              unselectedColor: MyColors.blue,
-              unselectedTextColor: Colors.white,
-              textStyle: const TextStyle(
-                color: Colors.white,
-                fontSize: Font.extraSmall,
+              kGap14,
+              RadioButtonGroup(
+                options: timeSlots,
+                decoration: BoxDecoration(
+                  color: MyColors.blue,
+                  borderRadius: kRadiusAll,
+                ),
+                contentPadding: kPaddH10V2,
+                selectedColor: MyColors.blue,
+                unselectedColor: MyColors.blue,
+                unselectedTextColor: Colors.white,
+                textStyle: const TextStyle(
+                  color: Colors.white,
+                  fontSize: Font.extraSmall,
+                ),
+                onSelected: onTimeSlotSelected ?? (value) {},
               ),
-              onSelected: (index) {},
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
