@@ -49,9 +49,9 @@ class _PasswordInputFieldState extends State<PasswordInputField> {
             obscureText: _obscureText,
             onChanged: widget.onChanged,
             keyboardType: widget.keyboardType,
-            cursorColor: MyColors.lightPurple,
+            cursorColor: MyColors.lightBlue,
             style: const TextStyle(
-              color: MyColors.text,
+              color: MyColors.textBlack,
               fontSize: 16,
             ),
             decoration: InputDecoration(

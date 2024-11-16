@@ -15,7 +15,7 @@ class GoogleLoginButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
       key: const Key('loginForm_googleLogin_raisedButton'),
-      style: kMainButtonStyle.copyWith(
+      style: kElevatedButtonStyle.copyWith(
         minimumSize: const WidgetStatePropertyAll(Size(200, 50)),
         shape: WidgetStatePropertyAll(
           RoundedRectangleBorder(

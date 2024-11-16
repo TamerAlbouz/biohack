@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/common/widgets/tag.dart';
 import 'package:medtalk/styles/sizes.dart';
 
@@ -33,7 +34,7 @@ class AppointmentWidget extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: MyColors.cardBackground,
+        color: MyColors.cardUnderpart,
         borderRadius: kRadius20,
       ),
       child: Column(
@@ -143,21 +144,7 @@ class _AppointmentCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: kRadius20,
       ),
-      child: Container(
-        padding: kPaddH20V15,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: MyColors.card,
-          borderRadius: kRadius20,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.12),
-              offset: const Offset(0, 8),
-              blurRadius: 12,
-              spreadRadius: 0,
-            ),
-          ],
-        ),
+      child: CustomBase(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -173,11 +160,14 @@ class _AppointmentCard extends StatelessWidget {
               ],
             ),
             kGap2,
-            Text(doctor,
-                style: const TextStyle(
-                    fontSize: Font.cardSubTitleSize,
-                    fontWeight: FontWeight.normal,
-                    color: MyColors.subtitle)),
+            Text(
+              doctor,
+              style: const TextStyle(
+                fontSize: Font.cardSubTitleSize,
+                fontWeight: FontWeight.normal,
+                color: MyColors.subtitle,
+              ),
+            ),
             kGap6,
             Text("📅  $date | $time",
                 style: const TextStyle(

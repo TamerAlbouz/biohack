@@ -183,9 +183,9 @@ class CustomComplexDropDown extends StatefulWidget {
     this.initialValue,
     this.defaultOption = 'Select an item',
     this.width,
-    this.backgroundColor = MyColors.textField,
+    this.backgroundColor,
     this.textColor,
-    this.dropdownColor = MyColors.dropdown,
+    this.dropdownColor,
     this.padding,
     this.borderRadius,
     this.icon,
@@ -329,7 +329,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
                                       topRight: Radius.circular(10),
                                     ),
                                     color: widget.searchFieldColor ??
-                                        MyColors.dropDownSearchField,
+                                        MyColors.dropdownSearchField,
                                   ),
                                   child: Focus(
                                     focusNode: _focusNode,
@@ -355,7 +355,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
                                   width: double.infinity,
                                   decoration: BoxDecoration(
                                     borderRadius: kRadius10,
-                                    color: widget.dropdownColor,
+                                    color: MyColors.white,
                                   ),
                                   child: Column(
                                     crossAxisAlignment:
@@ -380,7 +380,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
                                           child: Text(
                                             widget.defaultOption,
                                             style: kButtonHint.copyWith(
-                                                color: MyColors.text),
+                                                color: MyColors.textBlack),
                                           ),
                                         ),
                                       ),
@@ -395,6 +395,13 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
                                 Container(
                                   constraints: BoxConstraints(
                                       maxHeight: widget.maxMenuHeight),
+                                  decoration: const BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(10),
+                                      bottomRight: Radius.circular(10),
+                                    ),
+                                    color: MyColors.white,
+                                  ),
                                   child: ListView(
                                     padding: EdgeInsets.zero,
                                     shrinkWrap: true,
@@ -434,7 +441,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
                                             child: Text(
                                               item,
                                               style: kButtonHint.copyWith(
-                                                  color: MyColors.text),
+                                                  color: MyColors.textBlack),
                                             ),
                                           ),
                                         ),
@@ -470,7 +477,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
             width: widget.width,
             padding: widget.padding ?? kPaddH20V8,
             decoration: BoxDecoration(
-              color: widget.backgroundColor,
+              color: widget.backgroundColor ?? MyColors.textField,
               borderRadius: widget.borderRadius ?? kRadius10,
               border: Border.all(color: MyColors.blue, width: 2.5),
             ),
@@ -519,418 +526,3 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
     super.dispose();
   }
 }
-
-// import 'package:flutter/material.dart';
-// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-// import 'package:medtalk/styles/sizes.dart';
-// import 'package:medtalk/styles/styles/text.dart';
-//
-// import '../../../styles/colors.dart';
-//
-// class CustomComplexDropDownPopup extends StatefulWidget {
-//   final List<String> items;
-//   final String? initialValue;
-//   final String defaultOption;
-//   final String title;
-//   final FaIcon? icon;
-//   final void Function(String?) onChanged;
-//   final double? width;
-//   final Color? backgroundColor;
-//   final Color? textColor;
-//   final Color? dropdownColor;
-//   final EdgeInsetsGeometry? padding;
-//   final BorderRadius? borderRadius;
-//   final Color? searchFieldColor;
-//   final double maxMenuHeight;
-//
-//   const CustomComplexDropDownPopup({
-//     super.key,
-//     required this.items,
-//     required this.title,
-//     required this.onChanged,
-//     this.initialValue,
-//     this.defaultOption = 'Select an item',
-//     this.width,
-//     this.backgroundColor = MyColors.textField,
-//     this.textColor,
-//     this.dropdownColor = MyColors.dropdown,
-//     this.padding,
-//     this.borderRadius,
-//     this.icon,
-//     this.searchFieldColor,
-//     this.maxMenuHeight = 200,
-//   });
-//
-//   @override
-//   State<CustomComplexDropDownPopup> createState() =>
-//       _CustomComplexDropDownPopupState();
-// }
-//
-// class _CustomComplexDropDownPopupState extends State<CustomComplexDropDownPopup>
-//     with TickerProviderStateMixin {
-//   String? selectedValue;
-//   bool _isOpen = false;
-//   late AnimationController _animationController;
-//   late Animation<double> _expandAnimation;
-//   late Animation<double> _rotateAnimation;
-//
-//   List<String> filteredItems = [];
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     selectedValue = widget.initialValue;
-//     filteredItems = widget.items;
-//
-//     _animationController = AnimationController(
-//       vsync: this,
-//       duration: const Duration(milliseconds: 200),
-//     );
-//
-//     _expandAnimation = CurvedAnimation(
-//       parent: _animationController,
-//       curve: Curves.easeInOut,
-//     );
-//
-//     _rotateAnimation = Tween(begin: 0.0, end: 0.5).animate(CurvedAnimation(
-//       parent: _animationController,
-//       curve: Curves.easeInOut,
-//     ));
-//   }
-//
-//   void _filterItems(String query) {
-//     setState(() {
-//       filteredItems = widget.items
-//           .where(
-//               (element) => element.toLowerCase().contains(query.toLowerCase()))
-//           .toList();
-//     });
-//   }
-//
-//   void _toggleDropdown() {
-//     if (_isOpen) {
-//       _animationController.reverse().then((value) {
-//         setState(() {
-//           _isOpen = false;
-//           filteredItems = widget.items;
-//         });
-//       });
-//     } else {
-//       setState(() {
-//         _isOpen = true;
-//       });
-//       _animationController.forward();
-//     }
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: _toggleDropdown,
-//       child: AnimatedBuilder(
-//         animation: _expandAnimation,
-//         builder: (context, child) {
-//           if (_expandAnimation.status == AnimationStatus.forward ||
-//               _expandAnimation.status == AnimationStatus.reverse) {
-//             return child!;
-//           }
-//           WidgetsBinding.instance.addPostFrameCallback((_) {
-//             Navigator.push(
-//               context,
-//               _CustomPopupRoute(
-//                 width: widget.width,
-//                 backgroundColor: widget.dropdownColor ?? MyColors.dropdown,
-//                 searchFieldColor: widget.searchFieldColor,
-//                 maxMenuHeight: widget.maxMenuHeight,
-//                 items: filteredItems,
-//                 selectedValue: selectedValue,
-//                 defaultOption: widget.defaultOption,
-//                 onItemTapped: (value) {
-//                   setState(() {
-//                     selectedValue = value;
-//                   });
-//                   widget.onChanged(value);
-//                   _toggleDropdown();
-//                 },
-//                 onDismissed: () {
-//                   _toggleDropdown();
-//                 },
-//               ),
-//             );
-//           });
-//           return child!;
-//         },
-//         child: Container(
-//           width: widget.width,
-//           padding: widget.padding ?? kPaddH20V8,
-//           decoration: BoxDecoration(
-//             color: widget.backgroundColor,
-//             borderRadius: widget.borderRadius ?? kRadius10,
-//             border: Border.all(color: MyColors.blue, width: 2.5),
-//           ),
-//           child: Row(
-//             children: [
-//               SizedBox(
-//                 width: 40,
-//                 child: widget.icon,
-//               ),
-//               Expanded(
-//                 child: Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(widget.title,
-//                         textAlign: TextAlign.start, style: kButtonHint),
-//                     Text(
-//                       selectedValue ?? widget.defaultOption,
-//                       style: kDropdownText,
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               RotationTransition(
-//                 turns: _rotateAnimation,
-//                 child: const Icon(
-//                   Icons.arrow_drop_down,
-//                   color: MyColors.blue,
-//                   size: 30,
-//                 ),
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-//
-//   @override
-//   void dispose() {
-//     _animationController.dispose();
-//     super.dispose();
-//   }
-// }
-//
-// class _CustomPopupRoute extends PopupRoute<void> {
-//   _CustomPopupRoute({
-//     required this.width,
-//     required this.backgroundColor,
-//     required this.searchFieldColor,
-//     required this.maxMenuHeight,
-//     required this.items,
-//     required this.selectedValue,
-//     required this.defaultOption,
-//     required this.onItemTapped,
-//     required this.onDismissed,
-//   });
-//
-//   final double? width;
-//   final Color backgroundColor;
-//   final Color? searchFieldColor;
-//   final double maxMenuHeight;
-//   final List<String> items;
-//   final String? selectedValue;
-//   final String defaultOption;
-//   final void Function(String) onItemTapped;
-//   final VoidCallback onDismissed;
-//
-//   @override
-//   Color? get barrierColor => null;
-//
-//   @override
-//   bool get barrierDismissible => true;
-//
-//   @override
-//   String? get barrierLabel => null;
-//
-//   @override
-//   Widget buildPage(BuildContext context, Animation<double> animation,
-//       Animation<double> secondaryAnimation) {
-//     return _CustomPopupContent(
-//       width: width,
-//       backgroundColor: backgroundColor,
-//       searchFieldColor: searchFieldColor,
-//       maxMenuHeight: maxMenuHeight,
-//       items: items,
-//       selectedValue: selectedValue,
-//       defaultOption: defaultOption,
-//       onItemTapped: onItemTapped,
-//       onDismissed: onDismissed,
-//       animation: animation,
-//     );
-//   }
-//
-//   @override
-//   Duration get transitionDuration => const Duration(milliseconds: 200);
-// }
-//
-// class _CustomPopupContent extends StatefulWidget {
-//   const _CustomPopupContent({
-//     required this.width,
-//     required this.backgroundColor,
-//     required this.searchFieldColor,
-//     required this.maxMenuHeight,
-//     required this.items,
-//     required this.selectedValue,
-//     required this.defaultOption,
-//     required this.onItemTapped,
-//     required this.onDismissed,
-//     required this.animation,
-//   });
-//
-//   final double? width;
-//   final Color backgroundColor;
-//   final Color? searchFieldColor;
-//   final double maxMenuHeight;
-//   final List<String> items;
-//   final String? selectedValue;
-//   final String defaultOption;
-//   final void Function(String) onItemTapped;
-//   final VoidCallback onDismissed;
-//   final Animation<double> animation;
-//
-//   @override
-//   __CustomPopupContentState createState() => __CustomPopupContentState();
-// }
-//
-// class __CustomPopupContentState extends State<_CustomPopupContent> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return GestureDetector(
-//       onTap: () {
-//         widget.onDismissed();
-//       },
-//       child: Material(
-//         type: MaterialType.transparency,
-//         child: Center(
-//           child: ConstrainedBox(
-//             constraints: BoxConstraints(
-//               maxWidth: widget.width ?? double.infinity,
-//             ),
-//             child: AnimatedBuilder(
-//               animation: widget.animation,
-//               builder: (context, child) {
-//                 return FadeTransition(
-//                   opacity: widget.animation,
-//                   child: child,
-//                 );
-//               },
-//               child: Material(
-//                 elevation: 4.0,
-//                 shadowColor: Colors.black26,
-//                 borderRadius: kRadius10,
-//                 color: widget.backgroundColor,
-//                 child: Column(
-//                   mainAxisSize: MainAxisSize.min,
-//                   children: [
-//                     Container(
-//                       width: double.infinity,
-//                       decoration: BoxDecoration(
-//                         borderRadius: const BorderRadius.only(
-//                           topLeft: Radius.circular(10),
-//                           topRight: Radius.circular(10),
-//                         ),
-//                         color: widget.searchFieldColor ??
-//                             MyColors.dropDownSearchField,
-//                       ),
-//                       child: TextField(
-//                         style: kTextFieldDropdown,
-//                         decoration: const InputDecoration(
-//                           hintText: 'Search',
-//                           hintStyle: kTextFieldDropdown,
-//                           prefixIcon: Icon(
-//                             Icons.search,
-//                             color: MyColors.textWhite,
-//                           ),
-//                           border: InputBorder.none,
-//                           contentPadding: kPaddH16V12,
-//                         ),
-//                         cursorColor: MyColors.textWhite,
-//                         onChanged: (query) {
-//                           setState(() {
-//                             widget.items
-//                                 .where((element) => element
-//                                     .toLowerCase()
-//                                     .contains(query.toLowerCase()))
-//                                 .toList();
-//                           });
-//                         },
-//                       ),
-//                     ),
-//                     Container(
-//                       width: double.infinity,
-//                       constraints: BoxConstraints(
-//                         maxHeight: widget.maxMenuHeight,
-//                       ),
-//                       child: ListView(
-//                         padding: EdgeInsets.zero,
-//                         shrinkWrap: true,
-//                         children: [
-//                           InkWell(
-//                             onTap: () {
-//                               widget.onItemTapped(widget.defaultOption);
-//                             },
-//                             child: Container(
-//                               width: double.infinity,
-//                               padding: const EdgeInsets.symmetric(
-//                                 vertical: 12.0,
-//                                 horizontal: 16.0,
-//                               ),
-//                               child: Text(
-//                                 widget.defaultOption,
-//                                 style:
-//                                     kButtonHint.copyWith(color: MyColors.text),
-//                               ),
-//                             ),
-//                           ),
-//                           Divider(
-//                             height: 1,
-//                             thickness: 1,
-//                             color: Colors.grey[300],
-//                           ),
-//                           ...widget.items
-//                               .where((item) => item != widget.defaultOption)
-//                               .map((item) {
-//                             return TweenAnimationBuilder<double>(
-//                               duration: Duration(
-//                                   milliseconds:
-//                                       200 + widget.items.indexOf(item) * 40),
-//                               tween: Tween(begin: 0.0, end: 1.0),
-//                               builder: (context, value, child) {
-//                                 return Transform.translate(
-//                                   offset: Offset(0, -20 * (1 - value)),
-//                                   child: Opacity(
-//                                     opacity: value,
-//                                     child: child,
-//                                   ),
-//                                 );
-//                               },
-//                               child: InkWell(
-//                                 onTap: () {
-//                                   widget.onItemTapped(item);
-//                                 },
-//                                 child: Container(
-//                                   padding: const EdgeInsets.symmetric(
-//                                     vertical: 12.0,
-//                                     horizontal: 16.0,
-//                                   ),
-//                                   child: Text(
-//                                     item,
-//                                     style: kButtonHint.copyWith(
-//                                         color: MyColors.text),
-//                                   ),
-//                                 ),
-//                               ),
-//                             );
-//                           }),
-//                         ],
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

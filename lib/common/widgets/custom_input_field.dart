@@ -128,9 +128,9 @@ class InputField extends StatelessWidget {
             key: key,
             onChanged: onChanged,
             keyboardType: keyboardType,
-            cursorColor: MyColors.lightPurple,
+            cursorColor: MyColors.lightBlue,
             style: const TextStyle(
-              color: MyColors.text,
+              color: MyColors.textBlack,
               fontSize: Font.small,
             ),
             decoration: InputDecoration(

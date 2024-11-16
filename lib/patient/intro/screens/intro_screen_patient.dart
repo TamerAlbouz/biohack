@@ -5,9 +5,9 @@ import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
 import 'package:medtalk/common/widgets/button/loading_button.dart';
 import 'package:medtalk/common/widgets/button/success_button.dart';
-import 'package:medtalk/common/widgets/custom_divider.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/common/widgets/date_picker.dart';
+import 'package:medtalk/common/widgets/dividers/section_divider.dart';
 import 'package:medtalk/common/widgets/dropdown/custom_simple_dropdown.dart';
 import 'package:medtalk/common/widgets/rounded_radio_button.dart';
 import 'package:medtalk/patient/intro/cubit/intro_patient_cubit.dart';
@@ -52,7 +52,7 @@ class IntroScreenPatient extends StatelessWidget {
                     style: TextStyle(fontSize: Font.medium),
                   ),
                   kGap10,
-                  CustomDivider(),
+                  SectionDivider(),
                   kGap10,
                   Text(
                     'Personal Information',
@@ -64,7 +64,7 @@ class IntroScreenPatient extends StatelessWidget {
                   _FullNameInput(),
                   _BiographyInput(),
                   kGap10,
-                  CustomDivider(),
+                  SectionDivider(),
                   kGap10,
                   Text(
                     'Blood Group',
@@ -75,7 +75,7 @@ class IntroScreenPatient extends StatelessWidget {
                   kGap14,
                   _BloodGroupInput(),
                   kGap10,
-                  CustomDivider(),
+                  SectionDivider(),
                   kGap10,
                   Text(
                     'Body Measurements',
@@ -87,7 +87,7 @@ class IntroScreenPatient extends StatelessWidget {
                   _HeightInput(),
                   _WeightInput(),
                   kGap10,
-                  CustomDivider(),
+                  SectionDivider(),
                   kGap10,
                   Text(
                     'Additional Information',
@@ -161,7 +161,7 @@ class _BloodGroupInputState extends State<_BloodGroupInput> {
   Widget build(BuildContext context) {
     return RadioButtonGroup(
       options: const ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'],
-      onSelected: (value) =>
+      onChanged: (value) =>
           context.read<IntroPatientCubit>().bloodGroupChanged(value),
     );
   }
@@ -277,7 +277,7 @@ class _GetStartedButton extends StatelessWidget {
               context.read<IntroPatientCubit>().createPatient(email, uid);
             }
           : null,
-      style: kMainButtonStyle,
+      style: kElevatedButtonStyle,
       child: const Text('Get Started'),
     );
   }

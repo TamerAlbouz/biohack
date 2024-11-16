@@ -115,7 +115,7 @@ class _AppViewState extends State<_AppView> {
                                     .read<RouteBloc>()
                                     .add(ChooseRole(Role.doctor));
                               },
-                              style: kMainButtonStyle,
+                              style: kElevatedButtonStyle,
                               icon: const Icon(FontAwesomeIcons.userDoctor),
                               label: const Text('I am a Doctor'),
                             ),
@@ -126,7 +126,7 @@ class _AppViewState extends State<_AppView> {
                                     .read<RouteBloc>()
                                     .add(ChooseRole(Role.patient));
                               },
-                              style: kMainButtonStyle,
+                              style: kElevatedButtonStyle,
                               icon: const Icon(FontAwesomeIcons.userInjured),
                               label: const Text('I am a Patient'),
                             ),

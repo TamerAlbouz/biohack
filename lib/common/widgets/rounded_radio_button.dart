@@ -22,7 +22,7 @@ class RadioButtonGroup extends StatefulWidget {
   ///  print("Selected option: $selected");
   /// }
   /// ```
-  final void Function(String) onSelected;
+  final void Function(bool)? onSelected;
 
   /// Custom decoration for the radio button group.
   ///
@@ -43,7 +43,7 @@ class RadioButtonGroup extends StatefulWidget {
   /// ```dart
   /// MyColors.buttonGreen
   /// ```
-  final Color selectedColor;
+  final Color? selectedColor;
 
   /// Unselected color for the radio button.
   ///
@@ -51,7 +51,7 @@ class RadioButtonGroup extends StatefulWidget {
   /// ```dart
   /// MyColors.textField
   /// ```
-  final Color unselectedColor;
+  final Color? unselectedColor;
 
   /// Padding in the radio button.
   ///
@@ -80,6 +80,16 @@ class RadioButtonGroup extends StatefulWidget {
   ///  )
   /// ```
   final TextStyle? textStyle;
+
+  /// onChanged callback for the radio button group.
+  ///
+  /// Example:
+  /// ```dart
+  /// (selected) {
+  /// print("Selected option: $selected");
+  /// }
+  /// ```
+  final void Function(String) onChanged;
 
   /// A horizontal, scrollable group of radio-style buttons, allowing users to select one option at a time.
   ///
@@ -126,13 +136,14 @@ class RadioButtonGroup extends StatefulWidget {
   const RadioButtonGroup({
     super.key,
     required this.options,
-    required this.onSelected,
+    this.onSelected,
     this.decoration,
-    this.selectedColor = MyColors.buttonGreen,
-    this.unselectedColor = MyColors.textField,
+    this.selectedColor,
+    this.unselectedColor,
     this.contentPadding,
     this.unselectedTextColor,
     this.textStyle,
+    required this.onChanged,
   });
 
   @override
@@ -162,10 +173,31 @@ class _RadioButtonGroupState extends State<RadioButtonGroup> {
               unselectedTextColor: widget.unselectedTextColor,
               textStyle: widget.textStyle,
               onSelected: () {
+                // check if the same button is selected, if so, deselect it
+
+                if (widget.onSelected != null) {
+                  if (_selectedOption == widget.options[i]) {
+                    setState(() {
+                      _selectedOption = null;
+                    });
+                    widget.onSelected!(false);
+                    return;
+                  }
+                }
+
+                // check values are different
+                if (widget.onSelected != null && _selectedOption == null) {
+                  setState(() {
+                    _selectedOption = widget.options[i];
+                  });
+                  widget.onSelected!(true);
+                }
+
+                // check if onChanged is not null, if so, call it
                 setState(() {
                   _selectedOption = widget.options[i];
                 });
-                widget.onSelected(widget.options[i]);
+                widget.onChanged(widget.options[i]);
               },
             ),
           ],
@@ -208,7 +240,7 @@ class RoundedRadioButton extends StatelessWidget {
   /// ```dart
   /// MyColors.buttonGreen
   /// ```
-  final Color selectedColor;
+  final Color? selectedColor;
 
   /// Color of the button when unselected. Defaults to [MyColors.textField].
   ///
@@ -216,7 +248,7 @@ class RoundedRadioButton extends StatelessWidget {
   /// ```dart
   /// MyColors.textFieldBlack
   /// ```
-  final Color unselectedColor;
+  final Color? unselectedColor;
 
   /// Text color when the button is selected. Defaults to [Colors.white].
   ///
@@ -224,7 +256,7 @@ class RoundedRadioButton extends StatelessWidget {
   /// ```dart
   /// Colors.white
   /// ```
-  final Color selectedTextColor;
+  final Color? selectedTextColor;
 
   /// Text style for the radio button group.
   ///
@@ -316,8 +348,8 @@ class RoundedRadioButton extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onSelected,
-    this.selectedColor = MyColors.buttonGreen,
-    this.unselectedColor = MyColors.textField,
+    this.selectedColor,
+    this.unselectedColor,
     this.unselectedTextColor,
     this.selectedTextColor = Colors.white,
     this.decoration,
@@ -333,10 +365,14 @@ class RoundedRadioButton extends StatelessWidget {
         padding: contentPadding ??
             const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: decoration?.copyWith(
-              color: isSelected ? selectedColor : unselectedColor,
+              color: isSelected
+                  ? selectedColor ?? MyColors.buttonGreen
+                  : unselectedColor,
             ) ??
             BoxDecoration(
-              color: isSelected ? selectedColor : unselectedColor,
+              color: isSelected
+                  ? selectedColor ?? MyColors.textField
+                  : unselectedColor,
               borderRadius: kRadius10,
             ),
         child: Text(

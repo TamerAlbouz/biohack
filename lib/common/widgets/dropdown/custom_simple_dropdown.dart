@@ -150,9 +150,9 @@ class CustomSimpleDropdown extends StatefulWidget {
     this.initialValue,
     this.hint = 'Select an item',
     this.width,
-    this.backgroundColor = MyColors.textField,
+    this.backgroundColor,
     this.textColor,
-    this.dropdownColor = MyColors.dropdown,
+    this.dropdownColor,
     this.padding,
     this.borderRadius,
   });
@@ -176,7 +176,7 @@ class _CustomSimpleDropdownState extends State<CustomSimpleDropdown> {
       width: widget.width,
       padding: widget.padding ?? kPaddH20,
       decoration: BoxDecoration(
-        color: widget.backgroundColor,
+        color: widget.backgroundColor ?? MyColors.textField,
         borderRadius: widget.borderRadius ?? kRadius10,
       ),
       child: DropdownButton<String>(
@@ -185,8 +185,8 @@ class _CustomSimpleDropdownState extends State<CustomSimpleDropdown> {
         items: widget.items.map((String item) {
           return DropdownMenuItem<String>(
             value: item,
-            child:
-                Text(item, style: kButtonHint.copyWith(color: MyColors.text)),
+            child: Text(item,
+                style: kButtonHint.copyWith(color: MyColors.textBlack)),
           );
         }).toList(),
         onChanged: (String? newValue) {
@@ -201,7 +201,7 @@ class _CustomSimpleDropdownState extends State<CustomSimpleDropdown> {
           color: widget.textColor ?? Theme.of(context).iconTheme.color,
         ),
         underline: Container(),
-        dropdownColor: widget.dropdownColor,
+        dropdownColor: widget.dropdownColor ?? MyColors.dropdown,
       ),
     );
   }

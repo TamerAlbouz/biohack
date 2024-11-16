@@ -4,6 +4,7 @@ import 'package:medtalk/styles/colors.dart';
 
 import '../../../styles/font.dart';
 import '../../../styles/sizes.dart';
+import '../dummy/profile_picture.dart';
 import '../rounded_radio_button.dart';
 
 class DoctorCard extends StatelessWidget {
@@ -43,7 +44,7 @@ class DoctorCard extends StatelessWidget {
                 // space between
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const _ProfilePicture(),
+                  const ProfilePicture(),
                   kGap20,
                   _DoctorInfo(
                     name: name,
@@ -73,31 +74,11 @@ class DoctorCard extends StatelessWidget {
                   color: Colors.white,
                   fontSize: Font.extraSmall,
                 ),
-                onSelected: onTimeSlotSelected ?? (value) {},
+                onChanged: onTimeSlotSelected ?? (value) {},
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ProfilePicture extends StatelessWidget {
-  const _ProfilePicture({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(
-        color: Colors.grey,
-        borderRadius: kRadiusAll,
-      ),
-      child: const Icon(
-        FontAwesomeIcons.user,
-        color: Colors.white,
       ),
     );
   }

@@ -43,33 +43,31 @@ class DashboardView extends StatelessWidget {
             case PatientLoaded():
               // Load appointment data when patient data is loaded
               if (patientState.patient.appointments?.isEmpty ?? false) {
-                return Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: kPaddH20,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          const _AppointmentSection(),
-                          kGap6,
-                          AppointmentWidget(
-                            specialty: 'Ophthalmology',
-                            doctor: 'Dr. John Doe',
-                            date: 'Sep 20, 2023',
-                            time: '10:00 AM',
-                            location: 'Room 402',
-                            service: 'Eye Checkup',
-                            fee: '100',
-                            onJoinCall: () =>
-                                AppGlobal.navigatorKey.currentState!.push(
-                              VideoCallScreen.route(),
-                            ),
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: kPaddH20,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const _AppointmentSection(),
+                        kGap6,
+                        AppointmentWidget(
+                          specialty: 'Ophthalmology',
+                          doctor: 'Dr. John Doe',
+                          date: 'Sep 20, 2023',
+                          time: '10:00 AM',
+                          location: 'Room 402',
+                          service: 'Eye Checkup',
+                          fee: '100',
+                          onJoinCall: () =>
+                              AppGlobal.navigatorKey.currentState!.push(
+                            VideoCallScreen.route(),
                           ),
-                          kGap6,
-                          const _LogoutButton(),
-                        ],
-                      ),
+                        ),
+                        kGap6,
+                        const _LogoutButton(),
+                      ],
                     ),
                   ),
                 );

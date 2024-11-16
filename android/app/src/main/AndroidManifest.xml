@@ -8,6 +8,12 @@
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:label="BioHack"> <!-- Change the label to your app name -->
+
+        <!-- TODO: Add your Google Maps API key here -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAlkV0X9HzxfGpaRayzLNoUFWWVkMfX1_0" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

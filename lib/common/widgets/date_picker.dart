@@ -80,13 +80,13 @@ class _DatePickerState extends State<DatePicker> {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
               primary: MyColors.buttonGreen,
-              onPrimary: MyColors.text,
-              onSurface: MyColors.text,
+              onPrimary: MyColors.textBlack,
+              onSurface: MyColors.textBlack,
               // on selected change color to white
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: MyColors.lightPurple,
+                foregroundColor: MyColors.lightBlue,
                 textStyle: kButtonHint,
               ),
             ),
@@ -120,7 +120,7 @@ class _DatePickerState extends State<DatePicker> {
                 : widget.hint,
             textAlign: TextAlign.left,
             style: selectedDate != null
-                ? kButtonHint.copyWith(color: MyColors.text)
+                ? kButtonHint.copyWith(color: MyColors.textBlack)
                 : kButtonHint,
           ),
           const Icon(Icons.calendar_today),

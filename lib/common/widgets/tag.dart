@@ -18,7 +18,7 @@ class Tag extends StatelessWidget {
       child: const Text(
         'Confirmed',
         style: TextStyle(
-          color: MyColors.tagText,
+          color: MyColors.textWhite,
           fontSize: Font.extraSmall,
           fontWeight: FontWeight.bold,
         ),

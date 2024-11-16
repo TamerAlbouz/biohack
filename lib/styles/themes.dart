@@ -30,13 +30,13 @@ ThemeData get lightTheme {
     appBarTheme: const AppBarTheme(
       backgroundColor: MyColors.background,
       elevation: 0,
-      toolbarHeight: 15,
+      toolbarHeight: 0,
       scrolledUnderElevation: 0,
-      iconTheme: IconThemeData(color: MyColors.text),
+      iconTheme: IconThemeData(color: MyColors.textBlack),
       titleTextStyle: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.large,
-        color: MyColors.text,
+        color: MyColors.textBlack,
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -44,90 +44,96 @@ ThemeData get lightTheme {
       bodyLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.large,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
       bodyMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
       bodySmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumSmall,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
       displayLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.largest,
-        color: MyColors.text,
+        color: MyColors.textBlack,
         fontWeight: FontWeight.bold,
       ),
       displayMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.large,
-        color: MyColors.text,
+        color: MyColors.textBlack,
         fontWeight: FontWeight.bold,
       ),
       displaySmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumLarge,
-        color: MyColors.text,
+        color: MyColors.textBlack,
         fontWeight: FontWeight.bold,
       ),
       headlineMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.sectionTitleSize,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
       headlineSmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
       titleLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.largest,
-        color: MyColors.text,
+        color: MyColors.textBlack,
         fontWeight: FontWeight.bold,
       ),
       titleMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.large,
-        color: MyColors.text,
+        color: MyColors.textBlack,
         fontWeight: FontWeight.bold,
       ),
       titleSmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumLarge,
-        color: MyColors.text,
+        color: MyColors.textBlack,
         fontWeight: FontWeight.bold,
       ),
       headlineLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.sectionTitleSize,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
       labelLarge: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
       labelMedium: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumSmall,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
       labelSmall: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.cardSubTitleSize,
-        color: MyColors.text,
+        color: MyColors.textBlack,
       ),
     ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+      },
+    ),
     cardTheme: const CardTheme(
-      color: MyColors.card,
+      color: MyColors.cardBackground,
     ),
     tabBarTheme: const TabBarTheme(
-      labelColor: MyColors.text,
+      labelColor: MyColors.textBlack,
       labelStyle: TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
@@ -143,7 +149,7 @@ ThemeData get lightTheme {
       indicatorColor: MyColors.blue,
     ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
-      color: MyColors.text,
+      color: MyColors.textBlack,
     ),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       type: BottomNavigationBarType.fixed,
@@ -266,7 +272,7 @@ DatePickerThemeData get datePickerTheme {
   return DatePickerThemeData(
     backgroundColor: MyColors.textField,
     cancelButtonStyle: const ButtonStyle(
-      foregroundColor: WidgetStatePropertyAll(MyColors.lightPurple),
+      foregroundColor: WidgetStatePropertyAll(MyColors.lightBlue),
       textStyle: WidgetStatePropertyAll(TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
@@ -274,7 +280,7 @@ DatePickerThemeData get datePickerTheme {
       )),
     ),
     confirmButtonStyle: const ButtonStyle(
-      foregroundColor: WidgetStatePropertyAll(MyColors.lightPurple),
+      foregroundColor: WidgetStatePropertyAll(MyColors.lightBlue),
       textStyle: WidgetStatePropertyAll(TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
@@ -282,21 +288,21 @@ DatePickerThemeData get datePickerTheme {
       )),
     ),
     dividerColor: MyColors.lineDivider,
-    headerForegroundColor: MyColors.text,
+    headerForegroundColor: MyColors.textBlack,
     headerHeadlineStyle: const TextStyle(
       fontFamily: Font.family,
       fontSize: Font.large,
-      color: MyColors.text,
+      color: MyColors.textBlack,
     ),
     headerHelpStyle: const TextStyle(
       fontFamily: Font.family,
       fontSize: Font.medium,
-      color: MyColors.text,
+      color: MyColors.textBlack,
     ),
     dayStyle: const TextStyle(
       fontFamily: Font.family,
       fontSize: Font.medium,
-      color: MyColors.text,
+      color: MyColors.textBlack,
     ),
     yearStyle: const TextStyle(
       fontFamily: Font.family,
@@ -306,7 +312,7 @@ DatePickerThemeData get datePickerTheme {
     weekdayStyle: const TextStyle(
       fontFamily: Font.family,
       fontSize: Font.mediumLarge,
-      color: MyColors.text,
+      color: MyColors.textBlack,
       fontWeight: FontWeight.bold,
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -317,19 +323,19 @@ DatePickerThemeData get datePickerTheme {
         fontWeight: FontWeight.normal,
       ),
       activeIndicatorBorder: const BorderSide(
-        color: MyColors.lightPurple,
+        color: MyColors.lightBlue,
         width: 2,
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: const BorderSide(
-          color: MyColors.lightPurple,
+          color: MyColors.lightBlue,
           width: 2,
         ),
         borderRadius: kRadius10,
       ),
       enabledBorder: OutlineInputBorder(
         borderSide: const BorderSide(
-          color: MyColors.lightPurple,
+          color: MyColors.lightBlue,
           width: 2,
         ),
         borderRadius: kRadius10,
@@ -347,7 +353,7 @@ DatePickerThemeData get datePickerTheme {
       labelStyle: const TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumLarge,
-        color: MyColors.lightPurple,
+        color: MyColors.lightBlue,
       ),
       // inner value style
       errorMaxLines: 2,

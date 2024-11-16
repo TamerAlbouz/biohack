@@ -11,7 +11,7 @@ class LoadingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: null,
-      style: kMainButtonStyle,
+      style: kElevatedButtonStyle,
       child: const SizedBox(
         width: 25,
         height: 25,

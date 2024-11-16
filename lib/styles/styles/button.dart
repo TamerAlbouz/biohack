@@ -4,7 +4,7 @@ import 'package:medtalk/styles/font.dart';
 
 import '../sizes.dart';
 
-final kMainButtonStyle = ElevatedButton.styleFrom(
+final kElevatedButtonStyle = ElevatedButton.styleFrom(
   backgroundColor: MyColors.blue,
   foregroundColor: MyColors.buttonText,
   elevation: 0,

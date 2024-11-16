@@ -42,3 +42,31 @@ const kTimeslotText = TextStyle(
   fontSize: Font.extraSmall,
   fontWeight: FontWeight.normal,
 );
+
+const kAppBarText = TextStyle(
+  fontFamily: Font.family,
+  color: MyColors.textBlack,
+  fontSize: Font.medium,
+  fontWeight: FontWeight.bold,
+);
+
+const kAppointmentSetupSectionTitle = TextStyle(
+  fontFamily: Font.family,
+  color: MyColors.textBlack,
+  fontSize: Font.mediumSmall,
+  fontWeight: FontWeight.bold,
+);
+
+const kAppointmentSetupCalendarDate = TextStyle(
+  fontFamily: Font.family,
+  color: MyColors.textBlack,
+  fontSize: Font.mediumSmall,
+  fontWeight: FontWeight.normal,
+);
+
+const kServiceCardText = TextStyle(
+  fontFamily: Font.family,
+  color: MyColors.textGrey,
+  fontSize: Font.small,
+  fontWeight: FontWeight.normal,
+);

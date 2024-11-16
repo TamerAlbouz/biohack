@@ -28,7 +28,7 @@ class SignUpButton extends StatelessWidget {
 
     return ElevatedButton(
       key: const Key('signUpForm_continue_raisedButton'),
-      style: kMainButtonStyle,
+      style: kElevatedButtonStyle,
       onPressed: isValid ? onPressed : null,
       child: const Text('Sign Up', style: kButtonText),
     );
