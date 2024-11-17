@@ -45,7 +45,7 @@ class DashboardView extends StatelessWidget {
               if (patientState.patient.appointments?.isEmpty ?? false) {
                 return SingleChildScrollView(
                   child: Padding(
-                    padding: kPaddH20,
+                    padding: kPadd15,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,

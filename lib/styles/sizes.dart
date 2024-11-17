@@ -17,10 +17,13 @@ const kGap100 = Gap(100);
 const kGap128 = Gap(128);
 final kRadius20 = BorderRadius.circular(20);
 final kRadius10 = BorderRadius.circular(10);
+final kRadius12 = BorderRadius.circular(12);
 final kRadiusAll = BorderRadius.circular(999);
 const kPaddH20V15 = EdgeInsets.symmetric(horizontal: 20, vertical: 15);
+const kPaddH10V15 = EdgeInsets.symmetric(horizontal: 10, vertical: 15);
 const kPaddH32 = EdgeInsets.symmetric(horizontal: 32);
 const kPadd0 = EdgeInsets.all(0);
+const kPadd15 = EdgeInsets.all(15);
 const kPadd20 = EdgeInsets.all(20);
 const kPadd4 = EdgeInsets.all(4);
 const kPadd10 = EdgeInsets.all(10);
@@ -35,8 +38,11 @@ const kPaddH10 = EdgeInsets.symmetric(horizontal: 10);
 const kPaddH20 = EdgeInsets.symmetric(horizontal: 20);
 const kPaddH10V3 = EdgeInsets.symmetric(horizontal: 10, vertical: 3);
 const kPaddH42V68 = EdgeInsets.symmetric(horizontal: 42, vertical: 68);
+const kPaddR8 = EdgeInsets.only(right: 8);
 const kPaddL20R20T68B20 =
     EdgeInsets.only(left: 20, right: 20, top: 68, bottom: 20);
+const kPaddL15R15T68B20 =
+    EdgeInsets.only(left: 15, right: 15, top: 68, bottom: 20);
 const kPaddH20T10 = EdgeInsets.only(top: 10, left: 20, right: 20);
 const kPaddH20V10 = EdgeInsets.symmetric(horizontal: 20, vertical: 10);
 const kPaddR15 = EdgeInsets.only(right: 15);

@@ -70,3 +70,10 @@ const kServiceCardText = TextStyle(
   fontSize: Font.small,
   fontWeight: FontWeight.normal,
 );
+
+const kServiceCardSummary = TextStyle(
+  fontFamily: Font.family,
+  color: MyColors.textBlack,
+  fontSize: Font.small,
+  fontWeight: FontWeight.normal,
+);

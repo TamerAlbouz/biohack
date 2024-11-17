@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/cupertino.dart';
 
 class MyColors {
   static const background = Color(0xffE8E4E1);
@@ -31,6 +31,8 @@ class MyColors {
   static const reviewBarEmpty = Color(0xffC7C7C7);
   static const star = Color(0xffE9C01D);
   static const starEmpty = Color(0xffC7C7C7);
-
+  static const selectionCardEmpty = Color(0xffEFEBE7);
+  static const selectionCardStroke = Color(0xffAAAAAA);
+  static const selectionAddCard = Color(0xffDEDAD7);
   static const white = Color(0xffFFFFFF);
 }

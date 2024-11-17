@@ -173,8 +173,6 @@ class _RadioButtonGroupState extends State<RadioButtonGroup> {
               unselectedTextColor: widget.unselectedTextColor,
               textStyle: widget.textStyle,
               onSelected: () {
-                // check if the same button is selected, if so, deselect it
-
                 if (widget.onSelected != null) {
                   if (_selectedOption == widget.options[i]) {
                     setState(() {

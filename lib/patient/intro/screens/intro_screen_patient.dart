@@ -34,7 +34,7 @@ class IntroScreenPatient extends StatelessWidget {
         },
         child: const Scaffold(
           body: Padding(
-            padding: kPaddL20R20T68B20,
+            padding: kPaddL15R15T68B20,
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

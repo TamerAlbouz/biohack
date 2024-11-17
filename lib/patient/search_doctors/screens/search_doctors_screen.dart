@@ -23,7 +23,7 @@ class SearchDoctorsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
-        padding: kPaddH20,
+        padding: kPadd15,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/patient/search_doctors/bloc/setup_appointment_bloc.dart';
 import 'package:medtalk/patient/search_doctors/widgets/date_navigator.dart';
+import 'package:medtalk/patient/search_doctors/widgets/summary_entry.dart';
 import 'package:medtalk/styles/sizes.dart';
 
 import '../../../common/widgets/dividers/card_divider.dart';
@@ -12,7 +13,10 @@ import '../../../common/widgets/dummy/profile_picture.dart';
 import '../../../common/widgets/rounded_radio_button.dart';
 import '../../../styles/colors.dart';
 import '../../../styles/font.dart';
+import '../../../styles/styles/button.dart';
 import '../../../styles/styles/text.dart';
+import '../models/selection_item.dart';
+import '../widgets/selection_group.dart';
 
 class SetupAppointmentScreen extends StatefulWidget {
   const SetupAppointmentScreen({super.key});
@@ -42,7 +46,7 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
         ),
         body: SingleChildScrollView(
           child: Padding(
-            padding: kPaddH20V15,
+            padding: kPadd15,
             child: CustomBase(
               child: Column(
                 children: [
@@ -80,6 +84,7 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
                                     _ChoosePaymentType(),
                                     CardDivider(),
                                     _Summary(),
+                                    kGap20,
                                     _BookAppointmentButton(),
                                   ],
                                 )
@@ -123,24 +128,18 @@ class _ChooseAppointmentType extends StatelessWidget {
           style: kAppointmentSetupSectionTitle,
         ),
         kGap14,
-        RadioButtonGroup(
-          options: const ['In-Person', 'Online'],
-          decoration: BoxDecoration(
-            color: MyColors.blue,
-            borderRadius: kRadiusAll,
-          ),
-          contentPadding: kPaddH10V2,
-          selectedColor: MyColors.blue,
-          unselectedColor: MyColors.grey,
-          unselectedTextColor: Colors.white,
-          textStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: Font.extraSmall,
-          ),
-          onSelected: (value) {
-            context.read<SetupAppointmentBloc>().add(ToggleRebuild());
-          },
-          onChanged: (String) {},
+        SelectionGroup(
+          items: [
+            SelectionItem(
+              title: 'In-Person',
+              subtitle: '1234 Clinic St, Portland, OR 97205',
+            ),
+            SelectionItem(
+              title: 'Online',
+              subtitle: 'Video Call',
+            ),
+          ],
+          onSelected: (item) {},
         ),
       ],
     );
@@ -160,24 +159,25 @@ class _ChooseServiceType extends StatelessWidget {
           style: kAppointmentSetupSectionTitle,
         ),
         kGap14,
-        RadioButtonGroup(
-          options: const ['Consultation', 'Treatment', 'Checkup'],
-          decoration: BoxDecoration(
-            color: MyColors.blue,
-            borderRadius: kRadiusAll,
-          ),
-          contentPadding: kPaddH10V2,
-          selectedColor: MyColors.blue,
-          unselectedColor: MyColors.grey,
-          unselectedTextColor: Colors.white,
-          textStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: Font.extraSmall,
-          ),
-          onSelected: (value) {
-            context.read<SetupAppointmentBloc>().add(ToggleRebuild());
-          },
-          onChanged: (String) {},
+        SelectionGroup(
+          items: [
+            SelectionItem(
+              title: 'Treatment',
+              subtitle: '1 hr',
+              price: 100,
+            ),
+            SelectionItem(
+              title: 'Consultation',
+              subtitle: '30 mins',
+              price: 50,
+            ),
+            SelectionItem(
+              title: 'Checkup',
+              subtitle: '15 mins',
+              price: 30,
+            ),
+          ],
+          onSelected: (item) {},
         ),
       ],
     );
@@ -197,24 +197,27 @@ class _ChoosePaymentType extends StatelessWidget {
           style: kAppointmentSetupSectionTitle,
         ),
         kGap14,
-        RadioButtonGroup(
-          options: const ['Cash', 'Credit Card', 'Insurance'],
-          decoration: BoxDecoration(
-            color: MyColors.blue,
-            borderRadius: kRadiusAll,
+        SelectionGroup(
+          items: [
+            SelectionItem(
+              title: 'Cash',
+              subtitle: 'Pay at the clinic',
+            ),
+            SelectionItem(
+              title: 'Credit Card',
+              subtitle: 'Pay online',
+            ),
+          ],
+          onSelected: (item) {},
+        ),
+        // add card button
+        kGap10,
+        ElevatedButton(
+          onPressed: () {},
+          style: kElevatedButtonAddCardStyle,
+          child: const Text(
+            'Add Card',
           ),
-          contentPadding: kPaddH10V2,
-          selectedColor: MyColors.blue,
-          unselectedColor: MyColors.grey,
-          unselectedTextColor: Colors.white,
-          textStyle: const TextStyle(
-            color: Colors.white,
-            fontSize: Font.extraSmall,
-          ),
-          onSelected: (value) {
-            context.read<SetupAppointmentBloc>().add(ToggleRebuild());
-          },
-          onChanged: (String) {},
         ),
       ],
     );
@@ -224,59 +227,134 @@ class _ChoosePaymentType extends StatelessWidget {
 class _Summary extends StatelessWidget {
   const _Summary();
 
+  final double padding = 0;
+
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Summary',
           style: kAppointmentSetupSectionTitle,
         ),
         kGap14,
+        // note warning rich text
+        RichText(
+          text: const TextSpan(
+            style: kServiceCardText,
+            children: [
+              TextSpan(
+                text: 'Note: ',
+                style: TextStyle(
+                  fontFamily: Font.family,
+                  color: MyColors.cancel,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextSpan(
+                text: 'You will ',
+                style: kServiceCardText,
+              ),
+              TextSpan(
+                text: 'NOT',
+                style: TextStyle(
+                  fontFamily: Font.family,
+                  color: MyColors.textBlack,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              TextSpan(
+                text:
+                    ' be charged until the consultation was completed. If the meeting was canceled or not conducted, no charge will be made.',
+                style: kServiceCardText,
+              ),
+            ],
+          ),
+        ),
+        kGap10,
         Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            FaIcon(
-              FontAwesomeIcons.calendarDays,
-              color: MyColors.blue,
-              size: 20,
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: Checkbox(
+                value: false,
+                onChanged: (value) {},
+              ),
             ),
-            kGap10,
-            Text(
-              'Date: 12/12/2021',
+            kGap8,
+            const Text(
+              'I agree to the ',
               style: kServiceCardText,
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                padding: kPadd0,
+              ),
+              onPressed: () {},
+              child: const Text(
+                'Terms and Conditions',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: MyColors.blue,
+                  fontSize: Font.small,
+                ),
+              ),
             ),
           ],
         ),
         kGap10,
-        Row(
-          children: [
-            FaIcon(
-              FontAwesomeIcons.clock,
-              color: MyColors.blue,
-              size: 20,
-            ),
-            kGap10,
-            Text(
-              'Time: 11:00 AM',
-              style: kServiceCardText,
-            ),
-          ],
+        const SummaryEntry(
+          icon: FaIcon(FontAwesomeIcons.calendarDays,
+              size: 20, color: MyColors.blue),
+          title: 'Date',
+          value: '12/12/2021 • 11:00 AM',
+        ),
+        CardDivider(
+          height: 24,
+          padding: padding,
+        ),
+        const SummaryEntry(
+          icon: FaIcon(FontAwesomeIcons.handshakeSimple,
+              size: 18, color: MyColors.blue),
+          title: 'Appointment',
+          value: '1 hr',
         ),
         kGap10,
-        Row(
-          children: [
-            FaIcon(
-              FontAwesomeIcons.dollarSign,
-              color: MyColors.blue,
-              size: 20,
-            ),
-            kGap10,
-            Text(
-              'Total: \$100',
-              style: kServiceCardText,
-            ),
-          ],
+        const SummaryEntry(
+          icon: FaIcon(FontAwesomeIcons.clock, size: 20, color: MyColors.blue),
+          title: 'Time',
+          value: '1 hr',
+        ),
+        CardDivider(
+          height: 24,
+          padding: padding,
+        ),
+        const SummaryEntry(
+          icon: FaIcon(FontAwesomeIcons.mapLocationDot,
+              size: 20, color: MyColors.blue),
+          title: 'Location',
+          value: '1234 Clinic St, Portland, OR 97205',
+        ),
+        CardDivider(
+          height: 24,
+          padding: padding,
+        ),
+        const SummaryEntry(
+          icon: FaIcon(FontAwesomeIcons.moneyBill,
+              size: 20, color: MyColors.blue),
+          title: 'Payment',
+          value: 'Cash',
+        ),
+        kGap10,
+        const SummaryEntry(
+          icon: FaIcon(FontAwesomeIcons.creditCard,
+              size: 20, color: MyColors.blue),
+          title: 'Total',
+          value: '\$100',
         ),
       ],
     );
@@ -290,10 +368,7 @@ class _BookAppointmentButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        shape: RoundedRectangleBorder(borderRadius: kRadiusAll),
-        minimumSize: const Size(double.infinity, 50),
-      ),
+      style: kElevatedButtonBookAppointmentStyle,
       child: const Text(
         'Book Appointment',
         style: TextStyle(
@@ -306,7 +381,7 @@ class _BookAppointmentButton extends StatelessWidget {
 }
 
 class _PatientReviewsScreen extends StatelessWidget {
-  const _PatientReviewsScreen({super.key});
+  const _PatientReviewsScreen();
 
   @override
   Widget build(BuildContext context) {
@@ -556,9 +631,7 @@ class _Services extends StatelessWidget {
           separatorBuilder: (context, index) => kGap8,
           itemBuilder: (context, index) {
             return GestureDetector(
-              onTap: () {
-                // change color of check icon
-              },
+              onTap: () {},
               child: Row(
                 children: [
                   const FaIcon(
@@ -639,7 +712,7 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
           ),
           onSelected: (selected) {
             setState(() {
-              unselectedColor = selected ? MyColors.blue : MyColors.grey;
+              unselectedColor = selected ? MyColors.grey : MyColors.blue;
             });
             // if already selected, do not rebuild
             context.read<SetupAppointmentBloc>().add(ToggleRebuild());
