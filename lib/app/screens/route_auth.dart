@@ -1,4 +1,4 @@
-import 'package:firebase/firebase.dart';
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/common/globals/globals.dart';
@@ -9,7 +9,6 @@ import 'package:medtalk/patient/intro/screens/intro_screen_patient.dart';
 import 'package:medtalk/patient/login/screens/login_patient_screen.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
 import 'package:medtalk/styles/themes.dart';
-import 'package:models/models.dart';
 
 import '../bloc/auth/route_bloc.dart';
 import 'auth_screen.dart';

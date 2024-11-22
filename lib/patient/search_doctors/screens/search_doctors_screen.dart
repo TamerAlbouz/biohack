@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/common/widgets/dividers/section_divider.dart';
 import 'package:medtalk/common/widgets/dropdown/custom_complex_dropdown.dart';
-import 'package:medtalk/patient/search_doctors/screens/setup_appointment.dart';
+import 'package:medtalk/patient/search_doctors/screens/setup_appointment_screen.dart';
 import 'package:medtalk/styles/sizes.dart';
 
 import '../../../common/globals/globals.dart';

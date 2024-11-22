@@ -1,8 +1,7 @@
+import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase/firebase.dart';
 import 'package:flutter/material.dart';
-import 'package:models/models.dart';
 import 'package:p_logger/p_logger.dart';
 
 part 'route_event.dart';
@@ -75,7 +74,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     final patient = await _patientRepository.getPatient(user.uid);
 
     if (patient == null) {
-      logger.i('Patient not found');
+      logger.i('Patient first time');
       emit(AuthSuccess(user,
           role: Role.patient, status: AuthStatus.firstTimeAuthentication));
     } else {
@@ -90,7 +89,15 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     Emitter<RouteState> emit,
   ) async {
     await _userPreferences.clear();
+
+    // empty the secure storage
+    ISecureEncryptionStorage secureEncryptionStorage =
+        getIt<ISecureEncryptionStorage>();
+
+    await secureEncryptionStorage.deleteKeys();
+
     _authRepo.logOut();
+
     logger.i('User logged out');
   }
 

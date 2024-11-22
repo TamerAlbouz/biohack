@@ -1,4 +1,4 @@
-import 'package:firebase/firebase.dart';
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
@@ -27,7 +27,8 @@ class IntroScreenPatient extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => IntroPatientCubit(getIt<IPatientRepository>()),
+      create: (context) => IntroPatientCubit(
+          getIt<IPatientRepository>(), getIt<ISecureEncryptionStorage>()),
       child: BlocListener<IntroPatientCubit, IntroPatientState>(
         listener: (context, state) {
           // TODO: implement listener
@@ -274,7 +275,7 @@ class _GetStartedButton extends StatelessWidget {
                   context.read<IAuthenticationRepository>().currentUser.email;
               var uid =
                   context.read<IAuthenticationRepository>().currentUser.uid;
-              context.read<IntroPatientCubit>().createPatient(email, uid);
+              context.read<IntroPatientCubit>().updatePatientStatus(email, uid);
             }
           : null,
       style: kElevatedButtonStyle,

@@ -20,16 +20,17 @@ final kElevatedButtonStyle = ElevatedButton.styleFrom(
 );
 
 final kElevatedButtonBookAppointmentStyle = ElevatedButton.styleFrom(
-  shape: RoundedRectangleBorder(borderRadius: kRadius12),
+  shape: RoundedRectangleBorder(borderRadius: kRadius10),
   backgroundColor: MyColors.blue,
   foregroundColor: MyColors.buttonText,
   textStyle: const TextStyle(
     fontFamily: Font.family,
     fontSize: Font.mediumSmall,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w500,
   ),
   elevation: 0,
   minimumSize: const Size(double.infinity, 50),
+  alignment: Alignment.center,
 );
 
 final kElevatedButtonAddCardStyle = ElevatedButton.styleFrom(

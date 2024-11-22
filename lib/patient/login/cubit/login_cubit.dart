@@ -1,7 +1,7 @@
+import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase/firebase.dart';
 import 'package:formz/formz.dart';
 import 'package:formz_inputs/formz_inputs.dart';
 import 'package:p_logger/p_logger.dart';
@@ -9,9 +9,13 @@ import 'package:p_logger/p_logger.dart';
 part 'login_state.dart';
 
 class LoginCubit extends Cubit<LoginState> {
-  LoginCubit(this._authenticationRepository) : super(const LoginState());
+  LoginCubit(
+      this._authenticationRepository, this._encryptionRepository, this.crypto)
+      : super(const LoginState());
 
   final IAuthenticationRepository _authenticationRepository;
+  final IEncryptionRepository _encryptionRepository;
+  final ISecureEncryptionStorage crypto;
 
   void signInEmailChanged(String value) {
     final email = Email.dirty(value);
@@ -93,11 +97,37 @@ class LoginCubit extends Cubit<LoginState> {
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
       await _authenticationRepository.logInWithEmailAndPassword(
-        email: state.signInPassword.value,
+        email: state.signInEmail.value,
         password: state.signInPassword.value,
       );
-      logger.i('User logged in with email and password');
+
       emit(state.copyWith(status: FormzSubmissionStatus.success));
+
+      // TODO: Run this in an isolate
+      // run this process in the background in an isolate
+      // to avoid blocking the main thread
+      PrivateKeyEncryptionResult? encryptedData =
+          await _encryptionRepository.getEncryptedData(
+        _authenticationRepository.currentUser.uid,
+      );
+
+      if (encryptedData == null) {
+        encryptedData =
+            await crypto.generateAndSaveKeys(state.signInPassword.value);
+
+        await _encryptionRepository.addEncryptionData(
+          _authenticationRepository.currentUser.uid,
+          encryptedData,
+        );
+        return;
+      } else {
+        await crypto.decryptAndSaveKey(
+          encryptedData,
+          state.signInPassword.value,
+        );
+      }
+
+      logger.i('User logged in with email and password');
     } on LogInWithEmailAndPasswordFailure catch (e) {
       logger.e(e.message);
       emit(
@@ -112,35 +142,35 @@ class LoginCubit extends Cubit<LoginState> {
     }
   }
 
-  Future<void> logInWithGoogle() async {
-    emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
-    try {
-      await _authenticationRepository.logInWithGoogle();
-      emit(state.copyWith(status: FormzSubmissionStatus.success));
-      logger.i('User logged in with Google');
-    } on FirebaseException catch (e) {
-      await _authenticationRepository.logOut();
-      logger.e(e.message);
-      emit(
-        state.copyWith(
-          errorMessage: e.message,
-          status: FormzSubmissionStatus.failure,
-        ),
-      );
-    } on LogInWithGoogleFailure catch (e) {
-      logger.e(e.message);
-      emit(
-        state.copyWith(
-          errorMessage: e.message,
-          status: FormzSubmissionStatus.failure,
-        ),
-      );
-    } catch (e) {
-      await _authenticationRepository.logOut();
-      logger.e(e);
-      emit(state.copyWith(status: FormzSubmissionStatus.failure));
-    }
-  }
+  // Future<void> logInWithGoogle() async {
+  //   emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
+  //   try {
+  //     await _authenticationRepository.logInWithGoogle();
+  //     emit(state.copyWith(status: FormzSubmissionStatus.success));
+  //     logger.i('User logged in with Google');
+  //   } on FirebaseException catch (e) {
+  //     await _authenticationRepository.logOut();
+  //     logger.e(e.message);
+  //     emit(
+  //       state.copyWith(
+  //         errorMessage: e.message,
+  //         status: FormzSubmissionStatus.failure,
+  //       ),
+  //     );
+  //   } on LogInWithGoogleFailure catch (e) {
+  //     logger.e(e.message);
+  //     emit(
+  //       state.copyWith(
+  //         errorMessage: e.message,
+  //         status: FormzSubmissionStatus.failure,
+  //       ),
+  //     );
+  //   } catch (e) {
+  //     await _authenticationRepository.logOut();
+  //     logger.e(e);
+  //     emit(state.copyWith(status: FormzSubmissionStatus.failure));
+  //   }
+  // }
 
   Future<void> logInAnonymously() async {
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
@@ -168,8 +198,19 @@ class LoginCubit extends Cubit<LoginState> {
         email: state.signUpEmail.value,
         password: state.signUpPassword.value,
       );
-      logger.i('User signed up successfully');
+
       emit(state.copyWith(status: FormzSubmissionStatus.success));
+
+      // TODO: Run this in an isolate
+      final encryptionData =
+          await crypto.generateAndSaveKeys(state.signUpPassword.value);
+
+      await _encryptionRepository.addEncryptionData(
+        _authenticationRepository.currentUser.uid,
+        encryptionData,
+      );
+
+      logger.i('User signed up successfully');
     } on SignUpWithEmailAndPasswordFailure catch (e) {
       logger.e(e.message);
       emit(

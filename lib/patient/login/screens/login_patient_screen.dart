@@ -1,14 +1,11 @@
-import 'package:firebase/firebase.dart';
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:medtalk/common/widgets/logo_widget.dart';
 import 'package:medtalk/styles/sizes.dart';
 
-import '../../../styles/font.dart';
 import '../cubit/login_cubit.dart';
-import '../widgets/google_sign_button_widget.dart';
-import '../widgets/guest_login_widget.dart';
 import '../widgets/sign_in_button_widget.dart';
 import '../widgets/sign_in_email_widget.dart';
 import '../widgets/sign_in_password_widget.dart';
@@ -48,7 +45,11 @@ class _LoginPatientScreenState extends State<LoginPatientScreen>
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: BlocProvider(
-        create: (_) => LoginCubit(context.read<IAuthenticationRepository>()),
+        create: (_) => LoginCubit(
+          context.read<IAuthenticationRepository>(),
+          getIt<IEncryptionRepository>(),
+          getIt<ISecureEncryptionStorage>(),
+        ),
         child: LoginForm(tabController: _tabController),
       ),
     );
@@ -115,31 +116,6 @@ class LoginForm extends StatelessWidget {
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        const Text(
-                          'Or',
-                          style: TextStyle(
-                            fontFamily: Font.family,
-                            color: Colors.grey,
-                            fontSize: Font.medium,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        kGap14,
-                        GoogleLoginButton(
-                          onPressed: () {
-                            context.read<LoginCubit>().logInWithGoogle();
-                          },
-                        ),
-                        kGap14,
-                        SignInAsGuest(
-                          onPressed: () =>
-                              context.read<LoginCubit>().logInAnonymously(),
-                        ),
-                        kGap14,
                       ],
                     ),
                   ],

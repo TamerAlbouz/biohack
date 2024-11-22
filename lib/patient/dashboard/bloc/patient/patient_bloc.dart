@@ -1,7 +1,6 @@
+import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase/firebase.dart';
-import 'package:models/models.dart';
 import 'package:p_logger/p_logger.dart';
 
 part 'patient_event.dart';

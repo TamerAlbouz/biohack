@@ -1,9 +1,9 @@
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/styles/styles/button.dart';
-import 'package:models/models.dart';
 
 import '../../common/widgets/logo_widget.dart';
 import '../../styles/font.dart';

@@ -1,9 +1,9 @@
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:medtalk/agora/screens/call.dart';
 import 'package:medtalk/common/globals/globals.dart';
-import 'package:models/models.dart';
 
 import '../../../app/bloc/auth/route_bloc.dart';
 import '../../../common/widgets/cards/appointment_card.dart';

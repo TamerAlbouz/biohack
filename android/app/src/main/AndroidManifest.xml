@@ -6,6 +6,7 @@
         tools:ignore="PermissionImpliesUnsupportedChromeOsHardware" />
     <application
         android:name="${applicationName}"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/launcher_icon"
         android:label="BioHack"> <!-- Change the label to your app name -->
 

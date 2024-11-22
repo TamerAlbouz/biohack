@@ -77,3 +77,13 @@ const kServiceCardSummary = TextStyle(
   fontSize: Font.small,
   fontWeight: FontWeight.normal,
 );
+
+const kServiceDetailText = TextStyle(
+  fontSize: Font.extraSmall,
+  // Slightly smaller than the main text
+  color: MyColors.textGrey,
+  // Using a predefined grey color from your color palette
+  fontWeight: FontWeight.w400,
+  // Regular weight
+  letterSpacing: 0.5, // Slight letter spacing for readability
+);

@@ -1,19 +1,20 @@
+import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:firebase/firebase.dart';
 import 'package:formz/formz.dart';
 import 'package:formz_inputs/formz_inputs.dart';
 import 'package:intl/intl.dart';
-import 'package:models/models.dart';
 import 'package:p_logger/p_logger.dart';
 
 part 'intro_patient_state.dart';
 
 class IntroPatientCubit extends Cubit<IntroPatientState> {
-  IntroPatientCubit(this._patientRepository) : super(const IntroPatientState());
+  IntroPatientCubit(this._patientRepository, this._secureEncryptionStorage)
+      : super(const IntroPatientState());
 
   final IPatientRepository _patientRepository;
+  final ISecureEncryptionStorage _secureEncryptionStorage;
 
   void fullNameChanged(String value) {
     final fullName = FullName.dirty(value);
@@ -141,7 +142,7 @@ class IntroPatientCubit extends Cubit<IntroPatientState> {
     );
   }
 
-  Future<void> createPatient(String email, String uid) async {
+  Future<void> updatePatientStatus(String email, String uid) async {
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     DateFormat formatter = DateFormat('dd/MM/yyyy');
     try {
@@ -160,6 +161,13 @@ class IntroPatientCubit extends Cubit<IntroPatientState> {
         createdAt: DateTime.now(),
         emailVerified: false,
       );
+
+      // encrypt the patient data
+      final encryptedBio =
+          await _secureEncryptionStorage.encrypt(state.biography.value);
+
+      patient = patient.copyWith(biography: encryptedBio.data);
+
       await _patientRepository.addPatient(patient);
       emit(state.copyWith(status: FormzSubmissionStatus.success));
       logger.i('User logged in with Google');
