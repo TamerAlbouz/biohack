@@ -66,15 +66,15 @@ const kAppointmentSetupCalendarDate = TextStyle(
 
 const kServiceCardText = TextStyle(
   fontFamily: Font.family,
-  color: MyColors.textGrey,
+  color: MyColors.textBlack,
   fontSize: Font.small,
   fontWeight: FontWeight.normal,
 );
 
 const kServiceCardSummary = TextStyle(
   fontFamily: Font.family,
-  color: MyColors.textBlack,
-  fontSize: Font.small,
+  color: MyColors.textGrey,
+  fontSize: Font.extraSmall,
   fontWeight: FontWeight.normal,
 );
 

@@ -1,3 +1,4 @@
+import 'package:faker/faker.dart' hide Color;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -392,36 +393,43 @@ class _PatientReviewsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final faker = Faker();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Row(
+        Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'Patient Reviews',
               style: kAppointmentSetupSectionTitle,
             ),
             TextButton(
+              style: TextButton.styleFrom(
+                padding: kPadd0,
+                minimumSize: const Size(0, 0),
+                alignment: Alignment.centerRight,
+              ),
               onPressed: null,
-              child: Text(
+              child: const Text(
                 '256',
+                textAlign: TextAlign.right,
                 style: kButtonHint,
               ),
             ),
           ],
         ),
+        kGap10,
         SizedBox(
-          height: 300,
+          height: 250,
           child: ListView.separated(
             shrinkWrap: true,
             itemCount: 8,
             separatorBuilder: (context, index) => kGap14,
             itemBuilder: (context, index) {
-              return const _ReviewCard(
-                author: 'John Doe',
-                review:
-                    'Dr. Marissa is a great dentist. She is very professional and friendly. I highly recommend her.',
+              return _ReviewCard(
+                author: faker.person.name(),
+                review: faker.lorem.sentence(),
               );
             },
           ),
@@ -455,23 +463,26 @@ class _ReviewCard extends StatelessWidget {
             Text(
               author,
               style: kServiceCardText.copyWith(
-                color: MyColors.blue,
-                fontWeight: FontWeight.bold,
+                color: MyColors.textBlack,
+                fontWeight: FontWeight.normal,
               ),
             ),
-            const Spacer(),
+            kGap10,
             // flag
             const FaIcon(
-              FontAwesomeIcons.flag,
+              FontAwesomeIcons.solidFlag,
               color: MyColors.buttonRed,
-              size: 20,
+              size: 14,
             ),
           ],
         ),
         kGap10,
         Text(
           review,
-          style: kServiceCardText,
+          style: kServiceCardText.copyWith(
+            color: MyColors.textGrey,
+            fontSize: Font.extraSmall,
+          ),
         ),
       ],
     );
@@ -647,11 +658,11 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
           'Book an Appointment',
           style: kAppointmentSetupSectionTitle,
         ),
-        kGap24,
+        kGap28,
         DateNavigationWidget(
           onDateChanged: (date) {},
         ),
-        kGap24,
+        kGap28,
         RadioButtonGroup(
           options: const [
             '11:00 AM',
@@ -685,7 +696,6 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
             setState(() {
               unselectedColor = MyColors.grey;
             });
-            print(value);
           },
         ),
       ],

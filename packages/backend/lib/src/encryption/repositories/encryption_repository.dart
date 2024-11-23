@@ -5,7 +5,6 @@ import 'package:injectable/injectable.dart';
 import 'package:p_logger/p_logger.dart';
 
 import '../../../backend.dart';
-import '../interfaces/encryption_interface.dart';
 
 @LazySingleton(as: IEncryptionRepository)
 class EncryptionRepository implements IEncryptionRepository {

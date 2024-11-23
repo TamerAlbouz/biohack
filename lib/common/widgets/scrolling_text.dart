@@ -15,7 +15,7 @@ class ScrollingText extends StatefulWidget {
   final TextAlign textAlign; // New alignment parameter
 
   const ScrollingText({
-    Key? key,
+    super.key,
     required this.text,
     required this.width,
     this.style,
@@ -26,7 +26,7 @@ class ScrollingText extends StatefulWidget {
     this.backgroundColor,
     this.minCharactersToScroll = 20,
     this.textAlign = TextAlign.left, // Default to left alignment
-  }) : super(key: key);
+  });
 
   @override
   State<ScrollingText> createState() => _ScrollingTextState();

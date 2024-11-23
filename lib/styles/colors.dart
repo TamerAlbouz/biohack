@@ -1,10 +1,10 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class MyColors {
   static const background = Color(0xffE8E4E1);
   static const blue = Color(0xff4264FF);
   static const black = Color(0xff3C3C3C);
-  static const lightBlue = Color(0xff88A7FF);
+  static const lightBlue = Color(0xff6084f3);
   static const grey = Color(0xffA0A0A0);
   static const cancel = Color(0xffC62E31);
   static const pending = Color(0xffB29F0F);

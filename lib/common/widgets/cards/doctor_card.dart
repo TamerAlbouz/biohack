@@ -90,7 +90,6 @@ class _DoctorInfo extends StatelessWidget {
   final String availability;
 
   const _DoctorInfo({
-    super.key,
     required this.name,
     required this.specialty,
     required this.availability,

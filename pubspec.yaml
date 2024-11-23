@@ -47,6 +47,7 @@ dependencies:
   envied: ^0.5.4+1
   skeletonizer: ^1.4.2
   google_maps_flutter: ^2.9.0
+  faker: ^2.2.0
 
   # encryption
   crypton: ^2.2.1

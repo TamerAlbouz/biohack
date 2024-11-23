@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/patient/search_doctors/models/service_detail.dart';
 
+import '../../../common/widgets/dropdown/custom_expansion_list_radio.dart';
 import '../../../styles/colors.dart';
 import '../../../styles/sizes.dart';
 import '../../../styles/styles/text.dart';
@@ -14,37 +15,27 @@ class Services extends StatefulWidget {
 }
 
 class _ServicesState extends State<Services> {
-  // Track which service is expanded
-  int? _expandedIndex;
-
-  // Service details data structure
   final List<ServiceDetail> _services = [
     const ServiceDetail(
-      name: 'Haircut',
+      name: 'General Consultation',
       price: 100,
       duration: '45 mins',
-      availability: 'In-Person & Online',
-      summary:
-          'Professional styling tailored to your unique look and preferences.',
-      icon: FontAwesomeIcons.cut,
+      availability: 'In-Person &\nOnline',
+      summary: 'General consultation for any health issues',
     ),
     const ServiceDetail(
-      name: 'Color Treatment',
+      name: 'Dental Checkup',
       price: 150,
-      duration: '90 mins',
-      availability: 'In-Person Only',
-      summary:
-          'Expert coloring using premium, hair-friendly products for vibrant, long-lasting results.',
-      icon: FontAwesomeIcons.palette,
+      duration: '1 hour',
+      availability: 'In-Person',
+      summary: 'Routine dental checkup and cleaning',
     ),
     const ServiceDetail(
-      name: 'Consultation',
+      name: 'Vaccination',
       price: 50,
       duration: '30 mins',
-      availability: 'In-Person & Online',
-      summary:
-          'Personalized hair care advice and styling recommendations from our expert stylists.',
-      icon: FontAwesomeIcons.comments,
+      availability: 'In-Person',
+      summary: 'Vaccination for children and adults',
     ),
   ];
 
@@ -59,143 +50,62 @@ class _ServicesState extends State<Services> {
           'Services',
           style: kAppointmentSetupSectionTitle,
         ),
-        kGap14,
-        ListView.separated(
-          shrinkWrap: true,
-          itemCount: _services.length,
-          physics: const NeverScrollableScrollPhysics(),
-          separatorBuilder: (context, index) => kGap12,
-          itemBuilder: (context, index) {
-            final service = _services[index];
-            final isExpanded = _expandedIndex == index;
+        kGap4,
+        // apply negative margin to remove the default padding
+        CustomExpansionPanelList.radio(
+          elevation: 0,
+          materialGapSize: 16,
+          dividerColor: Colors.transparent,
+          expandedHeaderPadding: kPadd0,
+          initialOpenPanelValue: 0,
+          // This ensures first panel is open by default
+          children: _services.asMap().entries.map((entry) {
+            final index = entry.key;
+            final service = entry.value;
 
-            return GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                setState(() {
-                  if (_expandedIndex == index) {
-                    _expandedIndex = null;
-                  } else {
-                    _expandedIndex = index;
-                  }
-                });
-              },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                constraints: BoxConstraints(
-                  minHeight: 30,
-                  maxHeight: isExpanded ? 210 : 30,
-                ),
-                curve: Curves.easeInOut,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+            return CustomExpansionPanelRadio(
+              backgroundColor: Colors.transparent,
+              splashColor: Colors.transparent,
+              headerBuilder: (context, isExpanded) => Container(
+                padding: kPaddR8,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: Row(
-                        children: [
-                          const FaIcon(
-                            FontAwesomeIcons.check,
-                            color: MyColors.green,
-                            size: 20,
-                          ),
-                          kGap10,
-                          Text(service.name, style: kServiceCardText),
-                          const Spacer(),
-                          AnimatedOpacity(
-                            duration: const Duration(milliseconds: 300),
-                            opacity: isExpanded ? 0 : 1,
-                            child: Text(
-                              '\$${service.price}',
-                              style: kServiceCardText.copyWith(
-                                  color: MyColors.textBlack),
-                            ),
-                          ),
-                          kGap10,
-                          FaIcon(
-                            isExpanded
-                                ? FontAwesomeIcons.chevronDown
-                                : FontAwesomeIcons.chevronRight,
-                            color: MyColors.black,
-                            size: 18,
-                          ),
-                        ],
+                    const FaIcon(
+                      FontAwesomeIcons.check,
+                      color: MyColors.green,
+                      size: 20,
+                    ),
+                    kGap8,
+                    Text(
+                      service.name,
+                      style: kServiceCardText.copyWith(),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '\$${service.price}',
+                      style: kServiceCardText.copyWith(
+                        color: MyColors.textGrey,
                       ),
                     ),
-
-                    // Expanded Details with Fade-in Animation
-                    if (isExpanded)
-                      AnimatedOpacity(
-                        duration: const Duration(milliseconds: 300),
-                        opacity: isExpanded ? 1.0 : 0.0,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  FaIcon(service.icon,
-                                      size: 16, color: MyColors.textGrey),
-                                  kGap8,
-                                  Expanded(
-                                    child: Text(
-                                      service.summary,
-                                      style: kServiceDetailText,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              kGap14,
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Column(
-                                    children: [
-                                      const FaIcon(FontAwesomeIcons.clock,
-                                          size: 16, color: MyColors.textGrey),
-                                      kGap8,
-                                      Text(service.duration,
-                                          style: kServiceDetailText),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      FaIcon(
-                                          service.availability
-                                                  .contains('Online')
-                                              ? FontAwesomeIcons.video
-                                              : FontAwesomeIcons.mapPin,
-                                          size: 16,
-                                          color: MyColors.textGrey),
-                                      kGap8,
-                                      Text(service.availability,
-                                          style: kServiceDetailText),
-                                    ],
-                                  ),
-                                  Column(
-                                    children: [
-                                      const FaIcon(FontAwesomeIcons.moneyBill,
-                                          size: 16, color: MyColors.textGrey),
-                                      kGap8,
-                                      Text('\$${service.price}',
-                                          style: kServiceDetailText),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
+              body: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text(
+                    service.summary,
+                    style: kServiceCardSummary,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              value: index,
             );
-          },
+          }).toList(),
         ),
       ],
     );
