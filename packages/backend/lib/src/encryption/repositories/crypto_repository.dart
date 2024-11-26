@@ -14,7 +14,6 @@ import 'package:pointycastle/macs/hmac.dart';
 import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
 import 'package:pointycastle/paddings/pkcs7.dart';
 
-import '../../../backend.dart';
 import '../interfaces/crypto_interface.dart';
 import '../models/crypto_result.dart';
 
@@ -124,24 +123,5 @@ class CryptoRepository extends ICryptoRepository {
       // Error handling
       return CryptoResult(data: err.toString(), status: false);
     }
-  }
-
-  @override
-  KeyGenerationResult getKeys(String password) {
-    logger.i('Generating keys');
-    // Generate PBKDF key
-    final String randomSaltOne = generateRandomSalt().toString();
-    final Uint8List pbkdfKey = generatePBKDFKey(password, randomSaltOne);
-    logger.i('PBKDF key generated');
-
-    // Generate RSA Key Pair
-    final RSAKeypair keyPair = getKeyPair();
-    logger.i('RSA key pair generated');
-
-    return KeyGenerationResult(
-      keyPair: keyPair,
-      randomSaltOne: randomSaltOne,
-      pbkdfKey: pbkdfKey,
-    );
   }
 }

@@ -16,6 +16,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
         _userPreferences = userPreferences,
         _patientRepository = patientRepository,
         super(RouteInitial(user: authRepo.currentUser)) {
+    on<InitialRun>(_onInitialRun);
     on<AuthSubscriptionRequested>(_onSubscriptionRequested);
     on<AuthLogoutPressed>(_onLogoutPressed);
     on<ChooseRole>(_onChooseRole);
@@ -25,6 +26,35 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
   final UserPreferences _userPreferences;
   final IPatientRepository _patientRepository;
 
+  // on initial run, check if user is already signed in, and his email is verified
+  Future<void> _onInitialRun(
+    InitialRun event,
+    Emitter<RouteState> emit,
+  ) async {
+    logger.i('Initial run');
+    final user = _authRepo.currentUser;
+
+    if (user == User.empty) {
+      emit(AuthChooseRole());
+      return;
+    }
+
+    final Role? role = _userPreferences.getRole();
+
+    if (role == null) {
+      emit(AuthChooseRole());
+      return;
+    }
+
+    // check if email is verified
+    final isEmailVerified = await _authRepo.isEmailVerified();
+    if (!isEmailVerified) {
+      logger.i('Email not verified');
+      await signOut();
+      return;
+    }
+  }
+
   Future<void> _onSubscriptionRequested(
     AuthSubscriptionRequested event,
     Emitter<RouteState> emit,
@@ -32,13 +62,30 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     return emit.onEach(
       _authRepo.user,
       onData: (user) async {
-        emit(AuthLoading());
+        // if state is already loading, don't emit another loading state
+        if (state is! AuthLoading) {
+          emit(AuthLoading());
+        }
+
         logger.i('Subscription requested');
         final Role? role = _userPreferences.getRole();
 
         if (role == null || user == User.empty) {
           logger.i('Role not found');
           return emit(AuthChooseRole());
+        }
+
+        // was user deleted from the database?
+        if (await _authRepo.wasDeleted()) {
+          logger.i('User was deleted');
+          await signOut();
+          return;
+        }
+
+        // if email is not verified, don't proceed
+        if (!await _authRepo.isEmailVerified()) {
+          logger.i('Email not verified');
+          return;
         }
 
         switch (role) {
@@ -88,6 +135,11 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     AuthLogoutPressed event,
     Emitter<RouteState> emit,
   ) async {
+    emit(AuthLoading());
+    await signOut();
+  }
+
+  Future<void> signOut() async {
     await _userPreferences.clear();
 
     // empty the secure storage

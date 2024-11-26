@@ -13,6 +13,11 @@ final class AuthLogoutPressed extends RouteEvent {
   List<Object> get props => [];
 }
 
+final class InitialRun extends RouteEvent {
+  @override
+  List<Object> get props => [];
+}
+
 final class ChooseRole extends RouteEvent {
   final Role role;
 

@@ -33,6 +33,24 @@ class DatePicker extends StatefulWidget {
   /// ```
   final String hint;
 
+  /// The earliest allowable date that the user can select.
+  /// If null, there is no restriction on the earliest date.
+  ///
+  /// Example:
+  /// ```dart
+  /// firstDate: DateTime(2000),
+  /// ```
+  final DateTime firstDate;
+
+  /// The latest allowable date that the user can select.
+  /// If null, there is no restriction on the latest date.
+  ///
+  /// Example:
+  /// ```dart
+  /// lastDate: DateTime(2022),
+  /// ```
+  final DateTime lastDate;
+
   /// A customizable date picker widget that allows users to select a date using a calendar interface.
   ///
   /// The [DatePicker] widget provides a button that opens a date selection dialog,
@@ -43,6 +61,8 @@ class DatePicker extends StatefulWidget {
   /// * [onSelected]: A callback function that triggers when a date is selected, passing the selected [DateTime].
   /// * [height]: The height of the button. Defaults to 50.
   /// * [hint]: The hint text to display when no date is selected. Defaults to 'Select Date'.
+  /// * [firstDate]: The earliest allowable date that the user can select. If null, there is no restriction on the earliest date.
+  /// * [lastDate]: The latest allowable date that the user can select. If null, there is no restriction on the latest date.
   ///
   /// ### Example usage:
   /// ```dart
@@ -52,6 +72,8 @@ class DatePicker extends StatefulWidget {
   ///   },
   ///   height: 60,
   ///   hint: 'Select Date',
+  ///   firstDate: DateTime(2000),
+  ///   lastDate: DateTime(2022),
   /// );
   /// ```
   const DatePicker({
@@ -59,6 +81,8 @@ class DatePicker extends StatefulWidget {
     this.onSelected,
     this.hint = 'Select Date',
     this.height = 50,
+    required this.firstDate,
+    required this.lastDate,
   });
 
   @override
@@ -72,9 +96,9 @@ class _DatePickerState extends State<DatePicker> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate ?? DateTime(DateTime.now().year - 18),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(DateTime.now().year - 18),
+      initialDate: selectedDate,
+      firstDate: widget.firstDate,
+      lastDate: widget.lastDate,
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(

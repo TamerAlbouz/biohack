@@ -15,6 +15,12 @@ abstract class IAuthenticationRepository {
   /// Defaults to false if there is no user.
   bool get isAnonymous;
 
+  Future<bool> wasDeleted();
+
+  Future<void> sendEmailVerification();
+
+  Future<bool> isEmailVerified();
+
   /// Creates a new user with the provided [email] and [password].
   ///
   /// Throws a [SignUpWithEmailAndPasswordFailure] if an exception occurs.

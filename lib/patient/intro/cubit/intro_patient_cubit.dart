@@ -10,11 +10,9 @@ import 'package:p_logger/p_logger.dart';
 part 'intro_patient_state.dart';
 
 class IntroPatientCubit extends Cubit<IntroPatientState> {
-  IntroPatientCubit(this._patientRepository, this._secureEncryptionStorage)
-      : super(const IntroPatientState());
+  IntroPatientCubit(this._patientRepository) : super(const IntroPatientState());
 
   final IPatientRepository _patientRepository;
-  final ISecureEncryptionStorage _secureEncryptionStorage;
 
   void fullNameChanged(String value) {
     final fullName = FullName.dirty(value);
@@ -142,7 +140,7 @@ class IntroPatientCubit extends Cubit<IntroPatientState> {
     );
   }
 
-  Future<void> updatePatientStatus(String email, String uid) async {
+  Future<void> createPatient(String email, String uid) async {
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     DateFormat formatter = DateFormat('dd/MM/yyyy');
     try {
@@ -159,14 +157,7 @@ class IntroPatientCubit extends Cubit<IntroPatientState> {
         uid: uid,
         busy: false,
         createdAt: DateTime.now(),
-        emailVerified: false,
       );
-
-      // encrypt the patient data
-      final encryptedBio =
-          await _secureEncryptionStorage.encrypt(state.biography.value);
-
-      patient = patient.copyWith(biography: encryptedBio.data);
 
       await _patientRepository.addPatient(patient);
       emit(state.copyWith(status: FormzSubmissionStatus.success));

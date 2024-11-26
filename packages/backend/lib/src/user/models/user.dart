@@ -24,7 +24,6 @@ class User extends Equatable implements IUser {
       this.appointments,
       this.tokens,
       this.paymentIds,
-      this.emailVerified = false,
       this.biography});
 
   /// The current user's role.
@@ -74,9 +73,6 @@ class User extends Equatable implements IUser {
   @override
   final String? biography;
 
-  /// Email verification status
-  final bool emailVerified;
-
   static const empty = User(
     uid: '',
     role: Role.unknown,
@@ -92,7 +88,6 @@ class User extends Equatable implements IUser {
     String? profilePictureUrl,
     DateTime? updatedAt,
     List<String>? appointments,
-    bool? emailVerified,
     bool? busy,
     String? biography,
     List<String>? tokens,
@@ -101,7 +96,6 @@ class User extends Equatable implements IUser {
     return User(
       email: email ?? this.email,
       name: name ?? this.name,
-      emailVerified: emailVerified ?? this.emailVerified,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       updatedAt: updatedAt ?? this.updatedAt,
       appointments: appointments ?? this.appointments,
@@ -128,7 +122,6 @@ class User extends Equatable implements IUser {
         tokens,
         paymentIds,
         biography,
-        emailVerified,
       ];
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

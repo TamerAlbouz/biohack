@@ -7,12 +7,12 @@ class SignUpConfirmPasswordInput extends StatelessWidget {
     super.key,
     required this.onChanged,
     this.emptyInput = false,
-    this.isValid = true,
+    this.passwordMatch = true,
   });
 
   final void Function(String) onChanged;
   final bool emptyInput;
-  final bool isValid;
+  final bool passwordMatch;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,8 @@ class SignUpConfirmPasswordInput extends StatelessWidget {
       hintText: "Confirm Password",
       onChanged: onChanged,
       keyboardType: TextInputType.visiblePassword,
-      errorText: !isValid && !emptyInput ? "Passwords do not match" : null,
+      errorText:
+          !passwordMatch && !emptyInput ? "Passwords do not match" : null,
     );
   }
 }

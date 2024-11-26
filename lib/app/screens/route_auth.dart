@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/loading/screens/loading_screen.dart';
-import 'package:medtalk/patient/dashboard/bloc/appointment/appointment_bloc.dart';
+import 'package:medtalk/login/bloc/login_bloc.dart';
 import 'package:medtalk/patient/dashboard/bloc/patient/patient_bloc.dart';
 import 'package:medtalk/patient/intro/screens/intro_screen_patient.dart';
-import 'package:medtalk/patient/login/screens/login_patient_screen.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
 import 'package:medtalk/styles/themes.dart';
 
+import '../../login/screens/login_patient_screen.dart';
 import '../bloc/auth/route_bloc.dart';
 import 'auth_screen.dart';
 
@@ -45,7 +45,9 @@ class App extends StatelessWidget {
               authRepo: _authenticationRepository,
               userPreferences: getIt<UserPreferences>(),
               patientRepository: getIt<IPatientRepository>(),
-            )..add(AuthSubscriptionRequested()),
+            )
+              ..add(InitialRun())
+              ..add(AuthSubscriptionRequested()),
           ),
           BlocProvider(
             create: (_) => PatientBloc(
@@ -54,8 +56,11 @@ class App extends StatelessWidget {
             )..add(LoadPatient()),
           ),
           BlocProvider(
-            create: (_) => AppointmentBloc(
-              appointmentRepo: getIt<IAppointmentRepository>(),
+            lazy: false,
+            create: (_) => LoginBloc(
+              getIt<IAuthenticationRepository>(),
+              getIt<IEncryptionRepository>(),
+              getIt<ISecureEncryptionStorage>(),
             ),
           ),
         ],
@@ -106,6 +111,7 @@ class _AppViewState extends State<_AppView> {
             if (state is AuthSuccess) {
               switch (state.status) {
                 case AuthStatus.authenticated:
+                  // check if user is has their email verified
                   AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
                     NavigationPatientScreen.route(),
                     (route) => false,

@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:backend/src/encryption/models/key_generation_result.dart';
 import 'package:crypton/crypton.dart';
 
 import '../models/crypto_result.dart';
@@ -26,6 +25,4 @@ abstract class ICryptoRepository {
 
   /// method to decrypt a piece of text using the private key, returns a CryptoResult
   CryptoResult asymmetricDecrypt(String cipherText, RSAPrivateKey privKey);
-
-  KeyGenerationResult getKeys(String password);
 }

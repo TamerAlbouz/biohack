@@ -29,8 +29,11 @@ final class AuthSuccess extends RouteState {
   final Role role;
   final AuthStatus status;
 
-  AuthSuccess(this.user,
-      {this.role = Role.unknown, this.status = AuthStatus.unauthenticated});
+  AuthSuccess(
+    this.user, {
+    this.role = Role.unknown,
+    this.status = AuthStatus.unauthenticated,
+  });
 
   @override
   List<Object> get props => [user, role, status];

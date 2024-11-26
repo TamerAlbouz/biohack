@@ -34,6 +34,7 @@ const kPaddH14 = EdgeInsets.symmetric(horizontal: 14);
 const kPaddH24 = EdgeInsets.symmetric(horizontal: 24);
 const kPaddV14 = EdgeInsets.symmetric(vertical: 14);
 const kPaddL42R42T42 = EdgeInsets.only(left: 42, right: 42, top: 42);
+const kPaddL42R42 = EdgeInsets.symmetric(horizontal: 42);
 const kPaddL24R12T2 = EdgeInsets.only(left: 24, right: 12, top: 2);
 const kPaddH10 = EdgeInsets.symmetric(horizontal: 10);
 const kPaddH20 = EdgeInsets.symmetric(horizontal: 20);

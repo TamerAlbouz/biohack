@@ -44,16 +44,41 @@ class AuthenticationRepository implements IAuthenticationRepository {
     return _firebaseAuth.currentUser?.isAnonymous ?? false;
   }
 
+  @override
+  Future<void> sendEmailVerification() async {
+    final user = _firebaseAuth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    } else {
+      throw Exception('Unable to send verification email');
+    }
+  }
+
+  @override
+  Future<bool> isEmailVerified() async {
+    await _firebaseAuth.currentUser?.reload();
+    return _firebaseAuth.currentUser?.emailVerified ?? false;
+  }
+
+  @override
+  Future<bool> wasDeleted() async {
+    await _firebaseAuth.currentUser?.reload();
+    return _firebaseAuth.currentUser?.email == null;
+  }
+
   /// Creates a new user with the provided [email] and [password].
   ///
   /// Throws a [SignUpWithEmailAndPasswordFailure] if an exception occurs.
   @override
   Future<void> signUp({required String email, required String password}) async {
     try {
-      await _firebaseAuth.createUserWithEmailAndPassword(
+      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Send verification email right after sign up
+      await userCredential.user?.sendEmailVerification();
     } on firebase_auth.FirebaseAuthException catch (e) {
       throw SignUpWithEmailAndPasswordFailure.fromCode(e.code);
     } catch (_) {

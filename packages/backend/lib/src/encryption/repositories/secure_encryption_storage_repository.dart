@@ -19,42 +19,40 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
   /// Generate a new key pair and encrypt the private key using the user's password,
   /// while also storing the private key in the secure storage.
   @override
-  Future<PrivateKeyEncryptionResult> generateAndSaveKeys(
-      String password) async {
+  Future<PrivateKeyEncryptionResult> generateNewKeys(String password) async {
     try {
+      logger.i('Generating keys');
       // Generate keys
-      final KeyGenerationResult keyGenerationResult =
-          _cryptoRepository.getKeys(password);
+      // Generate PBKDF key
+      final String randomSaltOne =
+          _cryptoRepository.generateRandomSalt().toString();
+      final Uint8List pbkdfKey =
+          _cryptoRepository.generatePBKDFKey(password, randomSaltOne);
+      logger.i('PBKDF key generated');
 
-      final Uint8List privateKey = Uint8List.fromList(
-          keyGenerationResult.keyPair.privateKey.toFormattedPEM().codeUnits);
+      // Generate RSA Key Pair
+      final RSAKeypair keyPair = _cryptoRepository.getKeyPair();
+      logger.i('RSA key pair generated');
 
       // Encrypt Private key
       final privateKeySalt = _cryptoRepository.generateRandomSalt().toString();
 
-      // Store the private key in secure storage
-      await _secureStorageRepository.write(
-        'rsaKeys',
-        jsonEncode(PrivateKeyDecryptionResult(
-          publicKey: keyGenerationResult.keyPair.publicKey.toFormattedPEM(),
-          privateKey: String.fromCharCodes(privateKey),
-          randomSaltOne: keyGenerationResult.randomSaltOne,
-          randomSaltTwo: privateKeySalt,
-        ).toJson()),
-      );
-
       final encryptedPrivateKey = _cryptoRepository.symmetricEncrypt(
-        keyGenerationResult.pbkdfKey,
+        pbkdfKey,
         Uint8List.fromList(privateKeySalt.codeUnits),
-        privateKey,
+        Uint8List.fromList(keyPair.privateKey.toFormattedPEM().codeUnits),
       );
 
-      return PrivateKeyEncryptionResult(
-        publicKey: keyGenerationResult.keyPair.publicKey.toFormattedPEM(),
+      var result = PrivateKeyEncryptionResult(
+        publicKey: keyPair.publicKey.toFormattedPEM(),
         encryptedPrivateKey: String.fromCharCodes(encryptedPrivateKey),
-        randomSaltOne: keyGenerationResult.randomSaltOne,
+        randomSaltOne: randomSaltOne,
         randomSaltTwo: privateKeySalt,
       );
+
+      logger.i('Keys generated');
+
+      return result;
     } catch (e) {
       logger.e('Error generating and saving keys: $e');
       throw Exception('Error generating and saving keys');
@@ -66,6 +64,7 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
   Future<PrivateKeyDecryptionResult> decryptAndSaveKey(
       PrivateKeyEncryptionResult encryptedResult, String password) async {
     try {
+      logger.i('Decrypting private key');
       // Generate pbkdfKey using the random salt stored in DB and user's password
       final Uint8List pbkdfKey = _cryptoRepository.generatePBKDFKey(
         password,
@@ -91,6 +90,8 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
       await _secureStorageRepository.write(
           'rsaKeys', jsonEncode(result.toJson()));
 
+      logger.i('Private key decrypted and saved');
+
       return result;
     } catch (e) {
       logger.e('Error decrypting private key: $e');
@@ -100,15 +101,12 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
 
   /// Gets the private key from the secure storage.
   @override
-  Future<PrivateKeyDecryptionResult> getKeys() async {
+  Future<PrivateKeyDecryptionResult?> getKeys() async {
     try {
       final result = await _secureStorageRepository.read('rsaKeys');
-
-      if (result == null) {
-        throw Exception('Private key not found in secure storage');
-      }
-
-      return PrivateKeyDecryptionResult.fromJson(jsonDecode(result));
+      return result == null
+          ? null
+          : PrivateKeyDecryptionResult.fromJson(jsonDecode(result));
     } catch (e) {
       logger.e('Error reading private key from secure storage: $e');
       throw Exception('Error reading private key from secure storage');
@@ -155,9 +153,9 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
   @override
   Future<CryptoResult> encrypt(String data) async {
     try {
-      final PrivateKeyDecryptionResult keys = await getKeys();
+      final PrivateKeyDecryptionResult? keys = await getKeys();
 
-      logger.i('Encrypting data: $data, with public key: ${keys.publicKey}');
+      logger.i('Encrypting data: $data, with public key: ${keys!.publicKey}');
       final CryptoResult encryptedData = _cryptoRepository.asymmetricEncrypt(
         data,
         RSAPublicKey.fromPEM(keys.publicKey),
@@ -173,11 +171,11 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
   @override
   Future<CryptoResult> decrypt(String data) async {
     try {
-      final PrivateKeyDecryptionResult keys = await getKeys();
+      final PrivateKeyDecryptionResult? keys = await getKeys();
 
       final CryptoResult decryptedData = _cryptoRepository.asymmetricDecrypt(
         data,
-        RSAPrivateKey.fromString(keys.privateKey),
+        RSAPrivateKey.fromString(keys!.privateKey),
       );
 
       return decryptedData;
@@ -191,7 +189,7 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
   Future<void> deleteKeys() async {
     try {
       logger.i('Deleting keys');
-      await _secureStorageRepository.delete('rsaKeys');
+      await _secureStorageRepository.deleteAll();
     } catch (e) {
       logger.e('Error deleting keys: $e');
       throw Exception('Error deleting keys');

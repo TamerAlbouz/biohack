@@ -2,6 +2,7 @@ export './src/appointment/appointment.dart';
 export './src/authentication/authentication.dart';
 export './src/backend_injectable_module.dart';
 export './src/cache/shared_preferences.dart';
+export './src/chat/chat.dart';
 export './src/encryption/encryption.dart';
 export './src/injectable.dart';
 export './src/patient/patient.dart';

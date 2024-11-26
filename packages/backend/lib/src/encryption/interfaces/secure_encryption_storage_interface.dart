@@ -2,12 +2,12 @@ import '../../../backend.dart';
 import '../models/crypto_result.dart';
 
 abstract class ISecureEncryptionStorage {
-  Future<PrivateKeyEncryptionResult> generateAndSaveKeys(String password);
+  Future<PrivateKeyEncryptionResult> generateNewKeys(String password);
 
   Future<PrivateKeyDecryptionResult> decryptAndSaveKey(
       PrivateKeyEncryptionResult encryptedResult, String password);
 
-  Future<PrivateKeyDecryptionResult> getKeys();
+  Future<PrivateKeyDecryptionResult?> getKeys();
 
   PrivateKeyEncryptionResult resetPassword(
       PrivateKeyEncryptionResult dataInDB, String currentPass, String newPass);

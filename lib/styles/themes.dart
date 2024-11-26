@@ -123,6 +123,17 @@ ThemeData get lightTheme {
         color: MyColors.textBlack,
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        textStyle: const TextStyle(
+          fontFamily: Font.family,
+          fontSize: Font.medium,
+          fontWeight: FontWeight.normal,
+          color: MyColors.blue,
+        ),
+        foregroundColor: MyColors.blue,
+      ),
+    ),
     pageTransitionsTheme: const PageTransitionsTheme(
       builders: {
         TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),

@@ -15,6 +15,7 @@ import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dar
 import 'package:medtalk/styles/sizes.dart';
 import 'package:medtalk/styles/styles/button.dart';
 
+import '../../../styles/colors.dart';
 import '../../../styles/font.dart';
 
 class IntroScreenPatient extends StatelessWidget {
@@ -27,8 +28,7 @@ class IntroScreenPatient extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => IntroPatientCubit(
-          getIt<IPatientRepository>(), getIt<ISecureEncryptionStorage>()),
+      create: (context) => IntroPatientCubit(getIt<IPatientRepository>()),
       child: BlocListener<IntroPatientCubit, IntroPatientState>(
         listener: (context, state) {
           // TODO: implement listener
@@ -162,6 +162,8 @@ class _BloodGroupInputState extends State<_BloodGroupInput> {
   Widget build(BuildContext context) {
     return RadioButtonGroup(
       options: const ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'],
+      unselectedColor: MyColors.textField,
+      selectedColor: MyColors.blue,
       onChanged: (value) =>
           context.read<IntroPatientCubit>().bloodGroupChanged(value),
     );
@@ -215,7 +217,11 @@ class _DateOfBirthInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateFormat formatter = DateFormat('dd/MM/yyyy');
+    // last date should be 18 years ago
+    var lastDate = DateTime.now().subtract(const Duration(days: 18 * 365));
     return DatePicker(
+      firstDate: DateTime(1900),
+      lastDate: lastDate,
       hint: 'Date of Birth',
       onSelected: (date) {
         context
@@ -275,7 +281,7 @@ class _GetStartedButton extends StatelessWidget {
                   context.read<IAuthenticationRepository>().currentUser.email;
               var uid =
                   context.read<IAuthenticationRepository>().currentUser.uid;
-              context.read<IntroPatientCubit>().updatePatientStatus(email, uid);
+              context.read<IntroPatientCubit>().createPatient(email, uid);
             }
           : null,
       style: kElevatedButtonStyle,

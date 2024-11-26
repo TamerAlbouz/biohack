@@ -19,7 +19,14 @@ class SignUpPasswordInput extends StatelessWidget {
       hintText: "Password",
       onChanged: onChanged,
       keyboardType: TextInputType.visiblePassword,
-      errorText: displayError != null ? "Invalid Password" : null,
+      errorText: displayError != null
+          ? "Invalid Password. Must contain at least:\n"
+              "• 8 characters\n"
+              "• 1 uppercase letter\n"
+              "• 1 lowercase letter\n"
+              "• 1 number\n"
+              "• 1 special character"
+          : null,
     );
   }
 }

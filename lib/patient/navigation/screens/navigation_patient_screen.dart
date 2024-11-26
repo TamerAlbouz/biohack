@@ -1,8 +1,14 @@
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/patient/dashboard/bloc/appointment/appointment_bloc.dart';
 import 'package:medtalk/patient/search_doctors/screens/search_doctors_screen.dart';
 
+import '../../../app/bloc/auth/route_bloc.dart';
+import '../../../chat/bloc/chat_list/chat_list_bloc.dart';
+import '../../../chat/bloc/chat_list/chat_list_event.dart';
+import '../../../chat/screens/chat_list.dart';
 import '../../../common/widgets/svg_bottom_navbar.dart';
 import '../../dashboard/screens/patient_dashboard_screen.dart';
 import '../cubit/navigation_patient_cubit.dart';
@@ -18,8 +24,22 @@ class NavigationPatientScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<NavigationPatientCubit>(
-      create: (context) => NavigationPatientCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => AppointmentBloc(
+            appointmentRepo: getIt<IAppointmentRepository>(),
+          ),
+        ),
+        BlocProvider<NavigationPatientCubit>(
+            create: (context) => NavigationPatientCubit()),
+        BlocProvider(
+          create: (context) => ChatsListBloc(
+              getIt<IChatRepository>(), getIt<IAuthenticationRepository>())
+            ..add(LoadChatsList(
+                (context.read<RouteBloc>().state as AuthSuccess).user.uid)),
+        ),
+      ],
       child: const NavigationPatientView(),
     );
   }
@@ -109,7 +129,7 @@ class _Body extends StatelessWidget {
         case NavbarScreenItemsPatient.search:
           return const SearchDoctorsScreen();
         case NavbarScreenItemsPatient.appointments:
-          return const Text('Appointments Screen');
+          return const ChatsListScreen();
         case NavbarScreenItemsPatient.documents:
           return const Text('Documents Screen');
         case NavbarScreenItemsPatient.settings:
