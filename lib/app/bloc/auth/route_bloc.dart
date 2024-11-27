@@ -12,9 +12,11 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     required IAuthenticationRepository authRepo,
     required UserPreferences userPreferences,
     required IPatientRepository patientRepository,
+    required IDoctorRepository doctorRepository,
   })  : _authRepo = authRepo,
         _userPreferences = userPreferences,
         _patientRepository = patientRepository,
+        _doctorRepository = doctorRepository,
         super(RouteInitial(user: authRepo.currentUser)) {
     on<InitialRun>(_onInitialRun);
     on<AuthSubscriptionRequested>(_onSubscriptionRequested);
@@ -25,6 +27,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
   final IAuthenticationRepository _authRepo;
   final UserPreferences _userPreferences;
   final IPatientRepository _patientRepository;
+  final IDoctorRepository _doctorRepository;
 
   // on initial run, check if user is already signed in, and his email is verified
   Future<void> _onInitialRun(
@@ -61,7 +64,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
   ) {
     return emit.onEach(
       _authRepo.user,
-      onData: (user) async {
+      onData: (authUser) async {
         // if state is already loading, don't emit another loading state
         if (state is! AuthLoading) {
           emit(AuthLoading());
@@ -70,7 +73,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
         logger.i('Subscription requested');
         final Role? role = _userPreferences.getRole();
 
-        if (role == null || user == User.empty) {
+        if (role == null || authUser == User.empty) {
           logger.i('Role not found');
           return emit(AuthChooseRole());
         }
@@ -82,23 +85,13 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
           return;
         }
 
-        // if email is not verified, don't proceed
+        //if email is not verified, don't proceed
         if (!await _authRepo.isEmailVerified()) {
           logger.i('Email not verified');
           return;
         }
 
-        switch (role) {
-          case Role.patient:
-            logger.i('Patient role');
-            await _handlePatientFlow(user, emit, role);
-            break;
-          case Role.doctor:
-            break;
-          default:
-            emit(AuthFailure('Role not found'));
-            break;
-        }
+        _handleAuthFlow(authUser, emit, role);
       },
       onError: (error, stack) {
         addError(error, stack);
@@ -107,27 +100,38 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     );
   }
 
-  Future<void> _handlePatientFlow(
-      User user, Emitter<RouteState> emit, Role role) async {
+  Future<void> _handleAuthFlow(
+      User authUser, Emitter<RouteState> emit, Role role) async {
     emit(AuthLoading());
 
     // if user signed in anonymously, go straight to a premade workflow
     if (_authRepo.isAnonymous) {
-      logger.i('Anonymous user');
-      emit(AuthSuccess(user, role: Role.patient, status: AuthStatus.anonymous));
+      logger.i('Anonymous user ${role.name}: ${authUser.uid}');
+      emit(AuthSuccess(authUser, role: role, status: AuthStatus.anonymous));
       return;
     }
 
-    final patient = await _patientRepository.getPatient(user.uid);
+    var user;
 
-    if (patient == null) {
-      logger.i('Patient first time');
-      emit(AuthSuccess(user,
-          role: Role.patient, status: AuthStatus.firstTimeAuthentication));
+    switch (role) {
+      case Role.patient:
+        user = await _patientRepository.getPatient(authUser.uid);
+        break;
+      case Role.doctor:
+        user = await _doctorRepository.getDoctor(authUser.uid);
+        break;
+      default:
+        emit(AuthFailure('Role not found'));
+        return;
+    }
+
+    if (user == null) {
+      logger.i('${role.name} first time: ${authUser.uid}');
+      emit(AuthSuccess(authUser,
+          role: role, status: AuthStatus.firstTimeAuthentication));
     } else {
-      logger.i('Patient authenticated');
-      emit(AuthSuccess(user,
-          role: Role.patient, status: AuthStatus.authenticated));
+      logger.i('${role.name} authenticated: ${authUser.uid}');
+      emit(AuthSuccess(authUser, role: role, status: AuthStatus.authenticated));
     }
   }
 

@@ -32,6 +32,9 @@ class Font {
   /// Font size 12.0
   static const double tiny = 12.0;
 
+  /// Font size 11.0
+  static const double extraTiny = 11.0;
+
   /// Font size 13.0
   static const double tag = 13.0;
 }

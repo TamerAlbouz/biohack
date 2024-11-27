@@ -1,7 +1,1 @@
-enum NavbarScreenItemsPatient {
-  dashboard,
-  search,
-  appointments,
-  documents,
-  settings
-}
+enum NavbarScreenItemsPatient { dashboard, search, chats, documents, settings }

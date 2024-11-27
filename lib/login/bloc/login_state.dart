@@ -10,14 +10,12 @@ final class LoginState extends Equatable {
       this.signUpConfirmPassword = "",
       this.status = FormzSubmissionStatus.initial,
       this.requiresEmailVerification = false,
-      this.isSignUp = false,
       this.isValid = false,
       this.errorMessage});
 
   final Email signInEmail;
   final bool requiresEmailVerification;
   final Password signInPassword;
-  final bool isSignUp;
   final Email signUpEmail;
   final bool passwordMatch;
   final Password signUpPassword;
@@ -32,7 +30,6 @@ final class LoginState extends Equatable {
         signInPassword,
         signUpEmail,
         signUpPassword,
-        isSignUp,
         passwordMatch,
         signUpConfirmPassword,
         status,
@@ -45,7 +42,6 @@ final class LoginState extends Equatable {
       {Email? signInEmail,
       Password? signInPassword,
       Email? signUpEmail,
-      bool? isSignUp,
       bool? passwordMatch,
       Password? signUpPassword,
       String? signUpConfirmPassword,
@@ -54,7 +50,6 @@ final class LoginState extends Equatable {
       String? errorMessage,
       bool? requiresEmailVerification}) {
     return LoginState(
-      isSignUp: isSignUp ?? this.isSignUp,
       signInEmail: signInEmail ?? this.signInEmail,
       signInPassword: signInPassword ?? this.signInPassword,
       passwordMatch: passwordMatch ?? this.passwordMatch,

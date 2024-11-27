@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/styles/styles/button.dart';
 
 import '../../common/widgets/logo_widget.dart';
+import '../../styles/colors.dart';
 import '../../styles/font.dart';
 import '../../styles/sizes.dart';
 import '../bloc/auth/route_bloc.dart';
@@ -85,17 +86,21 @@ class _AppViewState extends State<_AppView> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               LogoWidget(),
-                              kGap14,
+                              kGap28,
                               Text(
                                 'Welcome!',
                                 style: TextStyle(
+                                    fontFamily: Font.family,
                                     fontSize: Font.mediumLarge,
-                                    fontWeight: FontWeight.normal),
+                                    fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
                               Text(
                                 'Who are you?',
-                                style: TextStyle(fontSize: Font.medium),
+                                style: TextStyle(
+                                    fontFamily: Font.family,
+                                    fontSize: Font.medium,
+                                    color: MyColors.textBlack),
                                 textAlign: TextAlign.center,
                               ),
                             ]),

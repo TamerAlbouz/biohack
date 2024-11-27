@@ -17,8 +17,8 @@ class NavigationPatientCubit extends Cubit<NavigationPatientState> {
       case NavbarScreenItemsPatient.search:
         emit(NavigationPatientState(NavbarScreenItemsPatient.search, 1));
         break;
-      case NavbarScreenItemsPatient.appointments:
-        emit(NavigationPatientState(NavbarScreenItemsPatient.appointments, 2));
+      case NavbarScreenItemsPatient.chats:
+        emit(NavigationPatientState(NavbarScreenItemsPatient.chats, 2));
         break;
       case NavbarScreenItemsPatient.documents:
         emit(NavigationPatientState(NavbarScreenItemsPatient.documents, 3));

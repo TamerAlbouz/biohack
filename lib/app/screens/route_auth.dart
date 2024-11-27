@@ -2,6 +2,7 @@ import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/common/globals/globals.dart';
+import 'package:medtalk/doctor/navigation/screens/navigation_doctor_screen.dart';
 import 'package:medtalk/loading/screens/loading_screen.dart';
 import 'package:medtalk/login/bloc/login_bloc.dart';
 import 'package:medtalk/patient/dashboard/bloc/patient/patient_bloc.dart';
@@ -9,7 +10,7 @@ import 'package:medtalk/patient/intro/screens/intro_screen_patient.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
 import 'package:medtalk/styles/themes.dart';
 
-import '../../login/screens/login_patient_screen.dart';
+import '../../login/screens/login_screen.dart';
 import '../bloc/auth/route_bloc.dart';
 import 'auth_screen.dart';
 
@@ -31,11 +32,9 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider.value(
+        RepositoryProvider<IAuthenticationRepository>.value(
           value: _authenticationRepository,
         ),
-        RepositoryProvider.value(value: getIt<IUserRepository>()),
-        RepositoryProvider.value(value: getIt<IAppointmentRepository>()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -45,6 +44,7 @@ class App extends StatelessWidget {
               authRepo: _authenticationRepository,
               userPreferences: getIt<UserPreferences>(),
               patientRepository: getIt<IPatientRepository>(),
+              doctorRepository: getIt<IDoctorRepository>(),
             )
               ..add(InitialRun())
               ..add(AuthSubscriptionRequested()),
@@ -105,33 +105,18 @@ class _AppViewState extends State<_AppView> {
             }
 
             if (state is AuthLogin) {
-              _navigateByRoleUnauthenticated(state);
+              AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+                LoginScreen.route(),
+                (route) => false,
+              );
             }
 
-            if (state is AuthSuccess) {
-              switch (state.status) {
-                case AuthStatus.authenticated:
-                  // check if user is has their email verified
-                  AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-                    NavigationPatientScreen.route(),
-                    (route) => false,
-                  );
-                  break;
-                case AuthStatus.firstTimeAuthentication:
-                  AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-                    IntroScreenPatient.route(),
-                    (route) => false,
-                  );
-                  break;
-                case AuthStatus.anonymous:
-                  AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-                    NavigationPatientScreen.route(),
-                    (route) => false,
-                  );
-                  break;
-                case AuthStatus.unauthenticated:
-                  break;
-              }
+            if (state is AuthSuccess && state.role == Role.patient) {
+              navigatePatient(state.status);
+            }
+
+            if (state is AuthSuccess && state.role == Role.doctor) {
+              navigateDoctor(state.status);
             }
           },
           child: child,
@@ -142,16 +127,54 @@ class _AppViewState extends State<_AppView> {
     );
   }
 
-  void _navigateByRoleUnauthenticated(AuthLogin successState) {
-    switch (successState.role) {
-      case Role.patient:
+  void navigatePatient(AuthStatus status) {
+    switch (status) {
+      case AuthStatus.authenticated:
+        // check if user is has their email verified
         AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-          LoginPatientScreen.route(),
+          NavigationPatientScreen.route(),
           (route) => false,
         );
-      case Role.admin:
-      case Role.doctor:
-      case Role.unknown:
+        break;
+      case AuthStatus.firstTimeAuthentication:
+        AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+          IntroScreenPatient.route(),
+          (route) => false,
+        );
+        break;
+      case AuthStatus.anonymous:
+        AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+          NavigationPatientScreen.route(),
+          (route) => false,
+        );
+        break;
+      case AuthStatus.unauthenticated:
+        break;
+    }
+  }
+
+  void navigateDoctor(AuthStatus status) {
+    switch (status) {
+      case AuthStatus.authenticated:
+        // check if user is has their email verified
+        AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+          NavigationDoctorScreen.route(),
+          (route) => false,
+        );
+        break;
+      case AuthStatus.firstTimeAuthentication:
+        AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+          NavigationDoctorScreen.route(),
+          (route) => false,
+        );
+        break;
+      case AuthStatus.anonymous:
+        AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
+          NavigationDoctorScreen.route(),
+          (route) => false,
+        );
+        break;
+      case AuthStatus.unauthenticated:
         break;
     }
   }

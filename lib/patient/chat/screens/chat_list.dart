@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/styles/colors.dart';
 
-import '../../app/bloc/auth/route_bloc.dart';
+import '../../../app/bloc/auth/route_bloc.dart';
 import '../bloc/chat_list/chat_list_bloc.dart';
 import '../bloc/chat_list/chat_list_event.dart';
 import '../bloc/chat_list/chat_list_state.dart';
@@ -43,6 +43,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: BlocConsumer<ChatsListBloc, ChatsListState>(
         listener: (context, state) {
           if (state is ChatsListError) {
@@ -102,7 +103,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                       ),
                     ),
                     title: Text(
-                      'Chat with $otherUserId',
+                      '$otherUserId',
                       // Replace with actual user name
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),

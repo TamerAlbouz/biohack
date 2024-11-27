@@ -57,6 +57,7 @@ class ChatRepository implements IChatRepository {
         .doc(chatId)
         .collection('messages')
         .orderBy('timestamp')
+        .limit(30) // Load only the most recent 20 messages
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => ChatMessage.fromMap(doc.data()))

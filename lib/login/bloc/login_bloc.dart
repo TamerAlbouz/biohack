@@ -134,12 +134,12 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         );
 
         emit(state.copyWith(
-          status: FormzSubmissionStatus.success,
+          status: FormzSubmissionStatus.inProgress,
           requiresEmailVerification: false,
         ));
       } else {
         emit(state.copyWith(
-          status: FormzSubmissionStatus.success,
+          status: FormzSubmissionStatus.inProgress,
           requiresEmailVerification: true,
         ));
       }
@@ -210,6 +210,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         ));
       } else {
         emit(state.copyWith(
+          status: FormzSubmissionStatus.inProgress,
           requiresEmailVerification: true,
         ));
       }
@@ -247,8 +248,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       );
 
       emit(state.copyWith(
+        status: FormzSubmissionStatus.inProgress,
         requiresEmailVerification: true,
-        isSignUp: true,
       ));
     } on SignUpWithEmailAndPasswordFailure catch (e) {
       logger.e(e.message);

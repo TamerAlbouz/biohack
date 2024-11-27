@@ -1,13 +1,13 @@
 part of 'appointment_bloc.dart';
 
-sealed class AppointmentEvent extends Equatable {
-  const AppointmentEvent();
+sealed class PatientAppointmentEvent extends Equatable {
+  const PatientAppointmentEvent();
 }
 
-class LoadAppointment extends AppointmentEvent {
+class LoadPatientAppointment extends PatientAppointmentEvent {
   final String appointmentId;
 
-  const LoadAppointment(this.appointmentId);
+  const LoadPatientAppointment(this.appointmentId);
 
   @override
   List<Object> get props => [appointmentId];

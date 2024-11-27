@@ -18,17 +18,17 @@ import '../widgets/sign_up_email_widget.dart';
 import '../widgets/sign_up_password_confirm_widget.dart';
 import '../widgets/sign_up_password_widget.dart';
 
-class LoginPatientScreen extends StatefulWidget {
-  const LoginPatientScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   static Route<void> route() =>
-      MaterialPageRoute(builder: (_) => const LoginPatientScreen());
+      MaterialPageRoute(builder: (_) => const LoginScreen());
 
   @override
-  State<LoginPatientScreen> createState() => _LoginPatientScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginPatientScreenState extends State<LoginPatientScreen>
+class _LoginScreenState extends State<LoginScreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
 
@@ -89,9 +89,7 @@ class _LoginFormState extends State<LoginForm> {
         if (state.status.isSuccess && !state.requiresEmailVerification) {
           _timer?.cancel();
           // check if request is from login or sign up
-          if (state.isSignUp) {
-            context.read<RouteBloc>().add(AuthSubscriptionRequested());
-          }
+          context.read<RouteBloc>().add(AuthSubscriptionRequested());
         }
 
         if (state.status.isFailure) {

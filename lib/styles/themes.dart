@@ -175,9 +175,10 @@ ThemeData get lightTheme {
       showSelectedLabels: true,
       selectedLabelStyle: TextStyle(
         fontFamily: Font.family,
+        // make tiny incase of small screen
         fontSize: Font.extraSmall,
         color: MyColors.textWhite,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.normal,
       ),
       unselectedLabelStyle: TextStyle(
         fontFamily: Font.family,

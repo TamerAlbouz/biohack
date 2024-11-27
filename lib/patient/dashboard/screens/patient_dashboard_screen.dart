@@ -72,8 +72,8 @@ class DashboardView extends StatelessWidget {
                   ),
                 );
               }
-              context.read<AppointmentBloc>().add(
-                  LoadAppointment(patientState.patient.appointments!.first));
+              context.read<PatientAppointmentBloc>().add(LoadPatientAppointment(
+                  patientState.patient.appointments!.first));
               return AppointmentBuilder(
                   appointmentId: patientState.patient.appointments!.first);
             case PatientError():
@@ -97,7 +97,7 @@ class AppointmentBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AppointmentBloc, AppointmentState>(
+    return BlocBuilder<PatientAppointmentBloc, PatientAppointmentState>(
       builder: (context, appointmentState) {
         switch (appointmentState) {
           case AppointmentInitial():
