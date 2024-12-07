@@ -5,7 +5,7 @@ import 'package:medtalk/styles/colors.dart';
 import '../../../styles/font.dart';
 import '../../../styles/sizes.dart';
 import '../dummy/profile_picture.dart';
-import '../rounded_radio_button.dart';
+import '../radio/rounded_radio_button.dart';
 
 class DoctorCard extends StatelessWidget {
   final String name;
@@ -13,7 +13,7 @@ class DoctorCard extends StatelessWidget {
   final String availability;
   final List<String> timeSlots;
   final Function()? onCardTap;
-  final void Function(String)? onTimeSlotSelected;
+  final void Function(String, int)? onTimeSlotSelected;
 
   const DoctorCard({
     super.key,
@@ -74,7 +74,7 @@ class DoctorCard extends StatelessWidget {
                   color: Colors.white,
                   fontSize: Font.extraSmall,
                 ),
-                onChanged: onTimeSlotSelected ?? (value) {},
+                onChanged: onTimeSlotSelected ?? (value, index) {},
               ),
             ],
           ),

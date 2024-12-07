@@ -3,7 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/sizes.dart';
 
-import '../../styles/font.dart';
+import '../../../styles/font.dart';
 
 class RadioButtonGroup extends StatefulWidget {
   /// A list of strings representing the radio button labels.
@@ -19,7 +19,7 @@ class RadioButtonGroup extends StatefulWidget {
   /// Example:
   /// ```dart
   /// (selected) {
-  ///  print("Selected option: $selected");
+  ///  print("Selected option: \$selected");
   /// }
   /// ```
   final void Function(bool)? onSelected;
@@ -86,10 +86,14 @@ class RadioButtonGroup extends StatefulWidget {
   /// Example:
   /// ```dart
   /// (selected) {
-  /// print("Selected option: $selected");
+  /// print("Selected option: \$selected");
   /// }
   /// ```
-  final void Function(String) onChanged;
+  final void Function(String, int) onChanged;
+
+  final int? selectedIndex;
+
+  final bool? wrap;
 
   /// A horizontal, scrollable group of radio-style buttons, allowing users to select one option at a time.
   ///
@@ -101,7 +105,7 @@ class RadioButtonGroup extends StatefulWidget {
   /// RadioButtonGroup(
   ///   options: ['Option 1', 'Option 2', 'Option 3'],
   ///   onSelected: (selected) {
-  ///     print("Selected option: $selected");
+  ///     print("Selected option: \$selected");
   ///   },
   ///   decoration: BoxDecoration(
   ///   color: MyColors.white,
@@ -143,6 +147,8 @@ class RadioButtonGroup extends StatefulWidget {
     this.contentPadding,
     this.unselectedTextColor,
     this.textStyle,
+    this.wrap,
+    this.selectedIndex,
     required this.onChanged,
   });
 
@@ -155,53 +161,99 @@ class _RadioButtonGroupState extends State<RadioButtonGroup> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          for (int i = 0; i < widget.options.length; i++) ...[
-            if (i > 0) const Gap(8),
-            RoundedRadioButton(
-              label: widget.options[i],
-              isSelected: _selectedOption == widget.options[i],
-              decoration: widget.decoration,
-              selectedColor: widget.selectedColor,
-              unselectedColor: widget.unselectedColor,
-              contentPadding: widget.contentPadding,
-              unselectedTextColor: widget.unselectedTextColor,
-              textStyle: widget.textStyle,
-              onSelected: () {
-                if (widget.onSelected != null) {
-                  if (_selectedOption == widget.options[i]) {
+    return widget.wrap == true
+        ? Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: [
+              for (int i = 0; i < widget.options.length; i++)
+                RoundedRadioButton(
+                  label: widget.options[i],
+                  isSelected: _selectedOption == widget.options[i] ||
+                      widget.selectedIndex == i,
+                  decoration: widget.decoration,
+                  selectedColor: widget.selectedColor,
+                  unselectedColor: widget.unselectedColor,
+                  contentPadding: widget.contentPadding,
+                  unselectedTextColor: widget.unselectedTextColor,
+                  textStyle: widget.textStyle,
+                  onSelected: () {
+                    if (widget.onSelected != null) {
+                      if (_selectedOption == widget.options[i]) {
+                        setState(() {
+                          _selectedOption = null;
+                        });
+                        widget.onSelected!(false);
+                        return;
+                      }
+                    }
+
+                    // check values are different
+                    if (widget.onSelected != null && _selectedOption == null) {
+                      setState(() {
+                        _selectedOption = widget.options[i];
+                      });
+                      widget.onSelected!(true);
+                    }
+
+                    // check if onChanged is not null, if so, call it
                     setState(() {
-                      _selectedOption = null;
+                      _selectedOption = widget.options[i];
                     });
-                    widget.onSelected!(false);
-                    return;
-                  }
-                }
+                    widget.onChanged(widget.options[i], i);
+                  },
+                ),
+            ],
+          )
+        : SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (int i = 0; i < widget.options.length; i++) ...[
+                  if (i > 0) const Gap(8),
+                  RoundedRadioButton(
+                    label: widget.options[i],
+                    isSelected: _selectedOption == widget.options[i] ||
+                        widget.selectedIndex == i,
+                    decoration: widget.decoration,
+                    selectedColor: widget.selectedColor,
+                    unselectedColor: widget.unselectedColor,
+                    contentPadding: widget.contentPadding,
+                    unselectedTextColor: widget.unselectedTextColor,
+                    textStyle: widget.textStyle,
+                    onSelected: () {
+                      if (widget.onSelected != null) {
+                        if (_selectedOption == widget.options[i]) {
+                          setState(() {
+                            _selectedOption = null;
+                          });
+                          widget.onSelected!(false);
+                          return;
+                        }
+                      }
 
-                // check values are different
-                if (widget.onSelected != null && _selectedOption == null) {
-                  setState(() {
-                    _selectedOption = widget.options[i];
-                  });
-                  widget.onSelected!(true);
-                }
+                      // check values are different
+                      if (widget.onSelected != null &&
+                          _selectedOption == null) {
+                        setState(() {
+                          _selectedOption = widget.options[i];
+                        });
+                        widget.onSelected!(true);
+                      }
 
-                // check if onChanged is not null, if so, call it
-                setState(() {
-                  _selectedOption = widget.options[i];
-                });
-                widget.onChanged(widget.options[i]);
-              },
+                      // check if onChanged is not null, if so, call it
+                      setState(() {
+                        _selectedOption = widget.options[i];
+                      });
+                      widget.onChanged(widget.options[i], i);
+                    },
+                  ),
+                ],
+              ],
             ),
-          ],
-        ],
-      ),
-    );
+          );
   }
 }
 

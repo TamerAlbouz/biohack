@@ -7,25 +7,27 @@ import '../../../styles/sizes.dart';
 import '../../../styles/styles/text.dart';
 
 class SummaryEntry extends StatelessWidget {
-  final FaIcon icon;
+  final FaIcon? icon;
   final String title;
   final String value;
 
   const SummaryEntry(
-      {super.key,
-      required this.title,
-      required this.value,
-      required this.icon});
+      {super.key, required this.title, required this.value, this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        SizedBox(
-          width: 20,
-          child: icon,
-        ),
-        kGap10,
+        if (icon != null)
+          Column(
+            children: [
+              SizedBox(
+                width: 20,
+                child: icon,
+              ),
+              kGap10,
+            ],
+          ),
         Text(
           title,
           style: kServiceCardText,
@@ -33,7 +35,7 @@ class SummaryEntry extends StatelessWidget {
         const Spacer(),
         ScrollingText(
           text: value,
-          width: 150,
+          width: 170,
           fadeWidth: 10,
           backgroundColor: MyColors.cardBackground,
           minCharactersToScroll: 20,

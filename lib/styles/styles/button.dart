@@ -25,7 +25,7 @@ final kElevatedButtonBookAppointmentStyle = ElevatedButton.styleFrom(
   foregroundColor: MyColors.buttonText,
   textStyle: const TextStyle(
     fontFamily: Font.family,
-    fontSize: Font.mediumSmall,
+    fontSize: Font.mediumExtra,
     fontWeight: FontWeight.w500,
   ),
   elevation: 0,

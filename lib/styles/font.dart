@@ -14,8 +14,14 @@ class Font {
   /// Font size 20.0
   static const double medium = 20.0;
 
+  /// Font size 19.0
+  static const double mediumExtra = 19.0;
+
   /// Font size 18.0
   static const double mediumSmall = 18.0;
+
+  /// Font size 17.0
+  static const double smallExtra = 17.0;
 
   /// Font size 16.0
   static const double small = 16.0;

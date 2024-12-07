@@ -30,11 +30,10 @@ class SendMessage extends ChatEvent {
   List<Object?> get props => [chatRoomId, message];
 }
 
-class LoadChatMessages extends ChatEvent {
+class LoadMoreMessages extends ChatEvent {
   final String chatRoomId;
+  final DateTime oldestMessageTimestamp;
 
-  const LoadChatMessages(this.chatRoomId);
-
-  @override
-  List<Object?> get props => [chatRoomId];
+  const LoadMoreMessages(
+      {required this.chatRoomId, required this.oldestMessageTimestamp});
 }

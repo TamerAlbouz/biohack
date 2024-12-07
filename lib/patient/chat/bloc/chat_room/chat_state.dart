@@ -17,17 +17,10 @@ class ChatRoomLoaded extends ChatState {
   final String chatRoomId;
   final Stream<List<ChatMessage>> messages;
 
-  const ChatRoomLoaded({required this.chatRoomId, required this.messages});
-
-  ChatRoomLoaded copyWith({
-    String? chatRoomId,
-    Stream<List<ChatMessage>>? messages,
-  }) {
-    return ChatRoomLoaded(
-      chatRoomId: chatRoomId ?? this.chatRoomId,
-      messages: messages ?? this.messages,
-    );
-  }
+  const ChatRoomLoaded({
+    required this.chatRoomId,
+    required this.messages,
+  });
 
   @override
   List<Object?> get props => [chatRoomId, messages];

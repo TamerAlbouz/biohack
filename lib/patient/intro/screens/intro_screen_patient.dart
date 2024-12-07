@@ -9,7 +9,7 @@ import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/common/widgets/date_picker.dart';
 import 'package:medtalk/common/widgets/dividers/section_divider.dart';
 import 'package:medtalk/common/widgets/dropdown/custom_simple_dropdown.dart';
-import 'package:medtalk/common/widgets/rounded_radio_button.dart';
+import 'package:medtalk/common/widgets/radio/rounded_radio_button.dart';
 import 'package:medtalk/patient/intro/cubit/intro_patient_cubit.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
 import 'package:medtalk/styles/sizes.dart';
@@ -164,7 +164,7 @@ class _BloodGroupInputState extends State<_BloodGroupInput> {
       options: const ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-'],
       unselectedColor: MyColors.textField,
       selectedColor: MyColors.blue,
-      onChanged: (value) =>
+      onChanged: (value, index) =>
           context.read<IntroPatientCubit>().bloodGroupChanged(value),
     );
   }

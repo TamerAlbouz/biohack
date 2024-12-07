@@ -51,6 +51,7 @@ dependencies:
   faker: ^2.2.0
   image_picker: ^1.1.2
   file_picker: ^8.1.4
+  dotted_line: ^3.2.3
 
   # encryption
   crypton: ^2.2.1

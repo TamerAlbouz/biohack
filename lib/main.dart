@@ -21,6 +21,13 @@ void main() async {
   await Firebase.initializeApp();
   logger.i('Firebase initialized');
 
+  logger.i('Enabling Firestore persistence (cache)');
+  FirebaseFirestore.instance.settings = const Settings(
+    persistenceEnabled: true,
+    cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+  );
+  logger.i('Firestore persistence (cache) enabled');
+
   logger.i('Assigning Bloc observer');
   Bloc.observer = CustomBlocObserver();
   logger.i('Bloc observer assigned');

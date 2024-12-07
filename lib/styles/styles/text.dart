@@ -64,7 +64,21 @@ const kAppointmentSetupCalendarDate = TextStyle(
   fontWeight: FontWeight.normal,
 );
 
+const kServiceTitle = TextStyle(
+  fontFamily: Font.family,
+  color: MyColors.textBlack,
+  fontSize: Font.small,
+  fontWeight: FontWeight.normal,
+);
+
 const kServiceCardText = TextStyle(
+  fontFamily: Font.family,
+  color: MyColors.textGrey,
+  fontSize: Font.small,
+  fontWeight: FontWeight.normal,
+);
+
+const kServiceClinicDetails = TextStyle(
   fontFamily: Font.family,
   color: MyColors.textBlack,
   fontSize: Font.small,
@@ -73,7 +87,7 @@ const kServiceCardText = TextStyle(
 
 const kServiceCardSummary = TextStyle(
   fontFamily: Font.family,
-  color: MyColors.textGrey,
+  color: MyColors.textBlack,
   fontSize: Font.extraSmall,
   fontWeight: FontWeight.normal,
 );

@@ -5,6 +5,8 @@ class MyColors {
   static const blue = Color(0xff4264FF);
   static const black = Color(0xff3C3C3C);
   static const lightBlue = Color(0xff6084f3);
+  static const blueGrey = Color(0x77b7c9f0);
+  static const messageBubble = Color(0xffc8e0ff);
   static const grey = Color(0xffA0A0A0);
   static const cancel = Color(0xffC62E31);
   static const pending = Color(0xffB29F0F);
@@ -35,4 +37,6 @@ class MyColors {
   static const selectionCardStroke = Color(0xffAAAAAA);
   static const selectionAddCard = Color(0xffDEDAD7);
   static const white = Color(0xffFFFFFF);
+  static const redBright = Color(0xffff1818);
+  static const softStroke = Color(0xffBCBCBC);
 }

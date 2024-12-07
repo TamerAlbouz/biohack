@@ -35,14 +35,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom();
-    });
-  }
+  final _loadingCachedMessages = false;
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
@@ -59,13 +52,13 @@ class _ChatScreenState extends State<ChatScreen> {
       alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-        padding: const EdgeInsets.all(12),
+        padding: kPadd12,
         decoration: BoxDecoration(
-          color: isCurrentUser ? MyColors.blue : Colors.white,
-          borderRadius: BorderRadius.circular(15),
+          color: isCurrentUser ? MyColors.messageBubble : Colors.white,
+          borderRadius: kRadius12,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
+              color: Colors.grey.withOpacity(0.1),
               spreadRadius: 1,
               blurRadius: 3,
               offset: const Offset(0, 1),
@@ -80,16 +73,13 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Text(
               message.content,
-              style: TextStyle(
-                  fontSize: 16,
-                  color: isCurrentUser ? MyColors.textWhite : Colors.black),
+              style: const TextStyle(fontSize: 16, color: MyColors.textBlack),
             ),
             kGap4,
             Text(
               DateFormat('hh:mm a').format(message.timestamp),
-              style: TextStyle(
-                  fontSize: Font.extraTiny,
-                  color: isCurrentUser ? Colors.grey[200] : Colors.grey[600]),
+              style:
+                  TextStyle(fontSize: Font.extraTiny, color: Colors.grey[600]),
             ),
           ],
         ),
@@ -279,22 +269,27 @@ class _ChatScreenState extends State<ChatScreen> {
             }
           },
           builder: (context, state) {
-            if (state is ChatRoomLoading) {
-              return const Center(child: CircularProgressIndicator());
+            if (state is ChatInitial) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _scrollToBottom();
+              });
             }
 
-            if (state is ChatRoomLoaded) {
-              return Column(
-                children: [
-                  // Messages List
+            return Column(
+              children: [
+                if (state is ChatRoomLoading)
+                  // skeleton loading
+                  const Expanded(
+                    child: SizedBox(),
+                  ),
+                if (state is ChatRoomLoaded)
                   Expanded(
                     child: StreamBuilder<List<ChatMessage>>(
                       stream: state.messages,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
+                          return const Center(child: SizedBox());
                         } else if (snapshot.hasError) {
                           return const Center(
                               child: Text('Error loading messages'));
@@ -324,87 +319,82 @@ class _ChatScreenState extends State<ChatScreen> {
                       },
                     ),
                   ),
-                  // Message Input
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    color: Colors.white,
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontFamily: Font.family,
-                                fontWeight: FontWeight.w500),
-                            controller: _messageController,
-                            decoration: InputDecoration(
-                              hintText: 'Type a message...',
-                              filled: true,
-                              fillColor: Colors.grey[100],
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(25),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
-                              suffixIcon: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const FaIcon(
-                                        FontAwesomeIcons.paperclip,
-                                        size: 20,
-                                        color: Colors.grey),
-                                    onPressed: _showAttachmentBottomSheet,
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(FontAwesomeIcons.camera,
-                                        size: 20, color: Colors.grey),
-                                    onPressed: _showAttachmentBottomSheet,
-                                  ),
-                                ],
-                              ),
-                              suffixIconConstraints: const BoxConstraints(
-                                minWidth: 100,
-                                maxWidth: 100,
-                              ),
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  color: Colors.white,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontFamily: Font.family,
+                              fontWeight: FontWeight.w500),
+                          controller: _messageController,
+                          decoration: InputDecoration(
+                            hintText: 'Type a message...',
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(25),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                            suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const FaIcon(FontAwesomeIcons.paperclip,
+                                      size: 20, color: Colors.grey),
+                                  onPressed: _showAttachmentBottomSheet,
+                                ),
+                                IconButton(
+                                  icon: const Icon(FontAwesomeIcons.camera,
+                                      size: 20, color: Colors.grey),
+                                  onPressed: _showAttachmentBottomSheet,
+                                ),
+                              ],
+                            ),
+                            suffixIconConstraints: const BoxConstraints(
+                              minWidth: 100,
+                              maxWidth: 100,
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        CircleAvatar(
-                          backgroundColor: MyColors.blue,
-                          child: IconButton(
-                            icon: const Icon(Icons.send, color: Colors.white),
-                            onPressed: () {
-                              if (_messageController.text.trim().isNotEmpty) {
-                                final message = ChatMessage(
-                                  id: const Uuid().v4(),
-                                  senderId: widget.currentUserId,
-                                  content: _messageController.text.trim(),
-                                  timestamp: DateTime.now(),
-                                );
+                      ),
+                      const SizedBox(width: 8),
+                      CircleAvatar(
+                        backgroundColor: MyColors.blue,
+                        child: IconButton(
+                          icon: const Icon(Icons.send, color: Colors.white),
+                          onPressed: () {
+                            if (_messageController.text.trim().isNotEmpty) {
+                              final message = ChatMessage(
+                                id: const Uuid().v4(),
+                                senderId: widget.currentUserId,
+                                content: _messageController.text.trim(),
+                                timestamp: DateTime.now(),
+                              );
 
+                              if (state is ChatRoomLoaded) {
                                 context.read<ChatBloc>().add(SendMessage(
                                     chatRoomId: state.chatRoomId,
                                     message: message));
 
                                 _messageController.clear();
-
-                                // Scroll to bottom after sending a message
-                                _scrollToBottom();
                               }
-                            },
-                          ),
+                              // Scroll to bottom after sending a message
+                              _scrollToBottom();
+                            }
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              );
-            }
-
-            return const Center(child: Text('Something went wrong'));
+                ),
+              ],
+            );
           },
         ),
       ),

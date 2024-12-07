@@ -7,11 +7,15 @@ import '../models/selection_item.dart';
 
 class SelectionGroup extends StatefulWidget {
   final List<SelectionItem> items;
-  final Function(SelectionItem?) onSelected;
+  final bool? disabled;
+  final int? selectedIndex;
+  final Function(SelectionItem, int) onSelected;
 
   const SelectionGroup({
     super.key,
     required this.items,
+    this.selectedIndex,
+    this.disabled,
     required this.onSelected,
   });
 
@@ -31,17 +35,24 @@ class _SelectionGroupState extends State<SelectionGroup> {
       separatorBuilder: (context, index) => kGap8,
       itemBuilder: (context, index) {
         final item = widget.items[index];
-        return _SelectionCard(
-          title: item.title,
-          subtitle: item.subtitle,
-          price: item.price,
-          isSelected: selectedIndex == index,
-          onTap: () {
-            setState(() {
-              selectedIndex = index;
-            });
-            widget.onSelected.call(item);
-          },
+        return AbsorbPointer(
+          absorbing: widget.disabled ?? false,
+          child: Opacity(
+            opacity: (widget.disabled ?? false) ? 0.5 : 1.0,
+            child: _SelectionCard(
+              title: item.title,
+              subtitle: item.subtitle,
+              price: item.price,
+              isSelected:
+                  selectedIndex == index || widget.selectedIndex == index,
+              onTap: () {
+                setState(() {
+                  selectedIndex = index;
+                });
+                widget.onSelected.call(item, index);
+              },
+            ),
+          ),
         );
       },
     );

@@ -3,15 +3,18 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 import '../../../styles/colors.dart';
+import '../../../styles/sizes.dart';
 import '../../../styles/styles/text.dart';
 import 'custom_icon_button.dart';
 
 class DateNavigationWidget extends StatefulWidget {
   final ValueChanged<DateTime> onDateChanged;
+  final DateTime? selectedDate;
 
   const DateNavigationWidget({
     super.key,
     required this.onDateChanged,
+    this.selectedDate,
   });
 
   @override
@@ -20,6 +23,12 @@ class DateNavigationWidget extends StatefulWidget {
 
 class _DateNavigationWidgetState extends State<DateNavigationWidget> {
   DateTime currentDate = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    currentDate = widget.selectedDate ?? DateTime.now();
+  }
 
   void _navigateToPreviousDate() {
     final newDate = currentDate.subtract(const Duration(days: 1));
@@ -60,6 +69,7 @@ class _DateNavigationWidgetState extends State<DateNavigationWidget> {
               FontAwesomeIcons.calendar,
               color: MyColors.blue,
             ),
+            kGap4,
             Text(
               DateFormat('EEEE, MMM d').format(currentDate),
               style: kAppointmentSetupCalendarDate,

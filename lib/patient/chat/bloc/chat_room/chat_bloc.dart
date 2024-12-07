@@ -12,7 +12,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   ChatBloc(this._chatRepository) : super(ChatInitial()) {
     on<InitializeChatRoom>(_onInitializeChatRoom);
     on<SendMessage>(_onSendMessage);
-    on<LoadChatMessages>(_onLoadChatMessages);
+    on<LoadMoreMessages>(_onLoadChatMessages);
   }
 
   Future<void> _onInitializeChatRoom(
@@ -31,7 +31,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       logger.i('Chat room initialized for user ${event.currentUserId}');
       emit(ChatRoomLoaded(chatRoomId: chatRoomId, messages: messagesStream));
     } catch (e) {
-      logger.e('Error initializing chat room: $e');
       emit(ChatError(e.toString()));
     }
   }
@@ -50,14 +49,20 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   Future<void> _onLoadChatMessages(
-      LoadChatMessages event, Emitter<ChatState> emit) async {
+      LoadMoreMessages event, Emitter<ChatState> emit) async {
     try {
       logger.i('Loading chat messages for chat room ${event.chatRoomId}');
-      emit(ChatRoomLoading());
 
-      final messagesStream = _chatRepository.getMessages(event.chatRoomId);
+      // get last document
+      final lastDocument = await _chatRepository.getLastDocument(
+          event.oldestMessageTimestamp, event.chatRoomId);
+
+      // Load messages previously cached
+      final messagesStream = _chatRepository.getMessages(event.chatRoomId,
+          lastDocument: lastDocument);
 
       logger.i('Chat messages loaded for chat room ${event.chatRoomId}');
+
       emit(ChatRoomLoaded(
           chatRoomId: event.chatRoomId, messages: messagesStream));
     } catch (e) {

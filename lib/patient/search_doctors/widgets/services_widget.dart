@@ -79,12 +79,12 @@ class _ServicesState extends State<Services> {
                     kGap8,
                     Text(
                       service.name,
-                      style: kServiceCardText.copyWith(),
+                      style: kServiceTitle.copyWith(),
                     ),
                     const Spacer(),
                     Text(
                       '\$${service.price}',
-                      style: kServiceCardText.copyWith(
+                      style: kServiceTitle.copyWith(
                         color: MyColors.textGrey,
                       ),
                     ),
@@ -97,7 +97,9 @@ class _ServicesState extends State<Services> {
                 children: [
                   Text(
                     service.summary,
-                    style: kServiceCardSummary,
+                    style: kServiceCardSummary.copyWith(
+                      color: MyColors.textGrey,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
