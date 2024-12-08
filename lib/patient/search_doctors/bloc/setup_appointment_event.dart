@@ -51,6 +51,11 @@ class UpdateAppointmentType extends SetupAppointmentEvent {
   List<Object?> get props => [appointmentType, appointmentLocation];
 }
 
+class BookAppointment extends SetupAppointmentEvent {
+  @override
+  List<Object?> get props => [];
+}
+
 class UpdatePaymentType extends SetupAppointmentEvent {
   final String paymentType;
 

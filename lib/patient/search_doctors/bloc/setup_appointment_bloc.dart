@@ -1,3 +1,4 @@
+import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +12,10 @@ class SetupAppointmentBloc
     extends Bloc<SetupAppointmentEvent, SetupAppointmentState> {
   bool reBuild = false;
 
-  SetupAppointmentBloc() : super(const SetupAppointmentState()) {
+  SetupAppointmentBloc({
+    required IMailRepository mailRepository,
+  })  : _mailRepository = mailRepository,
+        super(const SetupAppointmentState()) {
     on<ToggleRebuild>((event, emit) async {
       reBuild = !reBuild;
 
@@ -25,6 +29,28 @@ class SetupAppointmentBloc
     on<UpdateAppointmentType>(_onUpdateAppointmentType);
     on<UpdatePaymentType>(_onUpdatePaymentType);
     on<UpdateAppointmentTime>(_onUpdateAppointmentTime);
+    on<BookAppointment>(_onBookAppointment);
+  }
+
+  final IMailRepository _mailRepository;
+
+  Future<void> _onBookAppointment(
+      BookAppointment event, Emitter<SetupAppointmentState> emit) async {
+    // Simulate booking
+    await _mailRepository.sendMail(
+        to: "tameralbouz9@gmail.com",
+        templateName: "appointment_confirmation",
+        templateData: {
+          "userName": "John Doe",
+          "doctorName": "Dr. Smith",
+          "specialties": "Family Medicine, Cardiology",
+          "appointmentDate": "${state.appointmentDate}",
+          "appointmentTime": "${state.appointmentTime}",
+          "sessionLength": 30,
+          "fee": state.selectedService!.price,
+          "currency": "\$",
+          "appName": "BioHack"
+        });
   }
 
   void _onUpdatePaymentType(

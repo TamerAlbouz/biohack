@@ -22,20 +22,16 @@ class Doctor extends User {
     this.sessionLength,
     this.specialties,
     this.reviewIds,
-    this.servicesAndFees,
     this.availability,
     this.notes,
     this.clinicId,
   });
 
-  /// list of doctor specialities ids
+  /// list of doctor specialties (simple titles)
   final List<String>? specialties;
 
   /// List of review document IDs
   final List<String>? reviewIds;
-
-  /// Example: {'consultation': 60}
-  final Map<String, double>? servicesAndFees;
 
   /// Example: {'monday': ['09:00', '10:00']}
   final Map<String, List<String>>? availability;
@@ -64,7 +60,6 @@ class Doctor extends User {
     String? biography,
     List<String>? specialties,
     List<String>? reviewIds,
-    Map<String, double>? servicesAndFees,
     Map<String, List<String>>? availability,
     int? sessionLength,
     List<String>? notes,
@@ -86,7 +81,6 @@ class Doctor extends User {
       sessionLength: sessionLength ?? this.sessionLength,
       specialties: specialties ?? this.specialties,
       reviewIds: reviewIds ?? this.reviewIds,
-      servicesAndFees: servicesAndFees ?? this.servicesAndFees,
       availability: availability ?? this.availability,
       notes: notes ?? this.notes,
       clinicId: clinicId ?? this.clinicId,
@@ -110,12 +104,18 @@ class Doctor extends User {
       tokens: data['tokens'],
       paymentIds: data['paymentIds'],
       biography: data['biography'],
-      specialties: data['specialties'],
-      reviewIds: data['reviewIds'],
-      servicesAndFees: data['servicesAndFees'],
-      availability: data['availability'],
+      specialties: data['specialties'] != null
+          ? List<String>.from(data['specialties'])
+          : null,
+      reviewIds: data['reviewIds'] != null
+          ? List<String>.from(data['reviewIds'])
+          : null,
+      availability: data['availability'] != null
+          ? (data['availability'] as Map<String, dynamic>)
+              .map((k, v) => MapEntry(k, List<String>.from(v)))
+          : null,
       sessionLength: data['sessionLength'],
-      notes: data['notes'],
+      notes: data['notes'] != null ? List<String>.from(data['notes']) : null,
       clinicId: data['clinicId'],
     );
   }
@@ -137,7 +137,6 @@ class Doctor extends User {
       'biography': biography,
       'specialties': specialties,
       'reviewIds': reviewIds,
-      'servicesAndFees': servicesAndFees,
       'availability': availability,
       'sessionLength': sessionLength,
       'notes': notes,
@@ -157,13 +156,13 @@ class Doctor extends User {
         appointments,
         busy,
         tokens,
+        paymentIds,
+        biography,
         specialties,
         reviewIds,
-        servicesAndFees,
         availability,
         sessionLength,
         notes,
-        paymentIds,
         clinicId,
       ];
 

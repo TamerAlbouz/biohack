@@ -1,3 +1,4 @@
+import 'package:backend/backend.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:faker/faker.dart' hide Color;
 import 'package:flutter/material.dart';
@@ -5,8 +6,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/common/widgets/radio/split_radio_group.dart';
 import 'package:medtalk/patient/search_doctors/bloc/setup_appointment_bloc.dart';
+import 'package:medtalk/patient/search_doctors/screens/appointment_confirmed_screen.dart';
 import 'package:medtalk/patient/search_doctors/widgets/date_navigator.dart';
 import 'package:medtalk/patient/search_doctors/widgets/summary_entry.dart';
 import 'package:medtalk/styles/sizes.dart';
@@ -55,7 +58,9 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SetupAppointmentBloc(),
+      create: (context) => SetupAppointmentBloc(
+        mailRepository: getIt<IMailRepository>(),
+      ),
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 40,
@@ -165,17 +170,19 @@ class _Biography extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Biography',
           style: kAppointmentSetupSectionTitle,
         ),
         kGap10,
         Text(
           'Dr. Marissa Doe is a dentist with over 10 years of experience. She is a member of the American Dental Association and has a passion for helping patients achieve their best smile.',
-          style: kServiceCardText,
+          style: kServiceCardText.copyWith(
+            color: MyColors.black,
+          ),
         ),
       ],
     );
@@ -259,7 +266,8 @@ class _CustomStepperControlsState extends State<_CustomStepperControls> {
                             .canSkipSteps[widget.controller.currentStep] ||
                         widget.controller
                             .completedSteps[widget.controller.currentStep])
-                    ? widget.controller.goToNextStep
+                    ? () => widget.controller
+                        .goToNextStep(delay: const Duration(milliseconds: 0))
                     : null,
                 child: (widget.controller.currentStep <
                         widget.controller.completedSteps.length - 1)
@@ -890,7 +898,13 @@ class _PayButton extends StatelessWidget {
       padding: kPaddT15,
       child: ElevatedButton.icon(
         onPressed: () {
-          // show payment dialog
+          // show payment dialog. replace this screen onclick with the dashboard screen so when the user dismisses
+          // the payment screen, they are taken back to the dashboard
+          context.read<SetupAppointmentBloc>().add(BookAppointment());
+          AppGlobal.navigatorKey.currentState!.pushAndRemoveUntil(
+            AppointmentConfirmedScreen.route(),
+            (route) => route.isFirst,
+          );
         },
         style: kElevatedButtonBookAppointmentStyle,
         icon: const FaIcon(

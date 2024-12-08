@@ -6,6 +6,7 @@ export './src/chat/chat.dart';
 export './src/doctor/doctor.dart';
 export './src/encryption/encryption.dart';
 export './src/injectable.dart';
+export './src/mail/mail.dart';
 export './src/patient/patient.dart';
 export './src/secure_storage/secure_storage.dart';
 export './src/user/interfaces/user_interface.dart';
