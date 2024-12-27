@@ -152,7 +152,7 @@ class _AppointmentCard extends StatelessWidget {
                 Text(specialty,
                     style: const TextStyle(
                         fontSize: Font.medium,
-                        color: MyColors.blue,
+                        color: MyColors.primary,
                         fontWeight: FontWeight.bold)),
                 const Spacer(),
                 const Tag(),
@@ -182,7 +182,7 @@ class _AppointmentCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size.fromHeight(32),
                   // Adjust the height as needed
-                  backgroundColor: MyColors.blue,
+                  backgroundColor: MyColors.primary,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: kRadiusAll,

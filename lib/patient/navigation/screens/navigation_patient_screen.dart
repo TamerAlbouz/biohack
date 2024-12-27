@@ -1,25 +1,31 @@
 import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/patient/dashboard/bloc/appointment/appointment_bloc.dart';
+import 'package:medtalk/patient/profile/screens/profile_screen.dart';
 import 'package:medtalk/patient/search_doctors/screens/search_doctors_screen.dart';
 
 import '../../../app/bloc/auth/route_bloc.dart';
-import '../../../common/widgets/svg_bottom_navbar.dart';
+import '../../../common/widgets/custom_bottom_navbar.dart';
+import '../../../styles/sizes.dart';
 import '../../chat/bloc/chat_list/chat_list_bloc.dart';
 import '../../chat/bloc/chat_list/chat_list_event.dart';
 import '../../chat/screens/chat_list.dart';
 import '../../dashboard/screens/patient_dashboard_screen.dart';
+import '../../profile/bloc/patient_profile_bloc.dart';
 import '../cubit/navigation_patient_cubit.dart';
 import '../enums/navbar_screen_items_patients.dart';
 
 class NavigationPatientScreen extends StatelessWidget {
-  const NavigationPatientScreen({super.key});
+  const NavigationPatientScreen({super.key, required this.patientId});
 
-  static Route<void> route() {
+  final String patientId;
+
+  static Route<void> route(String patientId) {
     return MaterialPageRoute<void>(
-        builder: (_) => const NavigationPatientScreen());
+        builder: (_) => NavigationPatientScreen(
+              patientId: patientId,
+            ));
   }
 
   @override
@@ -34,10 +40,16 @@ class NavigationPatientScreen extends StatelessWidget {
         BlocProvider<NavigationPatientCubit>(
             create: (context) => NavigationPatientCubit()),
         BlocProvider(
-          create: (context) => ChatsListBloc(
-              getIt<IChatRepository>(), getIt<IAuthenticationRepository>())
+          create: (context) => ChatsListBloc(getIt<IChatRepository>())
             ..add(LoadChatsList(
                 (context.read<RouteBloc>().state as AuthSuccess).user.uid)),
+        ),
+        BlocProvider(
+          create: (_) => PatientProfileBloc(
+            getIt<IPatientRepository>(),
+          )..add(
+              LoadPatientProfile(patientId),
+            ),
         ),
       ],
       child: const NavigationPatientView(),
@@ -56,29 +68,40 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: const _Body(),
+      appBar: AppBar(
+        toolbarHeight: 10,
+      ),
+      body: const Padding(
+        padding: kPaddH20,
+        child: _Body(),
+      ),
       bottomNavigationBar:
-          SvgBottomNavBar<NavigationPatientCubit, NavigationPatientState>(
+          CustomBottomNavBar<NavigationPatientCubit, NavigationPatientState>(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.heartPulse),
+            icon: Icon(Icons.dashboard_outlined),
+            activeIcon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.magnifyingGlass),
+            icon: Icon(Icons.person_search_outlined),
+            activeIcon: Icon(Icons.person_search),
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.solidMessage),
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            activeIcon: Icon(Icons.chat_bubble),
             label: 'Chats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.folderOpen),
+            icon: Icon(Icons.folder_outlined),
+            activeIcon: Icon(Icons.folder),
             label: 'Documents',
           ),
           BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.gear),
-            label: 'Settings',
+            icon: Icon(Icons.account_circle_outlined),
+            activeIcon: Icon(Icons.account_circle),
+            label: 'Profile',
           ),
         ],
         onTap: _onItemTapped,
@@ -106,11 +129,9 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
         break;
       case 4:
         BlocProvider.of<NavigationPatientCubit>(context)
-            .getCurrentNavbarItem(NavbarScreenItemsPatient.settings);
+            .getCurrentNavbarItem(NavbarScreenItemsPatient.profile);
         break;
       default:
-        BlocProvider.of<NavigationPatientCubit>(context)
-            .getCurrentNavbarItem(NavbarScreenItemsPatient.dashboard);
         break;
     }
   }
@@ -132,10 +153,10 @@ class _Body extends StatelessWidget {
           return const ChatsListScreen();
         case NavbarScreenItemsPatient.documents:
           return const Text('Documents Screen');
-        case NavbarScreenItemsPatient.settings:
-          return const Text('Settings Screen');
+        case NavbarScreenItemsPatient.profile:
+          return const PatientProfileScreen();
         default:
-          return const PatientDashboardScreen();
+          return const Text('Error. Please try again');
       }
     });
   }

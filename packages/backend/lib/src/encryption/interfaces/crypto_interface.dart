@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:crypton/crypton.dart';
 
 import '../models/crypto_result.dart';
+import '../repositories/crypto_repository.dart';
 
 abstract class ICryptoRepository {
   /// Decrypt a piece of text using symmetric algorithm
@@ -12,10 +13,13 @@ abstract class ICryptoRepository {
   Uint8List symmetricEncrypt(Uint8List key, Uint8List iv, Uint8List plaintext);
 
   /// method to generate encryption key using user's password.
-  Uint8List generatePBKDFKey(String password, String salt,
-      {int iterations = 10000, int derivedKeyLength = 32});
+  Future<Uint8List> generateKey(
+    String password,
+    String salt, {
+    Argon2Profile profile = Argon2Profile.balanced,
+  });
 
-  Uint8List generateRandomSalt({int length = 16});
+  Uint8List generateRandomSalt();
 
   /// method to generate RSA key-pairs
   RSAKeypair getKeyPair();

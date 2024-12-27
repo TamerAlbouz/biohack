@@ -9,7 +9,7 @@ class SuccessButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton.icon(
-      style: kElevatedButtonStyle.copyWith(
+      style: kElevatedButtonCommonStyle.copyWith(
         backgroundColor: const WidgetStatePropertyAll(MyColors.buttonGreen),
       ),
       onPressed: null,

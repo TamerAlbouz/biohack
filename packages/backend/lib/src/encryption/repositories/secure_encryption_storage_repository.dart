@@ -7,57 +7,15 @@ import 'package:crypton/crypton.dart';
 import 'package:injectable/injectable.dart';
 import 'package:p_logger/p_logger.dart';
 
-import '../../secure_storage/interfaces/secure_storage_interface.dart';
-import '../interfaces/crypto_interface.dart';
+import '../interfaces/secure_encryption_repository_interface.dart';
 
 @LazySingleton(as: ISecureEncryptionStorage)
-class SecureEncryptionStorage implements ISecureEncryptionStorage {
-  final ISecureStorageRepository _secureStorageRepository =
-      getIt<ISecureStorageRepository>();
-  final ICryptoRepository _cryptoRepository = getIt<ICryptoRepository>();
+class SecureEncryptionStorageRepository implements ISecureEncryptionStorage {
+  final ICryptoRepository _cryptoRepository;
+  final ISecureStorageRepository _secureStorageRepository;
 
-  /// Generate a new key pair and encrypt the private key using the user's password,
-  /// while also storing the private key in the secure storage.
-  @override
-  Future<PrivateKeyEncryptionResult> generateNewKeys(String password) async {
-    try {
-      logger.i('Generating keys');
-      // Generate keys
-      // Generate PBKDF key
-      final String randomSaltOne =
-          _cryptoRepository.generateRandomSalt().toString();
-      final Uint8List pbkdfKey =
-          _cryptoRepository.generatePBKDFKey(password, randomSaltOne);
-      logger.i('PBKDF key generated');
-
-      // Generate RSA Key Pair
-      final RSAKeypair keyPair = _cryptoRepository.getKeyPair();
-      logger.i('RSA key pair generated');
-
-      // Encrypt Private key
-      final privateKeySalt = _cryptoRepository.generateRandomSalt().toString();
-
-      final encryptedPrivateKey = _cryptoRepository.symmetricEncrypt(
-        pbkdfKey,
-        Uint8List.fromList(privateKeySalt.codeUnits),
-        Uint8List.fromList(keyPair.privateKey.toFormattedPEM().codeUnits),
-      );
-
-      var result = PrivateKeyEncryptionResult(
-        publicKey: keyPair.publicKey.toFormattedPEM(),
-        encryptedPrivateKey: String.fromCharCodes(encryptedPrivateKey),
-        randomSaltOne: randomSaltOne,
-        randomSaltTwo: privateKeySalt,
-      );
-
-      logger.i('Keys generated');
-
-      return result;
-    } catch (e) {
-      logger.e('Error generating and saving keys: $e');
-      throw Exception('Error generating and saving keys');
-    }
-  }
+  SecureEncryptionStorageRepository(
+      this._cryptoRepository, this._secureStorageRepository);
 
   /// Decrypts the private key using the user's password and saves it in the secure storage.
   @override
@@ -65,15 +23,18 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
       PrivateKeyEncryptionResult encryptedResult, String password) async {
     try {
       logger.i('Decrypting private key');
-      // Generate pbkdfKey using the random salt stored in DB and user's password
-      final Uint8List pbkdfKey = _cryptoRepository.generatePBKDFKey(
+
+      // Step 1: Generate pbkdfKey using the random salt stored in DB and user's password
+      logger.i('Step 1: Generating PBKDF key');
+      Uint8List pbkdfKey = await _cryptoRepository.generateKey(
         password,
         encryptedResult.randomSaltOne,
       );
 
-      // decrypt private key using the pbkdfKey generated above
+      // Step 2: Decrypt private key using the pbkdfKey generated above
       // and the second random slat stored in DB
-      Uint8List decryptedPrivateKey = _cryptoRepository.symmetricDecrypt(
+      logger.i('Step 2: Decrypting private key');
+      final Uint8List decryptedPrivateKey = _cryptoRepository.symmetricDecrypt(
         pbkdfKey,
         Uint8List.fromList(encryptedResult.randomSaltTwo.codeUnits),
         Uint8List.fromList(encryptedResult.encryptedPrivateKey.codeUnits),
@@ -86,12 +47,12 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
         randomSaltTwo: encryptedResult.randomSaltTwo,
       );
 
-      // Store the private key in secure storage
+      // Step 3: Save the private key in secure storage
+      logger.i('Step 3: Saving private key in secure storage');
       await _secureStorageRepository.write(
           'rsaKeys', jsonEncode(result.toJson()));
 
       logger.i('Private key decrypted and saved');
-
       return result;
     } catch (e) {
       logger.e('Error decrypting private key: $e');
@@ -99,8 +60,6 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
     }
   }
 
-  /// Gets the private key from the secure storage.
-  @override
   Future<PrivateKeyDecryptionResult?> getKeys() async {
     try {
       final result = await _secureStorageRepository.read('rsaKeys');
@@ -113,42 +72,74 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
     }
   }
 
-  @override
-  PrivateKeyEncryptionResult resetPassword(
-      PrivateKeyEncryptionResult dataInDB, String currentPass, String newPass) {
-    // Generate pbkdfKey using the random salt stored in DB and user's password
-    final Uint8List pbkdfKey = _cryptoRepository.generatePBKDFKey(
-      currentPass,
-      dataInDB.randomSaltOne,
-    );
-
-    // decrypt private key
-    Uint8List decryptedPrivateKey = _cryptoRepository.symmetricDecrypt(
-      pbkdfKey,
-      Uint8List.fromList(dataInDB.randomSaltTwo.codeUnits),
-      Uint8List.fromList(dataInDB.encryptedPrivateKey.codeUnits),
-    );
-
-    // generate pbkdf key using new password
-    final Uint8List newPbkdfKey = _cryptoRepository.generatePBKDFKey(
-      newPass,
-      dataInDB.randomSaltOne,
-    );
-
-    // encrypt private key with new pbkdf key
-    final encryptedPrivateKey = _cryptoRepository.symmetricEncrypt(
-      newPbkdfKey,
-      Uint8List.fromList(dataInDB.randomSaltTwo.codeUnits),
-      decryptedPrivateKey,
-    );
-
-    return PrivateKeyEncryptionResult(
-      publicKey: dataInDB.publicKey,
-      encryptedPrivateKey: String.fromCharCodes(encryptedPrivateKey),
-      randomSaltOne: dataInDB.randomSaltOne,
-      randomSaltTwo: dataInDB.randomSaltTwo,
-    );
-  }
+// @override
+// Future<PrivateKeyEncryptionResult> resetPassword(
+//     PrivateKeyEncryptionResult dataInDB,
+//     String currentPass,
+//     String newPass) async {
+//   try {
+// logger.i('Resetting password for the private key');
+//
+// // Step 1: Generate PBKDF key using the current password and the stored randomSaltOne
+// final Uint8List currentPBKDFKey = _cryptoRepository.generatePBKDFKey(
+//   currentPass,
+//   dataInDB.randomSaltOne,
+// );
+//
+// // Step 2: Decrypt the private key using the current PBKDF key
+// final Uint8List decryptedPrivateKey = _cryptoRepository.symmetricDecrypt(
+//   currentPBKDFKey,
+//   Uint8List.fromList(dataInDB.randomSaltTwo.codeUnits),
+//   Uint8List.fromList(dataInDB.encryptedPrivateKey.codeUnits),
+// );
+//
+// // Step 3: Generate new PBKDF key using the new password and a new random salt
+// final String newRandomSaltOne =
+//     _cryptoRepository.generateRandomSalt().toString();
+// final Uint8List newPBKDFKey =
+//     _cryptoRepository.generatePBKDFKey(newPass, newRandomSaltOne);
+//
+// // Step 4: Encrypt the private key again using the new PBKDF key and a new random salt
+// final String newRandomSaltTwo =
+//     _cryptoRepository.generateRandomSalt().toString();
+// final Uint8List newEncryptedPrivateKey =
+//     _cryptoRepository.symmetricEncrypt(
+//   newPBKDFKey,
+//   Uint8List.fromList(newRandomSaltTwo.codeUnits),
+//   decryptedPrivateKey,
+// );
+//
+// // Step 5: Construct the updated PrivateKeyEncryptionResult
+// final PrivateKeyEncryptionResult updatedEncryptionResult =
+//     PrivateKeyEncryptionResult(
+//   publicKey: dataInDB.publicKey,
+//   encryptedPrivateKey: String.fromCharCodes(newEncryptedPrivateKey),
+//   randomSaltOne: newRandomSaltOne,
+//   randomSaltTwo: newRandomSaltTwo,
+// );
+//
+// // Step 6: Construct the updated PrivateKeyDecryptionResult
+// final PrivateKeyDecryptionResult updatedDecryptionResult =
+//     PrivateKeyDecryptionResult(
+//   publicKey: dataInDB.publicKey,
+//   privateKey: String.fromCharCodes(decryptedPrivateKey),
+//   randomSaltOne: newRandomSaltOne,
+//   randomSaltTwo: newRandomSaltTwo,
+// );
+//
+// // Step 7: Store the updated decryption result in secure storage
+// await _secureStorageRepository.write(
+//   'rsaKeys',
+//   jsonEncode(updatedDecryptionResult.toJson()),
+// );
+//
+// logger.i('Password reset and private key securely updated');
+// return updatedEncryptionResult;
+//   } catch (e) {
+//     logger.e('Error resetting password: $e');
+//     throw Exception('Error resetting password');
+//   }
+// }
 
   @override
   Future<CryptoResult> encrypt(String data) async {
@@ -182,17 +173,6 @@ class SecureEncryptionStorage implements ISecureEncryptionStorage {
     } catch (e) {
       logger.e('Error decrypting data: $e');
       throw Exception('Error decrypting data');
-    }
-  }
-
-  @override
-  Future<void> deleteKeys() async {
-    try {
-      logger.i('Deleting keys');
-      await _secureStorageRepository.deleteAll();
-    } catch (e) {
-      logger.e('Error deleting keys: $e');
-      throw Exception('Error deleting keys');
     }
   }
 }

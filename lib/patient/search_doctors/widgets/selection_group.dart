@@ -84,10 +84,11 @@ class _SelectionCard extends StatelessWidget {
         child: Ink(
           padding: kPadd10,
           decoration: BoxDecoration(
-            color: isSelected ? MyColors.blue : MyColors.selectionCardEmpty,
+            color: isSelected ? MyColors.primary : MyColors.selectionCardEmpty,
             borderRadius: kRadius12,
             border: Border.all(
-              color: isSelected ? MyColors.blue : MyColors.selectionCardStroke,
+              color:
+                  isSelected ? MyColors.primary : MyColors.selectionCardStroke,
               width: 1,
             ),
           ),
@@ -104,7 +105,7 @@ class _SelectionCard extends StatelessWidget {
                       onChanged: (_) => onTap(),
                       fillColor: WidgetStateProperty.resolveWith<Color>(
                         (Set<WidgetState> states) {
-                          return isSelected ? MyColors.white : MyColors.blue;
+                          return isSelected ? MyColors.white : MyColors.primary;
                         },
                       ),
                     ),

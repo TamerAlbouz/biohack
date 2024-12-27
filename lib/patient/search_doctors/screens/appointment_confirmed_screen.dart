@@ -30,7 +30,7 @@ class AppointmentConfirmedScreen extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: kPadd15,
+        padding: kPadd20,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

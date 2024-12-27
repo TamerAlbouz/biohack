@@ -17,10 +17,10 @@ class SignInAsGuest extends StatelessWidget {
         style: TextStyle(
           // underline
           fontFamily: Font.family,
-          color: MyColors.blue,
+          color: MyColors.primary,
           fontSize: Font.small,
           decoration: TextDecoration.underline,
-          decorationColor: MyColors.blue,
+          decorationColor: MyColors.primary,
           decorationThickness: 1.5,
         ),
       ),

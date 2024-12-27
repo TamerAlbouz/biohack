@@ -23,8 +23,8 @@ class NavigationPatientCubit extends Cubit<NavigationPatientState> {
       case NavbarScreenItemsPatient.documents:
         emit(NavigationPatientState(NavbarScreenItemsPatient.documents, 3));
         break;
-      case NavbarScreenItemsPatient.settings:
-        emit(NavigationPatientState(NavbarScreenItemsPatient.settings, 4));
+      case NavbarScreenItemsPatient.profile:
+        emit(NavigationPatientState(NavbarScreenItemsPatient.profile, 4));
         break;
       default:
         emit(NavigationPatientState(NavbarScreenItemsPatient.dashboard, 0));

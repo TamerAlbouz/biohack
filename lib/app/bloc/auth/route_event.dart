@@ -26,3 +26,10 @@ final class ChooseRole extends RouteEvent {
   @override
   List<Object> get props => [role];
 }
+
+final class SwitchRoles extends RouteEvent {
+  SwitchRoles();
+
+  @override
+  List<Object> get props => [];
+}

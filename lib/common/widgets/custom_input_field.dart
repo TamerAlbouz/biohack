@@ -1,154 +1,242 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../styles/colors.dart';
 import '../../styles/font.dart';
 import '../../styles/sizes.dart';
 import '../../styles/styles/text.dart';
 
-class InputField extends StatelessWidget {
-  /// The placeholder text shown when the input is empty.
-  ///
-  /// Example:
-  /// ```dart
-  /// hintText: 'Enter your email',
-  /// ```
+class CustomInputField extends StatefulWidget {
   final String hintText;
-
-  /// Callback function invoked when the input value changes.
-  ///
-  /// Example:
-  /// ```dart
-  /// onChanged: (value) {
-  ///  print('Input changed: $value');
-  /// },
-  /// ```
   final Function(String) onChanged;
-
-  /// Specifies the type of keyboard to use for text input.
-  ///
-  /// Example:
-  /// ```dart
-  /// keyboardType: TextInputType.emailAddress,
-  /// ```
   final TextInputType keyboardType;
-
-  /// Optional error message displayed below the input field.
-  ///
-  /// Example:
-  /// ```dart
-  /// errorText: 'Invalid email format',
-  /// ```
   final String? errorText;
-
-  /// Height of the input field container, in pixels. Defaults to 50.
-  ///
-  /// Example:
-  /// ```dart
-  /// height: 50,
-  /// ```
   final int height;
-
-  /// An optional widget displayed at the end of the input field.
-  ///
-  /// Example:
-  /// ```dart
-  /// trailingWidget: Icon(Icons.email),
-  /// ```
   final Widget? trailingWidget;
-
-  /// Controls the border radius of the input field.
-  /// Defaults to 10.
-  ///
-  /// Example:
-  /// ```dart
-  /// borderRadius: BorderRadius.circular(20),
-  /// ```
+  final Widget? leadingWidget;
   final BorderRadius? borderRadius;
+  final TextEditingController? controller;
+  final EdgeInsets innerPadding;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool obscureText;
+  final int? maxLength;
+  final int maxLines; // Added maxLines property
+  final bool showPasswordToggle;
 
-  /// A custom input field with styling options, error message display, and an optional trailing widget.
-  ///
-  /// [InputField] provides a styled text input field with a hint, customizable keyboard type,
-  /// error text display, and an optional trailing widget. It is wrapped in a [Column] for layout flexibility,
-  /// allowing error messages to be shown beneath the field when provided.
-  ///
-  /// Example usage:
-  /// ```dart
-  /// InputField(
-  ///   hintText: 'Enter your email',
-  ///   onChanged: (value) {
-  ///     print('Input changed: $value');
-  ///   },
-  ///   keyboardType: TextInputType.emailAddress,
-  ///   errorText: 'Invalid email format',
-  ///   trailingWidget: Icon(Icons.email),
-  ///   height: 50,
-  ///   borderRadius: BorderRadius.circular(20),
-  /// )
-  /// ```
-  ///
-  /// ### Properties:
-  ///
-  /// * [hintText] (required): The placeholder text shown when the input is empty.
-  /// * [onChanged] (required): Callback function invoked when the input value changes.
-  /// * [keyboardType] (required): Specifies the type of keyboard to use for text input, e.g., [TextInputType.emailAddress].
-  /// * [errorText]: Optional error message displayed below the input field. If null, no error message is shown.
-  /// * [height]: Height of the input field container, in pixels. Defaults to 50.
-  /// * [trailingWidget]: An optional widget displayed at the end of the input field, typically for additional actions or icons.
-  /// * [borderRadius]: Controls the border radius of the input field. Defaults to 10.
-  ///
-  /// ### Build Method:
-  ///
-  /// The widget is wrapped in a [Column] for stacked layout with optional error text below the input.
-  /// The input field is styled using a [Container] with padding, background color, and a rounded border.
-  /// The [TextField] is configured without an underline and uses a custom text style and hint style.
-  const InputField({
+  const CustomInputField({
     super.key,
     required this.hintText,
     required this.onChanged,
     required this.keyboardType,
-    required this.errorText,
-    this.trailingWidget,
+    this.errorText,
     this.height = 50,
+    this.trailingWidget,
+    this.leadingWidget,
     this.borderRadius,
+    this.controller,
+    this.innerPadding = kPaddH15,
+    this.inputFormatters,
+    this.obscureText = false,
+    this.maxLength,
+    this.maxLines = 1, // Default value set to 1
+    this.showPasswordToggle = false,
   });
 
   @override
+  State<CustomInputField> createState() => _CustomInputFieldState();
+}
+
+class _CustomInputFieldState extends State<CustomInputField> {
+  late bool _isObscured;
+
+  @override
+  void initState() {
+    super.initState();
+    _isObscured = widget.obscureText;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Determine the trailing widget based on password toggle
+    Widget? effectiveTrailingWidget = widget.trailingWidget;
+    if (widget.showPasswordToggle && widget.obscureText) {
+      effectiveTrailingWidget = IconButton(
+        icon: Icon(
+          _isObscured ? Icons.visibility : Icons.visibility_off,
+          color: MyColors.grey,
+        ),
+        onPressed: () {
+          setState(() {
+            _isObscured = !_isObscured;
+          });
+        },
+      );
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           decoration: BoxDecoration(
-            borderRadius: borderRadius ?? kRadius10,
+            borderRadius: widget.borderRadius ?? kRadius10,
             color: MyColors.textField,
           ),
-          padding: kPaddH20,
-          height: height.toDouble(),
-          child: TextField(
-            key: key,
-            onChanged: onChanged,
-            keyboardType: keyboardType,
-            cursorColor: MyColors.lightBlue,
-            style: const TextStyle(
-              color: MyColors.textBlack,
-              fontSize: Font.small,
-            ),
-            decoration: InputDecoration(
-              // remove underline
-              border: InputBorder.none,
-              hintText: hintText,
-              hintStyle: kButtonHint,
-              suffix: trailingWidget,
-            ),
+          // make padding dependent on the max lines. make a formula for this
+          padding: widget.maxLines == 1
+              ? widget.innerPadding
+              : const EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+          alignment: Alignment.topLeft,
+          height: widget.height.toDouble() * widget.maxLines,
+          child: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: widget.controller,
+                  onChanged: widget.onChanged,
+                  keyboardType: widget.keyboardType,
+                  obscureText: _isObscured,
+                  maxLength: widget.maxLength,
+                  maxLines: widget.maxLines,
+                  // Pass maxLines to TextFormField
+                  inputFormatters: widget.inputFormatters,
+                  cursorColor: MyColors.primaryLight,
+                  style: const TextStyle(
+                    color: MyColors.textBlack,
+                    fontSize: Font.small,
+                  ),
+                  decoration: InputDecoration(
+                    // remove underline
+                    border: InputBorder.none,
+                    counterText: '',
+                    // Hide max length counter
+                    hintText: widget.hintText,
+                    icon: widget.leadingWidget,
+                    hintStyle: kButtonHint,
+                  ),
+                ),
+              ),
+              if (effectiveTrailingWidget != null) effectiveTrailingWidget,
+            ],
           ),
         ),
         kGap5,
-        if (errorText != null)
+        if (widget.errorText != null)
           Text(
-            errorText ?? '',
+            widget.errorText ?? '',
             style: kErrorText,
           ),
       ],
     );
+  }
+}
+
+// Utility class for input validation
+class InputValidator {
+  // Email validation
+  static String? validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Email is required';
+    }
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (!emailRegex.hasMatch(value)) {
+      return 'Enter a valid email address';
+    }
+    return null;
+  }
+
+  // Password validation
+  static String? validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Password is required';
+    }
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!value.contains(RegExp(r'[A-Z]'))) {
+      return 'Password must contain an uppercase letter';
+    }
+    if (!value.contains(RegExp(r'[a-z]'))) {
+      return 'Password must contain a lowercase letter';
+    }
+    if (!value.contains(RegExp(r'[0-9]'))) {
+      return 'Password must contain a number';
+    }
+    return null;
+  }
+
+  // Full name validation
+  static String? validateFullName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Full name is required';
+    }
+    // Ensure at least two words (first and last name)
+    final parts = value.trim().split(' ');
+    if (parts.length < 2) {
+      return 'Please enter your full name';
+    }
+    return null;
+  }
+
+  // Height validation (in cm)
+  static String? validateHeight(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Height is required';
+    }
+    final height = double.tryParse(value);
+    if (height == null || height < 50 || height > 250) {
+      return 'Enter a valid height (50-250 cm)';
+    }
+    return null;
+  }
+
+  // Weight validation (in kg)
+  static String? validateWeight(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Weight is required';
+    }
+    final weight = double.tryParse(value);
+    if (weight == null || weight < 20 || weight > 300) {
+      return 'Enter a valid weight (20-300 kg)';
+    }
+    return null;
+  }
+
+  // Confirm password validation
+  static String? validateConfirmPassword(
+      String? value, String? originalPassword) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (value != originalPassword) {
+      return 'Passwords do not match';
+    }
+    return null;
+  }
+}
+
+// Example of how to use input formatters for specific input types
+class InputFormatters {
+  // Only allow numbers
+  static final numbersOnly = [FilteringTextInputFormatter.digitsOnly];
+
+  // Allow numbers and one decimal point
+  static final decimalNumbers = [
+    FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}'))
+  ];
+
+  // Capitalize first letter of each word
+  static TextInputFormatter capitalize() {
+    return TextInputFormatter.withFunction((oldValue, newValue) {
+      return TextEditingValue(
+        text: newValue.text
+            .split(' ')
+            .map((word) => word.isNotEmpty
+                ? word[0].toUpperCase() + word.substring(1)
+                : '')
+            .join(' '),
+        selection: newValue.selection,
+      );
+    });
   }
 }

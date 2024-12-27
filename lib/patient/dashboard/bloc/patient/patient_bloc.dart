@@ -18,14 +18,17 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
 
   final IPatientRepository _patientRepo;
   final IAuthenticationRepository _authRepo;
-  late Patient? _patient;
+  static Patient? _patient;
 
   Future<void> _onLoadPatient(
       LoadPatient event, Emitter<PatientState> emit) async {
-    await emit.onEach(_authRepo.user, onData: (patient) async {
-      emit(PatientLoading());
-      if (patient != User.empty) {
-        _patient = await _patientRepo.getPatient(patient.uid);
+    emit(PatientLoading());
+    try {
+      if (_patient != null) {
+        emit(PatientLoaded(_patient!));
+      } else {
+        _patient = await _patientRepo.getPatient(_authRepo.currentUser.uid);
+
         logger.i('Patient found in database: $_patient');
         if (_patient == null) {
           emit(const PatientError('Patient not found'));
@@ -33,9 +36,9 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
           emit(PatientLoaded(_patient!));
         }
       }
-    }, onError: (error, stackTrace) {
-      addError(error, stackTrace);
-      emit(PatientError(error.toString()));
-    });
+    } catch (e) {
+      logger.e(e);
+      emit(PatientError(e.toString()));
+    }
   }
 }

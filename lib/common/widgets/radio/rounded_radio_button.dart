@@ -160,6 +160,14 @@ class _RadioButtonGroupState extends State<RadioButtonGroup> {
   String? _selectedOption;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.selectedIndex != null) {
+      _selectedOption = widget.options[widget.selectedIndex!];
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return widget.wrap == true
         ? Wrap(
@@ -169,8 +177,7 @@ class _RadioButtonGroupState extends State<RadioButtonGroup> {
               for (int i = 0; i < widget.options.length; i++)
                 RoundedRadioButton(
                   label: widget.options[i],
-                  isSelected: _selectedOption == widget.options[i] ||
-                      widget.selectedIndex == i,
+                  isSelected: _selectedOption == widget.options[i],
                   decoration: widget.decoration,
                   selectedColor: widget.selectedColor,
                   unselectedColor: widget.unselectedColor,
@@ -215,8 +222,7 @@ class _RadioButtonGroupState extends State<RadioButtonGroup> {
                   if (i > 0) const Gap(8),
                   RoundedRadioButton(
                     label: widget.options[i],
-                    isSelected: _selectedOption == widget.options[i] ||
-                        widget.selectedIndex == i,
+                    isSelected: _selectedOption == widget.options[i],
                     decoration: widget.decoration,
                     selectedColor: widget.selectedColor,
                     unselectedColor: widget.unselectedColor,

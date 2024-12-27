@@ -8,10 +8,8 @@ import 'chat_list_state.dart';
 
 class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
   final IChatRepository _chatRepository;
-  final IAuthenticationRepository _authenticationRepository;
 
-  ChatsListBloc(this._chatRepository, this._authenticationRepository)
-      : super(ChatsListInitial()) {
+  ChatsListBloc(this._chatRepository) : super(ChatsListInitial()) {
     on<LoadChatsList>(_onLoadChatsList);
     on<RefreshChatsList>(_onRefreshChatsList);
   }

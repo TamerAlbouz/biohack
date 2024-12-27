@@ -479,7 +479,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
             decoration: BoxDecoration(
               color: widget.backgroundColor ?? MyColors.textField,
               borderRadius: widget.borderRadius ?? kRadius10,
-              border: Border.all(color: MyColors.blue, width: 2.5),
+              border: Border.all(color: MyColors.primary, width: 2.5),
             ),
             child: Row(
               children: [
@@ -504,7 +504,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
                   turns: _rotateAnimation,
                   child: const Icon(
                     Icons.arrow_drop_down,
-                    color: MyColors.blue,
+                    color: MyColors.primary,
                     size: 30,
                   ),
                 ),

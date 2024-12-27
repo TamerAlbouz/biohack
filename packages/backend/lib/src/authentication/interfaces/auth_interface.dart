@@ -1,4 +1,4 @@
-import '../../user/models/user.dart';
+import 'package:backend/backend.dart';
 
 abstract class IAuthenticationRepository {
   /// Stream of [User] which will emit the current user when
@@ -6,6 +6,11 @@ abstract class IAuthenticationRepository {
   ///
   /// Emits [User.empty] if the user is not authenticated.
   Stream<User> get user;
+
+  /// Delete the currently authenticated user.
+  ///
+  /// Throws a [Exception] if an exception occurs.
+  Future<void> deleteUser();
 
   /// Returns the current user.
   /// Defaults to [User.empty] if there is no user.
@@ -26,11 +31,6 @@ abstract class IAuthenticationRepository {
   /// Throws a [SignUpWithEmailAndPasswordFailure] if an exception occurs.
   Future<void> signUp({required String email, required String password});
 
-  /// Starts the Sign In with Google Flow.
-  ///
-  /// Throws a [LogInWithGoogleFailure] if an exception occurs.
-  Future<void> logInWithGoogle();
-
   /// Signs in with the provided [email] and [password].
   ///
   /// Throws a [LogInWithEmailAndPasswordFailure] if an exception occurs.
@@ -49,4 +49,15 @@ abstract class IAuthenticationRepository {
   ///
   /// Throws a [LogOutFailure] if an exception occurs.
   Future<void> logOut();
+
+  /// Sends a password reset email to the user with the provided [email].
+  ///
+  /// Throws a [SendResetPasswordException] if an exception occurs.
+  Future<void> sendPasswordResetEmail({required String email});
+
+  /// Resets the password with the provided [code] and [password].
+  ///
+  /// Throws a [ResetPasswordException] if an exception occurs.
+  Future<void> confirmResetPassword(
+      {required String code, required String password});
 }

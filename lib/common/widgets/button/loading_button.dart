@@ -11,12 +11,12 @@ class LoadingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: null,
-      style: kElevatedButtonStyle,
+      style: kElevatedButtonCommonStyle,
       child: const SizedBox(
         width: 25,
         height: 25,
         child: CircularProgressIndicator(
-          color: MyColors.blue,
+          color: MyColors.primary,
           semanticsValue: 'Loading',
           semanticsLabel: 'Loading',
           strokeWidth: 3.5,

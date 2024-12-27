@@ -57,7 +57,7 @@ class _DateNavigationWidgetState extends State<DateNavigationWidget> {
             FontAwesomeIcons.arrowLeft,
             color: currentDate.isBefore(DateTime.now())
                 ? MyColors.grey
-                : MyColors.blue,
+                : MyColors.primary,
             size: 20,
           ),
           onPressed: _navigateToPreviousDate,
@@ -67,7 +67,7 @@ class _DateNavigationWidgetState extends State<DateNavigationWidget> {
           children: [
             const FaIcon(
               FontAwesomeIcons.calendar,
-              color: MyColors.blue,
+              color: MyColors.primary,
             ),
             kGap4,
             Text(
@@ -79,7 +79,7 @@ class _DateNavigationWidgetState extends State<DateNavigationWidget> {
         CustomIconButton(
           icon: const FaIcon(
             FontAwesomeIcons.arrowRight,
-            color: MyColors.blue,
+            color: MyColors.primary,
             size: 20,
           ),
           onPressed: _navigateToNextDate,

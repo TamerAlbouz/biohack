@@ -4,10 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 
-import '../../user/models/user.dart';
-import '../exceptions/auth_exception.dart';
-import '../exceptions/google_exception.dart';
-import '../interfaces/auth_interface.dart';
+import '../../../backend.dart';
 
 /// Repository which manages user authentication.
 @LazySingleton(as: IAuthenticationRepository)
@@ -28,6 +25,18 @@ class AuthenticationRepository implements IAuthenticationRepository {
       final user = firebaseUser == null ? User.empty : firebaseUser.toUser;
       return user;
     });
+  }
+
+  /// Delete the currently authenticated user.
+  ///
+  /// Throws a [Exception] if an exception occurs.
+  @override
+  Future<void> deleteUser() async {
+    try {
+      await _firebaseAuth.currentUser?.delete();
+    } catch (_) {
+      throw Exception('Unable to delete user');
+    }
   }
 
   /// Returns the current user.
@@ -157,10 +166,36 @@ class AuthenticationRepository implements IAuthenticationRepository {
     }
   }
 
+  /// Sends a password reset email to the user with the provided [email].
+  ///
+  /// Throws a [SendResetPasswordException] if an exception occurs.
   @override
-  Future<void> logInWithGoogle() {
-    // TODO: implement logInWithGoogle
-    throw UnimplementedError();
+  Future<void> sendPasswordResetEmail({required String email}) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: email);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw SendResetPasswordException(e.code);
+    } catch (_) {
+      throw SendResetPasswordException(
+          "An error occurred while sending the password reset email.");
+    }
+  }
+
+  /// Resets the password with the provided [code] and [password].
+  ///
+  /// Throws a [ResetPasswordException] if an exception occurs.
+  @override
+  Future<void> confirmResetPassword(
+      {required String code, required String password}) async {
+    try {
+      await _firebaseAuth.confirmPasswordReset(
+          code: code, newPassword: password);
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      throw ResetPasswordException(e.code);
+    } catch (_) {
+      throw ResetPasswordException(
+          "An error occurred while resetting the password.");
+    }
   }
 }
 

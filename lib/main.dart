@@ -56,7 +56,7 @@ void main() async {
   stopwatch.stop();
   logger.i('Running application took ${stopwatch.elapsedMilliseconds}ms');
 
-  final mockService = FirestoreMockDataService();
+  // final mockService = FirestoreMockDataService();
 
   // Create mock users
   // Create chat room between first two users

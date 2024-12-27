@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../app/bloc/auth/route_bloc.dart';
-import '../../../common/widgets/svg_bottom_navbar.dart';
+import '../../../common/widgets/custom_bottom_navbar.dart';
 import '../cubit/navigation_doctor_cubit.dart';
 import '../enums/navbar_screen_items_doctor.dart';
 
@@ -40,7 +40,7 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
     return Scaffold(
       body: const _Body(),
       bottomNavigationBar:
-          SvgBottomNavBar<NavigationDoctorCubit, NavigationDoctorState>(
+      CustomBottomNavBar<NavigationDoctorCubit, NavigationDoctorState>(
         items: const [
           BottomNavigationBarItem(
             icon: Icon(FontAwesomeIcons.heartPulse),
@@ -105,27 +105,27 @@ class _Body extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<NavigationDoctorCubit, NavigationDoctorState>(
         builder: (context, state) {
-      switch (state.navbarItem) {
-        case NavbarScreenItemsDoctor.dashboard:
-          return const Column(
-            children: [
-              Text('Dashboard Screen'),
-              // logout button
-              _LogoutButton(),
-            ],
-          );
-        case NavbarScreenItemsDoctor.appointments:
-          return const Text('Appointments Screen');
-        case NavbarScreenItemsDoctor.stats:
-          return const Text('Stats Screen');
-        case NavbarScreenItemsDoctor.design:
-          return const Text('Design Screen');
-        case NavbarScreenItemsDoctor.settings:
-          return const Text('Settings Screen');
-        default:
-          return const Text('Dashboard Screen');
-      }
-    });
+          switch (state.navbarItem) {
+            case NavbarScreenItemsDoctor.dashboard:
+              return const Column(
+                children: [
+                  Text('Dashboard Screen'),
+                  // logout button
+                  _LogoutButton(),
+                ],
+              );
+            case NavbarScreenItemsDoctor.appointments:
+              return const Text('Appointments Screen');
+            case NavbarScreenItemsDoctor.stats:
+              return const Text('Stats Screen');
+            case NavbarScreenItemsDoctor.design:
+              return const Text('Design Screen');
+            case NavbarScreenItemsDoctor.settings:
+              return const Text('Settings Screen');
+            default:
+              return const Text('Dashboard Screen');
+          }
+        });
   }
 }
 

@@ -33,42 +33,40 @@ class DashboardView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
       body: BlocBuilder<PatientBloc, PatientState>(
         builder: (context, patientState) {
           switch (patientState) {
             case PatientInitial():
+              context.read<PatientBloc>().add(LoadPatient());
+              return const Center(child: CircularProgressIndicator());
             case PatientLoading():
               return const Center(child: CircularProgressIndicator());
             case PatientLoaded():
               // Load appointment data when patient data is loaded
               if (patientState.patient.appointments?.isEmpty ?? false) {
                 return SingleChildScrollView(
-                  child: Padding(
-                    padding: kPadd15,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        const _AppointmentSection(),
-                        kGap6,
-                        AppointmentWidget(
-                          specialty: 'Ophthalmology',
-                          doctor: 'Dr. John Doe',
-                          date: 'Sep 20, 2023',
-                          time: '10:00 AM',
-                          location: 'Room 402',
-                          service: 'Eye Checkup',
-                          fee: '100',
-                          onJoinCall: () =>
-                              AppGlobal.navigatorKey.currentState!.push(
-                            VideoCallScreen.route(),
-                          ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const _AppointmentSection(),
+                      kGap6,
+                      AppointmentWidget(
+                        specialty: 'Ophthalmology',
+                        doctor: 'Dr. John Doe',
+                        date: 'Sep 20, 2023',
+                        time: '10:00 AM',
+                        location: 'Room 402',
+                        service: 'Eye Checkup',
+                        fee: '100',
+                        onJoinCall: () =>
+                            AppGlobal.navigatorKey.currentState!.push(
+                          VideoCallScreen.route(),
                         ),
-                        kGap6,
-                        const _LogoutButton(),
-                      ],
-                    ),
+                      ),
+                      kGap6,
+                      const _LogoutButton(),
+                    ],
                   ),
                 );
               }

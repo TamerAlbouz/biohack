@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:medtalk/common/widgets/random_hexagons.dart';
 
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
@@ -10,7 +11,15 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(child: CircularProgressIndicator()),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          HexagonPatternBox(
+            height: 200,
+            width: double.infinity,
+          )
+        ],
+      ),
     );
   }
 }

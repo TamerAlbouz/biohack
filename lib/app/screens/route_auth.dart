@@ -1,18 +1,16 @@
 import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medtalk/app/screens/auth_screen.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/doctor/navigation/screens/navigation_doctor_screen.dart';
-import 'package:medtalk/loading/screens/loading_screen.dart';
 import 'package:medtalk/login/bloc/login_bloc.dart';
 import 'package:medtalk/patient/dashboard/bloc/patient/patient_bloc.dart';
-import 'package:medtalk/patient/intro/screens/intro_screen_patient.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
 import 'package:medtalk/styles/themes.dart';
 
 import '../../login/screens/login_screen.dart';
 import '../bloc/auth/route_bloc.dart';
-import 'auth_screen.dart';
 
 class App extends StatelessWidget {
   const App({
@@ -43,8 +41,6 @@ class App extends StatelessWidget {
             create: (_) => RouteBloc(
               authRepo: _authenticationRepository,
               userPreferences: getIt<UserPreferences>(),
-              patientRepository: getIt<IPatientRepository>(),
-              doctorRepository: getIt<IDoctorRepository>(),
             )
               ..add(InitialRun())
               ..add(AuthSubscriptionRequested()),
@@ -53,25 +49,30 @@ class App extends StatelessWidget {
             create: (_) => PatientBloc(
               patientRepo: getIt<IPatientRepository>(),
               authRepo: getIt<IAuthenticationRepository>(),
-            )..add(LoadPatient()),
+            ),
           ),
           BlocProvider(
             lazy: false,
             create: (_) => LoginBloc(
               getIt<IAuthenticationRepository>(),
               getIt<IEncryptionRepository>(),
-              getIt<ISecureEncryptionStorage>(),
+              getIt<ISecureStorageRepository>(),
+              getIt<ICryptoRepository>(),
             ),
           ),
         ],
-        child: const _AppView(),
+        child: _AppView(
+          authenticationRepository: _authenticationRepository,
+        ),
       ),
     );
   }
 }
 
 class _AppView extends StatefulWidget {
-  const _AppView();
+  final IAuthenticationRepository authenticationRepository;
+
+  const _AppView({super.key, required this.authenticationRepository});
 
   @override
   State<_AppView> createState() => _AppViewState();
@@ -111,18 +112,28 @@ class _AppViewState extends State<_AppView> {
               );
             }
 
-            if (state is AuthSuccess && state.role == Role.patient) {
-              navigatePatient(state.status);
-            }
-
-            if (state is AuthSuccess && state.role == Role.doctor) {
-              navigateDoctor(state.status);
+            if (state is AuthSuccess) {
+              if (state.role == Role.patient) {
+                navigatePatient(state.status);
+              } else {
+                navigateDoctor(state.status);
+              }
             }
           },
           child: child,
         );
       },
-      onGenerateRoute: (_) => LoadingScreen.route(),
+      onGenerateRoute: (settings) {
+        return MaterialPageRoute<void>(
+          builder: (context) {
+            return const Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          },
+        );
+      },
       theme: lightTheme,
     );
   }
@@ -132,19 +143,15 @@ class _AppViewState extends State<_AppView> {
       case AuthStatus.authenticated:
         // check if user is has their email verified
         AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-          NavigationPatientScreen.route(),
-          (route) => false,
-        );
-        break;
-      case AuthStatus.firstTimeAuthentication:
-        AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-          IntroScreenPatient.route(),
+          NavigationPatientScreen.route(
+              widget.authenticationRepository.currentUser.uid),
           (route) => false,
         );
         break;
       case AuthStatus.anonymous:
         AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-          NavigationPatientScreen.route(),
+          NavigationPatientScreen.route(
+              widget.authenticationRepository.currentUser.uid),
           (route) => false,
         );
         break;
@@ -157,12 +164,6 @@ class _AppViewState extends State<_AppView> {
     switch (status) {
       case AuthStatus.authenticated:
         // check if user is has their email verified
-        AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
-          NavigationDoctorScreen.route(),
-          (route) => false,
-        );
-        break;
-      case AuthStatus.firstTimeAuthentication:
         AppGlobal.navigatorKey.currentState?.pushAndRemoveUntil<void>(
           NavigationDoctorScreen.route(),
           (route) => false,

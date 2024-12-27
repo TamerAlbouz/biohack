@@ -6,143 +6,50 @@ import '../../../styles/colors.dart';
 
 class CustomSimpleDropdown extends StatefulWidget {
   /// A list of strings representing the dropdown items.
-  ///
-  /// Example:
-  /// ```dart
-  /// items: ['Item 1', 'Item 2', 'Item 3']
-  /// ```
   final List<String> items;
 
   /// The initial selected value.
-  /// If null, the dropdown shows the [hint].
-  ///
-  /// Example:
-  /// ```dart
-  /// initialValue: 'Item 1'
-  /// ```
   final String? initialValue;
 
   /// Placeholder text shown when no item is selected.
-  /// Defaults to "Select an item".
-  ///
-  /// Example:
-  /// ```dart
-  /// hint: 'Select an item'
-  /// ```
   final String hint;
 
   /// Callback function invoked when a new item is selected.
-  ///
-  /// Example:
-  /// ```dart
-  /// onChanged: (value) {
-  ///  print(value);
-  /// }
-  /// ```
   final void Function(String?) onChanged;
 
   /// Width of the dropdown container.
-  /// Defaults to the intrinsic width of the content.
-  ///
-  /// Example:
-  /// ```dart
-  /// width: 200
-  /// ```
   final double? width;
 
   /// Background color of the dropdown container.
-  /// Defaults to the theme's card color.
-  ///
-  /// Example:
-  /// ```dart
-  /// backgroundColor: Colors.grey[200]
-  /// ```
   final Color? backgroundColor;
 
   /// Text color of the dropdown items and hint text.
-  /// Defaults to the theme's text color.
-  ///
-  /// Example:
-  /// ```dart
-  /// textColor: Colors.black
-  /// ```
   final Color? textColor;
 
   /// Background color of the dropdown menu.
-  /// Defaults to the theme's dropdown color.
-  ///
-  /// Example:
-  /// ```dart
-  /// dropdownColor: Colors.white
-  /// ```
   final Color? dropdownColor;
 
   /// Padding inside the dropdown container.
-  /// Defaults to 12 pixels horizontally.
-  ///
-  /// Example:
-  /// ```dart
-  /// padding: EdgeInsets.all(8)
-  /// ```
   final EdgeInsetsGeometry? padding;
 
   /// Rounds the corners of the dropdown container.
-  /// Defaults to a radius of 8 pixels.
-  ///
-  /// Example:
-  /// ```dart
-  /// borderRadius: BorderRadius.circular(10)
-  /// ```
   final BorderRadius? borderRadius;
 
-  /// A customizable dropdown widget with support for styling options and an initial value.
-  ///
-  /// [CustomSimpleDropdown] provides a dropdown menu where users can select an item from a list.
-  /// The dropdown can be customized with various styling properties, such as colors, padding,
-  /// border radius, and more. It also includes a hint text for when no selection is made.
-  ///
-  /// Example usage:
-  /// ```dart
-  /// CustomSimpleDropDown(
-  ///   items: ['Item 1', 'Item 2', 'Item 3'],
-  ///   initialValue: 'Item 1',
-  ///   onChanged: (value) {
-  ///     print(value);
-  ///   },
-  ///   hint: 'Select an item',
-  ///   width: 200,
-  ///   backgroundColor: Colors.grey[200],
-  ///   textColor: Colors.black,
-  ///   dropdownColor: Colors.white,
-  ///   padding: EdgeInsets.all(8),
-  ///   borderRadius: BorderRadius.circular(10),
-  /// )
-  /// ```
-  ///
-  /// ### Properties:
-  ///
-  /// * [items] (required): A list of strings representing the dropdown items.
-  /// * [initialValue]: The initial selected value. If null, the dropdown shows the [hint].
-  /// * [hint]: Placeholder text shown when no item is selected. Defaults to "Select an item".
-  /// * [onChanged] (required): Callback function invoked when a new item is selected.
-  /// * [width]: Width of the dropdown container. Defaults to the intrinsic width of the content.
-  /// * [backgroundColor]: Background color of the dropdown container. Defaults to the theme's card color.
-  /// * [textColor]: Text color of the dropdown items and hint text. Defaults to the theme's text color.
-  /// * [dropdownColor]: Background color of the dropdown menu. Defaults to the theme's dropdown color.
-  /// * [padding]: Padding inside the dropdown container. Defaults to 12 pixels horizontally.
-  /// * [borderRadius]: Rounds the corners of the dropdown container. Defaults to a radius of 8 pixels.
-  ///
-  /// ### State Management:
-  ///
-  /// The widget maintains the currently selected value in [selectedValue] and updates it when
-  /// a new selection is made. The initial value can be set through [initialValue], which is stored
-  /// in the [selectedValue] state on initialization.
-  ///
-  /// ### Build Method:
-  ///
-  /// The widget is built inside a [Container] with customizable width, padding, background color,
-  /// and border radius. Inside, a [DropdownButton] is used to display the items, with a custom
-  /// icon and no underline by default.
+  /// Icon to display alongside the dropdown
+  final IconData? prefixIcon;
+
+  /// Color of the prefix icon
+  final Color? prefixIconColor;
+
+  /// Spacing between the icon and the dropdown content
+  final double? iconSpacing;
+
+  /// Optional custom leading widget to replace the default prefix icon
+  final Widget? customLeadingWidget;
+
+  /// Position of the icon relative to the dropdown text
+  final bool iconOnLeft;
+
   const CustomSimpleDropdown({
     super.key,
     required this.items,
@@ -155,6 +62,11 @@ class CustomSimpleDropdown extends StatefulWidget {
     this.dropdownColor,
     this.padding,
     this.borderRadius,
+    this.prefixIcon,
+    this.prefixIconColor,
+    this.iconSpacing = 8.0,
+    this.customLeadingWidget,
+    this.iconOnLeft = true,
   });
 
   @override
@@ -167,41 +79,89 @@ class _CustomSimpleDropdownState extends State<CustomSimpleDropdown> {
   @override
   void initState() {
     super.initState();
-    selectedValue = widget.initialValue;
+    if (widget.initialValue != null && widget.initialValue != '') {
+      selectedValue = widget.initialValue;
+    }
+  }
+
+  Widget _buildLeadingWidget() {
+    // Prefer custom leading widget if provided
+    if (widget.customLeadingWidget != null) {
+      return widget.customLeadingWidget!;
+    }
+
+    // Build icon if prefixIcon is provided
+    if (widget.prefixIcon != null) {
+      return Icon(
+        widget.prefixIcon,
+        color: widget.prefixIconColor ??
+            widget.textColor ??
+            Theme.of(context).iconTheme.color,
+        size: 20.0,
+      );
+    }
+
+    // Return empty container if no icon or custom widget
+    return const SizedBox.shrink();
   }
 
   @override
   Widget build(BuildContext context) {
+    final leadingWidget = _buildLeadingWidget();
+
     return Container(
       width: widget.width,
-      padding: widget.padding ?? kPaddH20,
+      padding: widget.padding ?? kPaddH15,
       decoration: BoxDecoration(
         color: widget.backgroundColor ?? MyColors.textField,
         borderRadius: widget.borderRadius ?? kRadius10,
       ),
-      child: DropdownButton<String>(
-        value: selectedValue,
-        hint: Text(widget.hint, style: kButtonHint),
-        items: widget.items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(item,
-                style: kButtonHint.copyWith(color: MyColors.textBlack)),
-          );
-        }).toList(),
-        onChanged: (String? newValue) {
-          setState(() {
-            selectedValue = newValue;
-          });
-          widget.onChanged(newValue);
-        },
-        isExpanded: true,
-        icon: Icon(
-          Icons.arrow_drop_down,
-          color: widget.textColor ?? Theme.of(context).iconTheme.color,
-        ),
-        underline: Container(),
-        dropdownColor: widget.dropdownColor ?? MyColors.dropdown,
+      child: Row(
+        children: [
+          // Leading icon/widget on the left side
+          if (widget.iconOnLeft &&
+              (widget.prefixIcon != null || widget.customLeadingWidget != null))
+            SizedBox(
+              width: 40.0,
+              child: leadingWidget,
+            ),
+
+          // Expanded dropdown
+          Expanded(
+            child: DropdownButton<String>(
+              value: selectedValue,
+              hint: Text(widget.hint, style: kButtonHint),
+              items: widget.items.map((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item,
+                      style: kButtonHint.copyWith(color: MyColors.textBlack)),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedValue = newValue;
+                });
+                widget.onChanged(newValue);
+              },
+              isExpanded: true,
+              icon: Icon(
+                Icons.arrow_drop_down,
+                color: widget.textColor ?? Theme.of(context).iconTheme.color,
+              ),
+              underline: Container(),
+              dropdownColor: widget.dropdownColor ?? MyColors.dropdown,
+            ),
+          ),
+
+          // Leading icon/widget on the right side
+          if (!widget.iconOnLeft &&
+              (widget.prefixIcon != null || widget.customLeadingWidget != null))
+            Padding(
+              padding: EdgeInsets.only(left: widget.iconSpacing!),
+              child: leadingWidget,
+            ),
+        ],
       ),
     );
   }

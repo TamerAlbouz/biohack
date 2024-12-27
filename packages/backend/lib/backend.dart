@@ -5,6 +5,7 @@ export './src/cache/shared_preferences.dart';
 export './src/chat/chat.dart';
 export './src/doctor/doctor.dart';
 export './src/encryption/encryption.dart';
+export './src/hashing/hashing.dart';
 export './src/injectable.dart';
 export './src/mail/mail.dart';
 export './src/patient/patient.dart';

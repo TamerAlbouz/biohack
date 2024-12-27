@@ -16,6 +16,7 @@ class LogoWidget extends StatelessWidget {
           semanticsLabel: "Logo",
           width: 70,
           height: 70,
+          colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
         ),
         kGap5,
         Padding(
@@ -26,7 +27,9 @@ class LogoWidget extends StatelessWidget {
               RichText(
                   text: TextSpan(
                 text: 'BioHack',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      color: Colors.white,
+                    ),
               )),
             ],
           ),

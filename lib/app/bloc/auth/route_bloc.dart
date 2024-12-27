@@ -11,23 +11,31 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
   RouteBloc({
     required IAuthenticationRepository authRepo,
     required UserPreferences userPreferences,
-    required IPatientRepository patientRepository,
-    required IDoctorRepository doctorRepository,
   })  : _authRepo = authRepo,
         _userPreferences = userPreferences,
-        _patientRepository = patientRepository,
-        _doctorRepository = doctorRepository,
         super(RouteInitial(user: authRepo.currentUser)) {
     on<InitialRun>(_onInitialRun);
     on<AuthSubscriptionRequested>(_onSubscriptionRequested);
     on<AuthLogoutPressed>(_onLogoutPressed);
     on<ChooseRole>(_onChooseRole);
+    on<SwitchRoles>(_onSwitchRoles);
   }
 
   final IAuthenticationRepository _authRepo;
   final UserPreferences _userPreferences;
-  final IPatientRepository _patientRepository;
-  final IDoctorRepository _doctorRepository;
+
+  String getRole() {
+    return _userPreferences.getRole()?.name ?? '';
+  }
+
+  void _onSwitchRoles(
+    SwitchRoles event,
+    Emitter<RouteState> emit,
+  ) {
+    // empty roles
+    _userPreferences.clear();
+    emit(AuthChooseRole());
+  }
 
   // on initial run, check if user is already signed in, and his email is verified
   Future<void> _onInitialRun(
@@ -111,28 +119,8 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
       return;
     }
 
-    var user;
-
-    switch (role) {
-      case Role.patient:
-        user = await _patientRepository.getPatient(authUser.uid);
-        break;
-      case Role.doctor:
-        user = await _doctorRepository.getDoctor(authUser.uid);
-        break;
-      default:
-        emit(AuthFailure('Role not found'));
-        return;
-    }
-
-    if (user == null) {
-      logger.i('${role.name} first time: ${authUser.uid}');
-      emit(AuthSuccess(authUser,
-          role: role, status: AuthStatus.firstTimeAuthentication));
-    } else {
-      logger.i('${role.name} authenticated: ${authUser.uid}');
-      emit(AuthSuccess(authUser, role: role, status: AuthStatus.authenticated));
-    }
+    logger.i('${role.name} authenticated');
+    emit(AuthSuccess(authUser, role: role, status: AuthStatus.authenticated));
   }
 
   void _onLogoutPressed(
@@ -147,10 +135,10 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     await _userPreferences.clear();
 
     // empty the secure storage
-    ISecureEncryptionStorage secureEncryptionStorage =
-        getIt<ISecureEncryptionStorage>();
+    ISecureStorageRepository secureEncryptionStorage =
+        getIt<ISecureStorageRepository>();
 
-    await secureEncryptionStorage.deleteKeys();
+    await secureEncryptionStorage.deleteAll();
 
     _authRepo.logOut();
 

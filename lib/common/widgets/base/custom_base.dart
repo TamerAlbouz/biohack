@@ -5,8 +5,9 @@ import '../../../styles/sizes.dart';
 
 class CustomBase extends StatelessWidget {
   final Widget child;
+  final bool shadow;
 
-  const CustomBase({super.key, required this.child});
+  const CustomBase({super.key, required this.child, this.shadow = true});
 
   @override
   Widget build(BuildContext context) {
@@ -16,14 +17,16 @@ class CustomBase extends StatelessWidget {
       decoration: BoxDecoration(
         color: MyColors.cardBackground,
         borderRadius: kRadius20,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.12),
-            offset: const Offset(0, 8),
-            blurRadius: 12,
-            spreadRadius: 0,
-          ),
-        ],
+        boxShadow: shadow
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.12),
+                  offset: const Offset(0, 8),
+                  blurRadius: 12,
+                  spreadRadius: 0,
+                ),
+              ]
+            : null,
       ),
       child: child,
     );

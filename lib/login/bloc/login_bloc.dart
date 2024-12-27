@@ -1,6 +1,8 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
 import 'package:formz_inputs/formz_inputs.dart';
@@ -13,24 +15,20 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc(
     this._authenticationRepository,
     this._encryptionRepository,
+    this._secureStorageRepository,
     this._crypto,
   ) : super(const LoginState()) {
     on<SignInEmailChanged>(_signInEmailChanged);
     on<SignInPasswordChanged>(_signInPasswordChanged);
-    on<SignUpEmailChanged>(_signUpEmailChanged);
-    on<SignUpPasswordChanged>(_signUpPasswordChanged);
-    on<SignUpConfirmPasswordChanged>(_signUpConfirmPasswordChanged);
     on<LogInWithCredentials>(_logInWithCredentials);
     on<LogInAnonymously>(_logInAnonymously);
-    on<CheckEmailVerification>(_checkEmailVerification);
-    on<ResendVerificationEmail>(_resendVerificationEmail);
-    on<SignUpWithCredential>(_signUpWithCredential);
     on<ResetStatus>(_resetStatus);
   }
 
   final IAuthenticationRepository _authenticationRepository;
   final IEncryptionRepository _encryptionRepository;
-  final ISecureEncryptionStorage _crypto;
+  final ISecureStorageRepository _secureStorageRepository;
+  final ICryptoRepository _crypto;
 
   void _signInEmailChanged(SignInEmailChanged event, Emitter<LoginState> emit) {
     final email = Email.dirty(event.email);
@@ -53,65 +51,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     );
   }
 
-  void _signUpEmailChanged(SignUpEmailChanged event, Emitter<LoginState> emit) {
-    final email = Email.dirty(event.email);
-    emit(
-      state.copyWith(
-        signUpEmail: email,
-        isValid: Formz.validate([email, state.signUpPassword]),
-      ),
-    );
-  }
-
-  void _signUpPasswordChanged(
-      SignUpPasswordChanged event, Emitter<LoginState> emit) {
-    final password = Password.dirty(event.password);
-
-    // also check if the password and confirm password match
-    if (state.signUpConfirmPassword != event.password) {
-      emit(
-        state.copyWith(
-          signUpPassword: password,
-          isValid: false,
-        ),
-      );
-      return;
-    }
-
-    emit(
-      state.copyWith(
-        signUpPassword: password,
-        isValid: Formz.validate([state.signUpEmail, password]),
-      ),
-    );
-  }
-
-  void _signUpConfirmPasswordChanged(
-      SignUpConfirmPasswordChanged event, Emitter<LoginState> emit) {
-    // also check if the password and confirm password match
-    if (state.signUpPassword.value != event.password) {
-      emit(
-        state.copyWith(
-          signUpConfirmPassword: event.password,
-          passwordMatch: false,
-          isValid: false,
-        ),
-      );
-      return;
-    }
-
-    emit(
-      state.copyWith(
-        signUpConfirmPassword: event.password,
-        passwordMatch: true,
-        isValid: Formz.validate([
-          state.signUpEmail,
-          state.signUpPassword,
-        ]),
-      ),
-    );
-  }
-
   Future<void> _logInWithCredentials(
       LogInWithCredentials event, Emitter<LoginState> emit) async {
     if (!state.isValid) return;
@@ -122,28 +61,63 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         password: state.signInPassword.value,
       );
 
-      // check if the user is verified
-      if (await _authenticationRepository.isEmailVerified()) {
-        // get keys from db
-        final encryptedData = await _encryptionRepository
-            .getEncryptedData(_authenticationRepository.currentUser.uid);
-
-        await _crypto.decryptAndSaveKey(
-          encryptedData!,
-          state.signInPassword.value,
-        );
-
+      // if email is not verified delete the user
+      if (!await _authenticationRepository.isEmailVerified()) {
+        await _authenticationRepository.deleteUser();
         emit(state.copyWith(
-          status: FormzSubmissionStatus.inProgress,
-          requiresEmailVerification: false,
+          status: FormzSubmissionStatus.failure,
+          errorMessage: 'Email not verified. Please sign up again',
         ));
-      } else {
-        emit(state.copyWith(
-          status: FormzSubmissionStatus.inProgress,
-          requiresEmailVerification: true,
-        ));
+        return;
       }
+
+      final encryptedData = await _encryptionRepository
+          .getEncryptedData(_authenticationRepository.currentUser.uid);
+
+      logger.i('Decrypting private key');
+
+      // Step 1: Generate pbkdfKey using the random salt stored in DB and user's password
+      logger.i('Step 1: Generating PBKDF key');
+      Uint8List pbkdfKey = await _crypto.generateKey(
+        state.signInPassword.value,
+        encryptedData![0].randomSaltOne,
+      );
+
+      // Step 2: Decrypt private key using the pbkdfKey generated above
+      // and the second random slat stored in DB
+      logger.i('Step 2: Decrypting private key');
+      final Uint8List decryptedPrivateKey = _crypto.symmetricDecrypt(
+        pbkdfKey,
+        Uint8List.fromList(encryptedData[0].randomSaltTwo.codeUnits),
+        Uint8List.fromList(encryptedData[0].encryptedPrivateKey.codeUnits),
+      );
+
+      final PrivateKeyDecryptionResult result = PrivateKeyDecryptionResult(
+        publicKey: encryptedData[0].publicKey,
+        privateKey: String.fromCharCodes(decryptedPrivateKey),
+        randomSaltOne: encryptedData[0].randomSaltOne,
+        randomSaltTwo: encryptedData[0].randomSaltTwo,
+      );
+
+      // Step 3: Save the private key in secure storage
+      logger.i('Step 3: Saving private key in secure storage');
+      await _secureStorageRepository.write(
+          'rsaKeys', jsonEncode(result.toJson()));
+
+      logger.i('Private key decrypted and saved');
+
+      emit(state.copyWith(
+        status: FormzSubmissionStatus.success,
+      ));
     } on LogInWithEmailAndPasswordFailure catch (e) {
+      logger.e(e.message);
+      emit(
+        state.copyWith(
+          errorMessage: e.message,
+          status: FormzSubmissionStatus.failure,
+        ),
+      );
+    } on EncryptionException catch (e) {
       logger.e(e.message);
       emit(
         state.copyWith(
@@ -168,102 +142,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       emit(
         state.copyWith(
           errorMessage: 'An unknown error occurred',
-          status: FormzSubmissionStatus.failure,
-        ),
-      );
-    } catch (e) {
-      logger.e(e);
-      emit(state.copyWith(status: FormzSubmissionStatus.failure));
-    }
-  }
-
-  Future<void> _checkEmailVerification(
-      CheckEmailVerification event, Emitter<LoginState> emit) async {
-    try {
-      logger.i('Checking email verification');
-      final isVerified = await _authenticationRepository.isEmailVerified();
-      if (isVerified) {
-        logger.w('Email is verified. Generating Keys...');
-        PrivateKeyEncryptionResult keys = await _crypto.generateNewKeys(
-            state.signUpPassword.value == ""
-                ? state.signInPassword.value
-                : state.signUpPassword.value);
-
-        // delete existing key
-        await _crypto.deleteKeys();
-
-        await _crypto.decryptAndSaveKey(
-            keys,
-            state.signUpPassword.value == ""
-                ? state.signInPassword.value
-                : state.signUpPassword.value);
-
-        await _encryptionRepository.addEncryptionData(
-          _authenticationRepository.currentUser.uid,
-          keys,
-        );
-
-        logger.w('Keys generated');
-        emit(state.copyWith(
-          status: FormzSubmissionStatus.success,
-          requiresEmailVerification: false,
-        ));
-      } else {
-        emit(state.copyWith(
-          status: FormzSubmissionStatus.inProgress,
-          requiresEmailVerification: true,
-        ));
-      }
-    } catch (error) {
-      emit(state.copyWith(
-        status: FormzSubmissionStatus.failure,
-        errorMessage: error.toString(),
-      ));
-    }
-  }
-
-  Future<void> _resendVerificationEmail(
-      ResendVerificationEmail event, Emitter<LoginState> emit) async {
-    try {
-      await _authenticationRepository.sendEmailVerification();
-      emit(state.copyWith(
-        status: FormzSubmissionStatus.success,
-        errorMessage: 'Verification email resent successfully',
-      ));
-    } catch (error) {
-      emit(state.copyWith(
-        status: FormzSubmissionStatus.failure,
-        errorMessage: error.toString(),
-      ));
-    }
-  }
-
-  Future<void> _signUpWithCredential(
-      SignUpWithCredential event, Emitter<LoginState> emit) async {
-    emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
-    try {
-      await _authenticationRepository.signUp(
-        email: state.signUpEmail.value,
-        password: state.signUpPassword.value,
-      );
-
-      emit(state.copyWith(
-        status: FormzSubmissionStatus.inProgress,
-        requiresEmailVerification: true,
-      ));
-    } on SignUpWithEmailAndPasswordFailure catch (e) {
-      logger.e(e.message);
-      emit(
-        state.copyWith(
-          errorMessage: e.message,
-          status: FormzSubmissionStatus.failure,
-        ),
-      );
-    } on FirebaseException catch (e) {
-      logger.e(e.message);
-      emit(
-        state.copyWith(
-          errorMessage: e.message,
           status: FormzSubmissionStatus.failure,
         ),
       );

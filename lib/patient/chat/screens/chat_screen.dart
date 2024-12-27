@@ -35,7 +35,6 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final _loadingCachedMessages = false;
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
@@ -170,7 +169,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: MyColors.lightBlue,
+              backgroundColor: MyColors.primaryLight,
               child: Icon(icon, color: MyColors.white, size: 30),
             ),
             kGap10,
@@ -365,7 +364,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       const SizedBox(width: 8),
                       CircleAvatar(
-                        backgroundColor: MyColors.blue,
+                        backgroundColor: MyColors.primary,
                         child: IconButton(
                           icon: const Icon(Icons.send, color: Colors.white),
                           onPressed: () {

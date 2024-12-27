@@ -10,7 +10,7 @@ ThemeData get lightTheme {
     scaffoldBackgroundColor: MyColors.background,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: MyColors.blue,
+        backgroundColor: MyColors.primary,
         foregroundColor: MyColors.buttonText,
         shape: RoundedRectangleBorder(
           borderRadius: kRadius10,
@@ -18,7 +18,7 @@ ThemeData get lightTheme {
       ),
     ),
     buttonTheme: ButtonThemeData(
-      buttonColor: MyColors.blue,
+      buttonColor: MyColors.primary,
       textTheme: ButtonTextTheme.primary,
       shape: RoundedRectangleBorder(
         borderRadius: kRadius10,
@@ -129,9 +129,9 @@ ThemeData get lightTheme {
           fontFamily: Font.family,
           fontSize: Font.medium,
           fontWeight: FontWeight.normal,
-          color: MyColors.blue,
+          color: MyColors.primary,
         ),
-        foregroundColor: MyColors.blue,
+        foregroundColor: MyColors.primary,
       ),
     ),
     pageTransitionsTheme: const PageTransitionsTheme(
@@ -157,7 +157,7 @@ ThemeData get lightTheme {
       ),
       unselectedLabelColor: MyColors.grey,
       dividerHeight: 0,
-      indicatorColor: MyColors.blue,
+      indicatorColor: MyColors.primary,
     ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: MyColors.textBlack,
@@ -166,23 +166,24 @@ ThemeData get lightTheme {
       type: BottomNavigationBarType.fixed,
       landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
       enableFeedback: true,
-      backgroundColor: Colors.transparent,
-      showUnselectedLabels: false,
-      unselectedIconTheme: IconThemeData(color: Colors.white),
-      selectedIconTheme: IconThemeData(color: Colors.white),
+      showUnselectedLabels: true,
+      unselectedIconTheme: IconThemeData(color: MyColors.white),
+      selectedIconTheme: IconThemeData(color: MyColors.white),
       elevation: 0,
-      selectedItemColor: MyColors.textWhite,
+      selectedItemColor: MyColors.white,
+      unselectedItemColor: MyColors.white,
       showSelectedLabels: true,
       selectedLabelStyle: TextStyle(
         fontFamily: Font.family,
         // make tiny incase of small screen
-        fontSize: Font.extraSmall,
-        color: MyColors.textWhite,
-        fontWeight: FontWeight.normal,
+        fontSize: Font.tiny,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
       ),
       unselectedLabelStyle: TextStyle(
         fontFamily: Font.family,
-        fontSize: Font.medium,
+        fontSize: Font.tiny,
+        color: MyColors.white,
         fontWeight: FontWeight.normal,
       ),
     ),
@@ -284,19 +285,19 @@ DatePickerThemeData get datePickerTheme {
   return DatePickerThemeData(
     backgroundColor: MyColors.textField,
     cancelButtonStyle: const ButtonStyle(
-      foregroundColor: WidgetStatePropertyAll(MyColors.lightBlue),
+      foregroundColor: WidgetStatePropertyAll(MyColors.primaryLight),
       textStyle: WidgetStatePropertyAll(TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
-        color: MyColors.blue,
+        color: MyColors.primary,
       )),
     ),
     confirmButtonStyle: const ButtonStyle(
-      foregroundColor: WidgetStatePropertyAll(MyColors.lightBlue),
+      foregroundColor: WidgetStatePropertyAll(MyColors.primaryLight),
       textStyle: WidgetStatePropertyAll(TextStyle(
         fontFamily: Font.family,
         fontSize: Font.medium,
-        color: MyColors.blue,
+        color: MyColors.primary,
       )),
     ),
     dividerColor: MyColors.lineDivider,
@@ -335,19 +336,19 @@ DatePickerThemeData get datePickerTheme {
         fontWeight: FontWeight.normal,
       ),
       activeIndicatorBorder: const BorderSide(
-        color: MyColors.lightBlue,
+        color: MyColors.primaryLight,
         width: 2,
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: const BorderSide(
-          color: MyColors.lightBlue,
+          color: MyColors.primaryLight,
           width: 2,
         ),
         borderRadius: kRadius10,
       ),
       enabledBorder: OutlineInputBorder(
         borderSide: const BorderSide(
-          color: MyColors.lightBlue,
+          color: MyColors.primaryLight,
           width: 2,
         ),
         borderRadius: kRadius10,
@@ -365,7 +366,7 @@ DatePickerThemeData get datePickerTheme {
       labelStyle: const TextStyle(
         fontFamily: Font.family,
         fontSize: Font.mediumLarge,
-        color: MyColors.lightBlue,
+        color: MyColors.primaryLight,
       ),
       // inner value style
       errorMaxLines: 2,

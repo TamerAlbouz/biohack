@@ -1,5 +1,3 @@
-import 'package:backend/src/encryption/exceptions/encryption_exception.dart';
-import 'package:backend/src/extensions/object.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 import 'package:p_logger/p_logger.dart';
@@ -16,9 +14,12 @@ class EncryptionRepository implements IEncryptionRepository {
   }
 
   @override
-  Future<void> addEncryptionData(String uid, PrivateKeyEncryptionResult data) {
+  Future<void> addEncryptionData(
+      String uid, List<PrivateKeyEncryptionResult> data) {
     try {
-      return _encryptionRepository.doc(uid).set(data.toMap);
+      return _encryptionRepository.doc(uid).set({
+        'data': data.map((e) => e.toJson()).toList(),
+      });
     } on FirebaseException catch (e) {
       logger.e(e.message);
       throw EncryptionException.fromCode(e.code);
@@ -29,11 +30,14 @@ class EncryptionRepository implements IEncryptionRepository {
   }
 
   @override
-  Future<PrivateKeyEncryptionResult?> getEncryptedData(String id) {
+  Future<List<PrivateKeyEncryptionResult>?> getEncryptedData(String id) {
     try {
       return _encryptionRepository.doc(id).get().then((snapshot) {
         if (snapshot.exists) {
-          return PrivateKeyEncryptionResult.fromMap(snapshot.data()!.toMap());
+          return List<PrivateKeyEncryptionResult>.from(
+            (snapshot.data() as Map<String, dynamic>)['data']
+                .map((e) => PrivateKeyEncryptionResult.fromJson(e)),
+          );
         }
 
         return null;
@@ -49,9 +53,12 @@ class EncryptionRepository implements IEncryptionRepository {
 
   @override
   Future<void> updateEncryptionData(
-      String uid, PrivateKeyEncryptionResult data) {
+      String uid, List<PrivateKeyEncryptionResult> data) {
     try {
-      return _encryptionRepository.doc(uid).update(data.toMap);
+      // merge: true will only update the fields that are different
+      return _encryptionRepository.doc(uid).set(
+          {'data': data.map((e) => e.toJson()).toList()},
+          SetOptions(merge: true));
     } on FirebaseException catch (e) {
       logger.e(e.message);
       throw EncryptionException.fromCode(e.code);

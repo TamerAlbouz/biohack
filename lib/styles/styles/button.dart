@@ -4,29 +4,14 @@ import 'package:medtalk/styles/font.dart';
 
 import '../sizes.dart';
 
-final kElevatedButtonStyle = ElevatedButton.styleFrom(
-  backgroundColor: MyColors.blue,
-  foregroundColor: MyColors.buttonText,
-  elevation: 0,
-  shape: RoundedRectangleBorder(
-    borderRadius: kRadius10,
-  ),
-  minimumSize: const Size(double.infinity, 50),
-  textStyle: const TextStyle(
-    fontFamily: Font.family,
-    fontSize: Font.mediumSmall,
-    fontWeight: FontWeight.bold,
-  ),
-);
-
-final kElevatedButtonBookAppointmentStyle = ElevatedButton.styleFrom(
+final kElevatedButtonCommonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(borderRadius: kRadius10),
-  backgroundColor: MyColors.blue,
+  backgroundColor: MyColors.primary,
   foregroundColor: MyColors.buttonText,
   textStyle: const TextStyle(
     fontFamily: Font.family,
     fontSize: Font.mediumExtra,
-    fontWeight: FontWeight.w500,
+    fontWeight: FontWeight.bold,
   ),
   elevation: 0,
   minimumSize: const Size(double.infinity, 50),

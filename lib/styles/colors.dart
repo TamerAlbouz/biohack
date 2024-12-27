@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class MyColors {
   static const background = Color(0xffE8E4E1);
-  static const blue = Color(0xff4264FF);
+  static const primary = Color(0xff4264FF);
   static const black = Color(0xff3C3C3C);
-  static const lightBlue = Color(0xff6084f3);
+  static const primaryLight = Color(0xff6084f3);
+  static const accentBlue = Color(0xff8399ff);
   static const blueGrey = Color(0x77b7c9f0);
   static const messageBubble = Color(0xffc8e0ff);
   static const grey = Color(0xffA0A0A0);

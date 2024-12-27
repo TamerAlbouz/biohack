@@ -3,6 +3,19 @@ import 'package:flutter/material.dart';
 import '../colors.dart';
 import '../font.dart';
 
+const kAppIntro = TextStyle(
+  fontFamily: Font.family,
+  fontSize: Font.large,
+  fontWeight: FontWeight.bold,
+  color: MyColors.textBlack,
+);
+
+const kAppIntroSubtitle = TextStyle(
+  fontSize: Font.small,
+  fontFamily: Font.family,
+  color: MyColors.textGrey,
+);
+
 const kButtonHint = TextStyle(
   fontFamily: Font.family,
   color: MyColors.grey,
@@ -31,7 +44,7 @@ const kErrorText = TextStyle(
 
 const kDropdownText = TextStyle(
   fontFamily: Font.family,
-  color: MyColors.blue,
+  color: MyColors.primary,
   fontSize: Font.medium,
   fontWeight: FontWeight.bold,
 );

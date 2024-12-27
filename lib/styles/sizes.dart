@@ -10,6 +10,8 @@ const kGap4 = Gap(4);
 const kGap6 = Gap(6);
 const kGap8 = Gap(8);
 const kGap12 = Gap(12);
+const kGap16 = Gap(16);
+const kGap18 = Gap(18);
 const kGap20 = Gap(20);
 const kGap24 = Gap(24);
 const kGap28 = Gap(28);
@@ -23,9 +25,12 @@ const kGap100 = Gap(100);
 const kGap128 = Gap(128);
 final kRadius20 = BorderRadius.circular(20);
 final kRadius10 = BorderRadius.circular(10);
+final kRadius8 = BorderRadius.circular(8);
 final kRadius12 = BorderRadius.circular(12);
 final kRadiusAll = BorderRadius.circular(999);
 const kPadd12 = EdgeInsets.all(12);
+const kPaddH10V8 = EdgeInsets.symmetric(horizontal: 10, vertical: 8);
+const kPaddH15V10 = EdgeInsets.symmetric(horizontal: 15, vertical: 10);
 const kPaddH20V15 = EdgeInsets.symmetric(horizontal: 20, vertical: 15);
 const kPaddH10V15 = EdgeInsets.symmetric(horizontal: 10, vertical: 15);
 const kPaddH32 = EdgeInsets.symmetric(horizontal: 32);
@@ -36,6 +41,7 @@ const kPadd4 = EdgeInsets.all(4);
 const kPadd8 = EdgeInsets.all(8);
 const kPadd10 = EdgeInsets.all(10);
 const kPadd14 = EdgeInsets.all(14);
+const kPadd42 = EdgeInsets.all(42);
 const kPaddH42 = EdgeInsets.symmetric(horizontal: 42);
 const kPaddH14 = EdgeInsets.symmetric(horizontal: 14);
 const kPaddH24 = EdgeInsets.symmetric(horizontal: 24);
@@ -50,6 +56,7 @@ const kPaddH42V68 = EdgeInsets.symmetric(horizontal: 42, vertical: 68);
 const kPaddR8 = EdgeInsets.only(right: 8);
 const kPaddL20R20T68B20 =
     EdgeInsets.only(left: 20, right: 20, top: 68, bottom: 20);
+const kPaddH15 = EdgeInsets.symmetric(horizontal: 15);
 const kPaddL15R15T68B20 =
     EdgeInsets.only(left: 15, right: 15, top: 68, bottom: 20);
 const kPaddH20T10 = EdgeInsets.only(top: 10, left: 20, right: 20);
@@ -61,3 +68,8 @@ const kPaddH20V8 = EdgeInsets.symmetric(horizontal: 20, vertical: 8);
 const kPaddT15 = EdgeInsets.only(top: 15);
 const kPaddB2 = EdgeInsets.only(bottom: 2);
 const kPaddH8V4 = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+const kPaddL15R15T20B20 =
+    EdgeInsets.only(left: 15, right: 15, top: 20, bottom: 20);
+const kPaddL15R15T10B20 =
+    EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 20);
+const kPaddL15R15T50 = EdgeInsets.only(left: 15, right: 15, top: 50);

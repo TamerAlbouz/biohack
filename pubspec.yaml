@@ -69,6 +69,7 @@ dependencies:
     path: packages/formz_inputs
   backend:
     path: packages/backend
+  lottie: ^3.2.0
 
 
 dev_dependencies:
@@ -87,6 +88,7 @@ flutter:
     - assets/svgs/
     - assets/icons/
     - assets/images/
+    - assets/animations/json/
 
   fonts:
     - family: inriaSans

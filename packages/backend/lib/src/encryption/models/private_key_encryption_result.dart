@@ -31,12 +31,12 @@ class PrivateKeyEncryptionResult extends Equatable {
     );
   }
 
-  factory PrivateKeyEncryptionResult.fromMap(Map<String, dynamic> map) {
+  factory PrivateKeyEncryptionResult.fromMap(Map<String, dynamic> json) {
     return PrivateKeyEncryptionResult(
-      publicKey: map['publicKey'] as String,
-      encryptedPrivateKey: map['encryptedPrivateKey'] as String,
-      randomSaltOne: map['randomSaltOne'] as String,
-      randomSaltTwo: map['randomSaltTwo'] as String,
+      publicKey: json['publicKey'],
+      encryptedPrivateKey: json['encryptedPrivateKey'],
+      randomSaltOne: json['randomSaltOne'],
+      randomSaltTwo: json['randomSaltTwo'],
     );
   }
 

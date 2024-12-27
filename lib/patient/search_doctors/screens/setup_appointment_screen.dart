@@ -18,6 +18,7 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../common/widgets/base/custom_base.dart';
 import '../../../common/widgets/dividers/card_divider.dart';
 import '../../../common/widgets/dummy/profile_picture.dart';
+import '../../../common/widgets/pageview/custom_page_view.dart';
 import '../../../styles/colors.dart';
 import '../../../styles/font.dart';
 import '../../../styles/styles/button.dart';
@@ -40,13 +41,13 @@ class SetupAppointmentScreen extends StatefulWidget {
 
 class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
   bool reBuild = false;
-  Color unselectedColor = MyColors.blue;
-  late final _CustomStepperController _stepperController;
+  Color unselectedColor = MyColors.primary;
+  late final CustomStepperController _stepperController;
 
   @override
   void initState() {
     super.initState();
-    _stepperController = _CustomStepperController(canSkipSteps: [
+    _stepperController = CustomStepperController(canSkipSteps: [
       false,
       false,
       false,
@@ -108,7 +109,7 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
                                     opacity: animation, child: child);
                               },
                               child: showNewWidgets
-                                  ? _CustomStepper(
+                                  ? CustomStepper(
                                       controller: _stepperController,
                                       steps: [
                                         _ChooseAppointmentDate(
@@ -148,7 +149,10 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
                     ),
                     if (showNewWidgets)
                       // Stepper buttons should always be at the bottom
-                      _CustomStepperControls(
+                      CustomStepperControls(
+                        onCanceled: () => context
+                            .read<SetupAppointmentBloc>()
+                            .add(ToggleRebuild()),
                         controller: _stepperController,
                       ),
                     if (!showNewWidgets)
@@ -189,451 +193,94 @@ class _Biography extends StatelessWidget {
   }
 }
 
-class _CustomStepperControls extends StatefulWidget {
-  final _CustomStepperController controller;
-
-  const _CustomStepperControls({required this.controller});
-
-  @override
-  State<_CustomStepperControls> createState() => _CustomStepperControlsState();
-}
-
-class _CustomStepperControlsState extends State<_CustomStepperControls> {
-  @override
-  void initState() {
-    super.initState();
-    widget.controller.addListener(_onControllerChanged);
-  }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_onControllerChanged);
-    super.dispose();
-  }
-
-  void _onControllerChanged() {
-    setState(() {
-      // Trigger rebuild whenever the controller notifies listeners
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        kGap20,
-        const CardDivider(
-          height: 0,
-          padding: 0,
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 100,
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: widget.controller.currentStep > 0
-                    ? widget.controller.goToPreviousStep
-                    : null,
-                child: const Text('Previous',
-                    style: TextStyle(fontSize: Font.mediumSmall)),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                // show are you sure dialog
-
-                widget.controller.reset();
-                context.read<SetupAppointmentBloc>().add(ToggleRebuild());
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  fontSize: Font.mediumSmall,
-                  color: MyColors.buttonRed,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Container(
-              width: 100,
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: (widget.controller
-                            .canSkipSteps[widget.controller.currentStep] ||
-                        widget.controller
-                            .completedSteps[widget.controller.currentStep])
-                    ? () => widget.controller
-                        .goToNextStep(delay: const Duration(milliseconds: 0))
-                    : null,
-                child: (widget.controller.currentStep <
-                        widget.controller.completedSteps.length - 1)
-                    ? const Text('Next',
-                        style: TextStyle(fontSize: Font.mediumSmall))
-                    : const Text('',
-                        style: TextStyle(fontSize: Font.mediumSmall)),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _CustomStepperController extends ChangeNotifier {
-  int _currentStep = 0;
-  final List<bool> _completedSteps;
-  final List<bool> _canSkipSteps;
-
-  // have a dictionary of steps for the result of each step
-  final Map<int, dynamic> _stepResults = {};
-
-  _CustomStepperController({List<bool>? canSkipSteps, int stepCount = 5})
-      : _canSkipSteps = canSkipSteps ?? List.generate(stepCount, (_) => true),
-        _completedSteps = List.generate(stepCount, (_) => false);
-
-  int get currentStep => _currentStep;
-
-  List<bool> get completedSteps => List.unmodifiable(_completedSteps);
-
-  List<bool> get canSkipSteps => List.unmodifiable(_canSkipSteps);
-
-  Map<int, dynamic> get stepResults => Map.unmodifiable(_stepResults);
-
-  // add a result for a step
-  void updateStepResult(int step, dynamic result) {
-    _stepResults[step] = result;
-  }
-
-  // get the result of a step
-  dynamic getStepResult(int step) {
-    return _stepResults[step];
-  }
-
-  void reset() {
-    _currentStep = 0;
-    _completedSteps.fillRange(0, _completedSteps.length, false);
-    notifyListeners();
-  }
-
-  /// Adds a delay before actually moving to the next step without using async/await.
-  void goToNextStep({Duration delay = const Duration(milliseconds: 300)}) {
-    // Schedule the step change after the specified delay
-    Future.delayed(delay, () {
-      if (_currentStep < _completedSteps.length - 1) {
-        if (_canSkipSteps[_currentStep] || _completedSteps[_currentStep]) {
-          _completedSteps[_currentStep] = true;
-          _currentStep++;
-          notifyListeners();
-        }
-      }
-    });
-  }
-
-  void goToPreviousStep() {
-    if (_currentStep > 0) {
-      _currentStep--;
-      notifyListeners();
-    }
-  }
-
-  void markStepComplete() {
-    if (currentStep >= 0 && currentStep < _completedSteps.length) {
-      _completedSteps[currentStep] = true;
-      notifyListeners();
-    }
-  }
-}
-
-class _CustomStepper extends StatefulWidget {
-  final _CustomStepperController controller;
-  final List<Widget> steps;
-
-  const _CustomStepper(
-      {super.key, required this.controller, required this.steps});
-
-  @override
-  _CustomStepperState createState() => _CustomStepperState();
-}
-
-class _CustomStepperState extends State<_CustomStepper>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<Offset> _slideAnimation;
-  int _previousStep = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(1.0, 0.0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutQuad,
-    ));
-
-    // Start the animation for the initial step
-    _animationController.forward();
-
-    widget.controller.addListener(_onControllerChanged);
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    widget.controller.removeListener(_onControllerChanged);
-    super.dispose();
-  }
-
-  void _onControllerChanged() {
-    if (widget.controller.currentStep != _previousStep) {
-      // Determine slide direction based on step change
-      final isForward = widget.controller.currentStep > _previousStep;
-
-      _slideAnimation = Tween<Offset>(
-        begin: Offset(isForward ? 1.0 : -1.0, 0.0),
-        end: Offset.zero,
-      ).animate(CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeOutQuad,
-      ));
-
-      _animationController.reset();
-      _animationController.forward();
-
-      setState(() {
-        _previousStep = widget.controller.currentStep;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        // Stepper indicator remains the same
-        StepperHeader(
-          currentStep: widget.controller.currentStep,
-          completedSteps: widget.controller.completedSteps,
-        ),
-        kGap10,
-        // Wrap the current step with SlideTransition
-        SlideTransition(
-          position: _slideAnimation,
-          child: widget.steps[widget.controller.currentStep],
-        ),
-      ],
-    );
-  }
-}
-
-class StepperHeader extends StatefulWidget {
-  final int currentStep;
-  final List<bool> completedSteps;
-  final bool showIcons;
-  final MainAxisAlignment? mainAxisAlignment;
-
-  const StepperHeader({
-    super.key,
-    required this.currentStep,
-    required this.completedSteps,
-    this.showIcons = false,
-    this.mainAxisAlignment,
-  });
-
-  @override
-  State<StepperHeader> createState() => _StepperHeaderState();
-}
-
-class _StepperHeaderState extends State<StepperHeader>
-    with TickerProviderStateMixin {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: widget.mainAxisAlignment ?? MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
-      children: List.generate(widget.completedSteps.length, (index) {
-        final isActiveStep = index == widget.currentStep;
-        final isCompleted = widget.completedSteps[index];
-
-        return Padding(
-          padding: const EdgeInsets.only(right: 10.0, bottom: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (widget.showIcons) ...[
-                Icon(
-                  Icons.check_circle,
-                  color: isCompleted
-                      ? Colors.green
-                      : isActiveStep
-                          ? Colors.blue
-                          : Colors.grey,
-                ),
-                const SizedBox(width: 4.0),
-              ],
-              _buildStepText(index, isActiveStep),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-
-  Widget _buildStepText(int index, bool isActiveStep) {
-    final String fullText = _getStepTitle(index);
-
-    if (!isActiveStep) {
-      // If not active, show the pipe immediately (no animation).
-      return const Text("|", style: TextStyle(color: Colors.grey));
-    }
-
-    // If active, we animate character-by-character fade-in with a smoother curve and longer duration.
-    return TweenAnimationBuilder<double>(
-      key: ValueKey('active_step_$index'),
-      tween: Tween<double>(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.linear,
-      // smoother easing
-      builder: (context, value, child) {
-        final int length = fullText.length;
-        final double position = value * length;
-        final int revealedChars = position.floor();
-        final double partial = position - revealedChars;
-
-        // If no characters are revealed and no partial fade, show just '|'.
-        if (revealedChars == 0 && partial == 0) {
-          return const Text("|", style: TextStyle(color: Colors.grey));
-        }
-
-        List<Widget> charWidgets = [];
-        for (int i = 0; i < length; i++) {
-          double charOpacity = 0.0;
-          if (i < revealedChars) {
-            // Fully revealed characters
-            charOpacity = 1.0;
-          } else if (i == revealedChars) {
-            // Currently fading-in character
-            charOpacity = partial;
-          }
-          // Characters beyond revealedChars remain 0.0 (invisible)
-
-          if (charOpacity > 0.0) {
-            charWidgets.add(
-              Opacity(
-                opacity: charOpacity,
-                child: Text(fullText[i], style: kAppointmentSetupSectionTitle),
-              ),
-            );
-          }
-        }
-
-        return Row(
-          mainAxisSize: MainAxisSize.min,
-          children: charWidgets,
-        );
-      },
-    );
-  }
-
-  String _getStepTitle(int index) {
-    switch (index) {
-      case 0:
-        return 'Date & Time';
-      case 1:
-        return 'Service Type';
-      case 2:
-        return 'Appointment Type';
-      case 3:
-        return 'Payment Type';
-      case 4:
-        return 'Summary';
-      default:
-        return 'Step ${index + 1}';
-    }
-  }
-}
-
 class _ChooseServiceType extends StatelessWidget {
-  final _CustomStepperController controller;
+  final CustomStepperController controller;
 
   const _ChooseServiceType({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return SelectionGroup(
-      selectedIndex: controller.getStepResult(controller.currentStep),
-      items: [
-        SelectionItem(
-          title: 'Treatment',
-          subtitle: '1 hr',
-          price: 100,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Choose Service Type',
+          style: kAppointmentSetupSectionTitle,
         ),
-        SelectionItem(
-          title: 'Consultation',
-          subtitle: '30 mins',
-          price: 50,
-        ),
-        SelectionItem(
-          title: 'Checkup',
-          subtitle: '15 mins',
-          price: 30,
+        kGap20,
+        SelectionGroup(
+          selectedIndex: controller.getStepResult(controller.currentStep),
+          items: [
+            SelectionItem(
+              title: 'Treatment',
+              subtitle: '1 hr',
+              price: 100,
+            ),
+            SelectionItem(
+              title: 'Consultation',
+              subtitle: '30 mins',
+              price: 50,
+            ),
+            SelectionItem(
+              title: 'Checkup',
+              subtitle: '15 mins',
+              price: 30,
+            ),
+          ],
+          onSelected: (item, index) {
+            context.read<SetupAppointmentBloc>().add(UpdateServiceType(item));
+            controller.updateStepResult(controller.currentStep, index);
+            controller.markStepComplete();
+            controller.goToNextStep();
+          },
         ),
       ],
-      onSelected: (item, index) {
-        context.read<SetupAppointmentBloc>().add(UpdateServiceType(item));
-        controller.updateStepResult(controller.currentStep, index);
-        controller.markStepComplete();
-        controller.goToNextStep();
-      },
     );
   }
 }
 
 class _ChooseAppointmentType extends StatelessWidget {
-  final _CustomStepperController controller;
+  final CustomStepperController controller;
 
   const _ChooseAppointmentType({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return SelectionGroup(
-        selectedIndex: controller.getStepResult(controller.currentStep),
-        items: [
-          SelectionItem(
-            title: 'In-Person',
-            subtitle: '1234 Clinic St, Portland, OR 97205',
-          ),
-          SelectionItem(
-            title: 'Online',
-            subtitle: 'Video Call',
-          ),
-        ],
-        onSelected: (item, index) {
-          context
-              .read<SetupAppointmentBloc>()
-              .add(UpdateAppointmentType(item.title, item.subtitle));
-          controller.updateStepResult(controller.currentStep, index);
-          controller.markStepComplete();
-          controller.goToNextStep();
-        });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Choose Appointment Type',
+          style: kAppointmentSetupSectionTitle,
+        ),
+        kGap20,
+        SelectionGroup(
+            selectedIndex: controller.getStepResult(controller.currentStep),
+            items: [
+              SelectionItem(
+                title: 'In-Person',
+                subtitle: '1234 Clinic St, Portland, OR 97205',
+              ),
+              SelectionItem(
+                title: 'Online',
+                subtitle: 'Video Call',
+              ),
+            ],
+            onSelected: (item, index) {
+              context
+                  .read<SetupAppointmentBloc>()
+                  .add(UpdateAppointmentType(item.title, item.subtitle));
+              controller.updateStepResult(controller.currentStep, index);
+              controller.markStepComplete();
+              controller.goToNextStep();
+            }),
+      ],
+    );
   }
 }
 
 class _ChoosePaymentType extends StatelessWidget {
-  final _CustomStepperController controller;
+  final CustomStepperController controller;
 
   const _ChoosePaymentType({required this.controller});
 
@@ -642,6 +289,11 @@ class _ChoosePaymentType extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Text(
+          'Choose Payment Type',
+          style: kAppointmentSetupSectionTitle,
+        ),
+        kGap20,
         SelectionGroup(
             selectedIndex: controller.getStepResult(controller.currentStep),
             items: [
@@ -677,7 +329,7 @@ class _ChoosePaymentType extends StatelessWidget {
 }
 
 class _Summary extends StatelessWidget {
-  final _CustomStepperController controller;
+  final CustomStepperController controller;
 
   const _Summary({required this.controller});
 
@@ -697,6 +349,11 @@ class _Summary extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const Text(
+              'Summary',
+              style: kAppointmentSetupSectionTitle,
+            ),
+            kGap20,
             // note warning rich text
             Container(
               decoration: BoxDecoration(
@@ -768,7 +425,7 @@ class _Summary extends StatelessWidget {
                     'Terms and Conditions',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: MyColors.blue,
+                      color: MyColors.primary,
                       fontSize: Font.small,
                     ),
                   ),
@@ -839,7 +496,7 @@ class _Summary extends StatelessWidget {
                       SummaryEntry(
                         title: 'Date',
                         value:
-                            '${dateFormat.format(state.appointmentDate ?? DateTime.now())} • ${time.format(context) ?? ''}',
+                            '${dateFormat.format(state.appointmentDate ?? DateTime.now())} • ${time.format(context)}',
                       ),
                       kGap10,
                       // dotted divider
@@ -906,7 +563,7 @@ class _PayButton extends StatelessWidget {
             (route) => route.isFirst,
           );
         },
-        style: kElevatedButtonBookAppointmentStyle,
+        style: kElevatedButtonCommonStyle,
         icon: const FaIcon(
           FontAwesomeIcons.circleCheck,
           size: 18,
@@ -933,7 +590,7 @@ class _BookAppointmentButton extends StatelessWidget {
         onPressed: () {
           context.read<SetupAppointmentBloc>().add(ToggleRebuild());
         },
-        style: kElevatedButtonBookAppointmentStyle,
+        style: kElevatedButtonCommonStyle,
         child: const Text(
           'Book Appointment',
         ),
@@ -1213,7 +870,7 @@ class _ClinicLocationState extends State<_ClinicLocation> {
 }
 
 class _ChooseAppointmentDate extends StatefulWidget {
-  final _CustomStepperController controller;
+  final CustomStepperController controller;
 
   const _ChooseAppointmentDate({required this.controller});
 
@@ -1233,7 +890,11 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        kGap10,
+        const Text(
+          'Choose Appointment Date',
+          style: kAppointmentSetupSectionTitle,
+        ),
+        kGap20,
         DateNavigationWidget(
           selectedDate:
               context.read<SetupAppointmentBloc>().state.appointmentDate,
@@ -1283,7 +944,7 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
           selectedIndex:
               widget.controller.getStepResult(widget.controller.currentStep),
           contentPadding: kPaddH10V2,
-          selectedColor: MyColors.blue,
+          selectedColor: MyColors.primary,
           unselectedColor: unselectedColor,
           unselectedTextColor: MyColors.textGrey,
           textStyle: const TextStyle(
@@ -1293,7 +954,7 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
           onSelected: (selected) {
             setState(() {
               unselectedColor =
-                  selected ? MyColors.blue : MyColors.selectionCardEmpty;
+                  selected ? MyColors.primary : MyColors.selectionCardEmpty;
             });
             // if already selected, do not rebuild
           },
@@ -1366,7 +1027,7 @@ class _DoctorInfo extends StatelessWidget {
           name,
           style: const TextStyle(
             fontSize: Font.medium,
-            color: MyColors.blue,
+            color: MyColors.primary,
             fontWeight: FontWeight.bold,
           ),
         ),

@@ -21,7 +21,7 @@ class CustomIconButton extends StatelessWidget {
           color: Colors.transparent,
           borderRadius: kRadiusAll,
           border: Border.all(
-            color: disabled == true ? MyColors.grey : MyColors.blue,
+            color: disabled == true ? MyColors.grey : MyColors.primary,
             width: 1.5,
             style: BorderStyle.solid,
           ),

@@ -187,7 +187,7 @@ class _NumberPickerState extends State<NumberPicker> {
           // if width is too small, the text will overflow, so we set a minimum width
           decoration: BoxDecoration(
             color: MyColors.textField,
-            border: Border.all(color: MyColors.lightBlue, width: 2),
+            border: Border.all(color: MyColors.primaryLight, width: 2),
             borderRadius: kRadius10,
           ),
           child: Row(
@@ -196,7 +196,7 @@ class _NumberPickerState extends State<NumberPicker> {
             children: [
               IconButton(
                 icon: const Icon(Icons.remove),
-                color: MyColors.lightBlue,
+                color: MyColors.primaryLight,
                 onPressed:
                     _currentValue > widget.minValue ? _decrementValue : null,
               ),
@@ -210,7 +210,7 @@ class _NumberPickerState extends State<NumberPicker> {
               ),
               IconButton(
                 icon: const Icon(Icons.add),
-                color: MyColors.lightBlue,
+                color: MyColors.primaryLight,
                 onPressed:
                     _currentValue < widget.maxValue ? _incrementValue : null,
               ),

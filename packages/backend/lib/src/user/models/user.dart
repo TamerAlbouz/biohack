@@ -12,19 +12,20 @@ part 'user.g.dart';
 @JsonSerializable()
 class User extends Equatable implements IUser {
   /// {@macro user}
-  const User(
-      {required this.uid,
-      this.role,
-      required this.email,
-      this.name,
-      this.busy = false,
-      this.profilePictureUrl,
-      this.createdAt,
-      this.updatedAt,
-      this.appointments,
-      this.tokens,
-      this.paymentIds,
-      this.biography});
+  const User({
+    required this.uid,
+    this.role,
+    required this.email,
+    this.name,
+    this.busy = false,
+    this.profilePictureUrl,
+    this.createdAt,
+    this.updatedAt,
+    this.appointments,
+    this.tokens,
+    this.paymentIds,
+    this.biography,
+  });
 
   /// The current user's role.
   @override

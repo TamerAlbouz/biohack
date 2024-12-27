@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:medtalk/styles/styles/text.dart';
 
 import '../../styles/colors.dart';
-import '../../styles/styles/text_field.dart';
+import '../../styles/sizes.dart';
 
 class DatePicker extends StatefulWidget {
   /// A callback function that triggers when a date is selected, passing the selected [DateTime].
@@ -51,6 +52,14 @@ class DatePicker extends StatefulWidget {
   /// ```
   final DateTime lastDate;
 
+  /// Initial date
+  ///
+  /// Example:
+  /// ```dart
+  /// initialDate: DateTime.now(),
+  /// ```
+  final DateTime? initialDate;
+
   /// A customizable date picker widget that allows users to select a date using a calendar interface.
   ///
   /// The [DatePicker] widget provides a button that opens a date selection dialog,
@@ -83,6 +92,7 @@ class DatePicker extends StatefulWidget {
     this.height = 50,
     required this.firstDate,
     required this.lastDate,
+    this.initialDate,
   });
 
   @override
@@ -96,21 +106,23 @@ class _DatePickerState extends State<DatePicker> {
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: selectedDate ?? widget.lastDate,
       firstDate: widget.firstDate,
       lastDate: widget.lastDate,
+      initialEntryMode: DatePickerEntryMode.calendar,
+      // initial date to display on text box
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
-              primary: MyColors.buttonGreen,
-              onPrimary: MyColors.textBlack,
+              primary: MyColors.primary,
+              onPrimary: MyColors.white,
               onSurface: MyColors.textBlack,
               // on selected change color to white
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: MyColors.lightBlue,
+                foregroundColor: MyColors.primaryLight,
                 textStyle: kButtonHint,
               ),
             ),
@@ -130,25 +142,42 @@ class _DatePickerState extends State<DatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () => _selectDate(context),
-      style: kTextFieldButtonStyle,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            selectedDate != null
-                ? formatter.format(selectedDate!)
-                : widget.hint,
-            textAlign: TextAlign.left,
-            style: selectedDate != null
-                ? kButtonHint.copyWith(color: MyColors.textBlack)
-                : kButtonHint,
-          ),
-          const Icon(Icons.calendar_today),
-        ],
+    return GestureDetector(
+      onTap: () {
+        _selectDate(context);
+      },
+      child: Container(
+        height: 50,
+        padding: kPaddH15,
+        decoration: BoxDecoration(
+          borderRadius: kRadius10,
+          color: MyColors.textField,
+        ),
+        alignment: Alignment.centerLeft,
+        child: Row(
+          children: [
+            if (selectedDate == null)
+              const FaIcon(
+                FontAwesomeIcons.calendar,
+                color: MyColors.primary,
+              )
+            else
+              const FaIcon(
+                FontAwesomeIcons.solidCalendar,
+                color: MyColors.primary,
+              ),
+            kGap18,
+            Text(
+              selectedDate != null
+                  ? formatter.format(selectedDate!)
+                  : widget.hint,
+              textAlign: TextAlign.left,
+              style: selectedDate != null
+                  ? kButtonHint.copyWith(color: MyColors.textBlack)
+                  : kButtonHint,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/styles/colors.dart';
 
 import '../../../styles/font.dart';
@@ -36,7 +35,7 @@ class DoctorCard extends StatelessWidget {
         ),
         elevation: 0,
         child: Padding(
-          padding: kPaddH20V15,
+          padding: kPadd15,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -51,24 +50,18 @@ class DoctorCard extends StatelessWidget {
                     specialty: specialty,
                     availability: availability,
                   ),
-                  const Spacer(),
-                  // faicon right arrow
-                  const FaIcon(
-                    FontAwesomeIcons.chevronRight,
-                    color: Colors.black,
-                  ),
                 ],
               ),
               kGap14,
               RadioButtonGroup(
                 options: timeSlots,
                 decoration: BoxDecoration(
-                  color: MyColors.blue,
+                  color: MyColors.primary,
                   borderRadius: kRadiusAll,
                 ),
                 contentPadding: kPaddH10V2,
-                selectedColor: MyColors.blue,
-                unselectedColor: MyColors.blue,
+                selectedColor: MyColors.primary,
+                unselectedColor: MyColors.primary,
                 unselectedTextColor: Colors.white,
                 textStyle: const TextStyle(
                   color: Colors.white,
@@ -103,8 +96,8 @@ class _DoctorInfo extends StatelessWidget {
         Text(
           name,
           style: const TextStyle(
-            fontSize: Font.medium,
-            color: MyColors.blue,
+            fontSize: Font.mediumSmall,
+            color: MyColors.black,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -115,7 +108,7 @@ class _DoctorInfo extends StatelessWidget {
             color: MyColors.textGrey,
           ),
         ),
-        kGap4,
+        kGap8,
         Text(
           availability,
           style: const TextStyle(

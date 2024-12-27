@@ -1,10 +1,11 @@
 import 'package:backend/backend.dart';
 
 abstract class IEncryptionRepository {
-  Future<PrivateKeyEncryptionResult?> getEncryptedData(String id);
+  Future<List<PrivateKeyEncryptionResult>?> getEncryptedData(String id);
 
-  Future<void> addEncryptionData(String uid, PrivateKeyEncryptionResult data);
+  Future<void> addEncryptionData(
+      String uid, List<PrivateKeyEncryptionResult> data);
 
   Future<void> updateEncryptionData(
-      String uid, PrivateKeyEncryptionResult data);
+      String uid, List<PrivateKeyEncryptionResult> data);
 }

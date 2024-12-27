@@ -95,7 +95,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
 
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: MyColors.blue,
+                      backgroundColor: MyColors.primary,
                       // Placeholder for user avatar
                       child: Text(
                         otherUserId[0].toUpperCase(),
