@@ -50,6 +50,51 @@ class DoctorCard extends StatelessWidget {
                     specialty: specialty,
                     availability: availability,
                   ),
+                  const Spacer(),
+                  // show date
+                  Container(
+                    // outlined
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: MyColors.green,
+                        width: 1,
+                      ),
+                      borderRadius: kRadius10,
+                    ),
+                    width: 50,
+                    height: 60,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          '12',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: MyColors.green,
+                            fontSize: Font.medium,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Divider(
+                          color: MyColors.green.withOpacity(0.5),
+                          thickness: 1,
+                          height: 3,
+                        ),
+                        const Text(
+                          'Oct',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: MyColors.green,
+                            fontSize: Font.extraSmall,
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
                 ],
               ),
               kGap14,
@@ -59,7 +104,10 @@ class DoctorCard extends StatelessWidget {
                   color: MyColors.primary,
                   borderRadius: kRadiusAll,
                 ),
-                contentPadding: kPaddH10V2,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 8,
+                  vertical: 1.5,
+                ),
                 selectedColor: MyColors.primary,
                 unselectedColor: MyColors.primary,
                 unselectedTextColor: Colors.white,
