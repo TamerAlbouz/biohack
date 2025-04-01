@@ -5,7 +5,7 @@ import '../../../styles/sizes.dart';
 
 class CustomIconButton extends StatelessWidget {
   // make this accept Icon or FaIcon
-  final Widget icon;
+  final IconData icon;
   final Function onPressed;
   final bool? disabled;
 
@@ -30,7 +30,11 @@ class CustomIconButton extends StatelessWidget {
         height: 35,
         padding: kPadd0,
         alignment: Alignment.center,
-        child: icon,
+        child: Icon(
+          icon,
+          size: 20,
+          color: disabled == true ? MyColors.grey : MyColors.primary,
+        ),
       ),
     );
   }

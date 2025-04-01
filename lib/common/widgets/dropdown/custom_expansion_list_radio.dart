@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'custom_expand_icon.dart';
 
-const double _kPanelHeaderCollapsedHeight = 36;
+const double _kPanelHeaderCollapsedHeight = 42;
 const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
   vertical: 64.0 - _kPanelHeaderCollapsedHeight,
 );

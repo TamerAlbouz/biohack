@@ -9,6 +9,7 @@ export './src/hashing/hashing.dart';
 export './src/injectable.dart';
 export './src/mail/mail.dart';
 export './src/patient/patient.dart';
+export './src/rate_limiter/rate_limiter.dart';
 export './src/secure_storage/secure_storage.dart';
 export './src/user/interfaces/user_interface.dart';
 export './src/user/user.dart';

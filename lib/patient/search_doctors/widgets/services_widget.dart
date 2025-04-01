@@ -1,3 +1,4 @@
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/patient/search_doctors/models/service_detail.dart';
@@ -20,21 +21,21 @@ class _ServicesState extends State<Services> {
       name: 'General Consultation',
       price: 100,
       duration: '45 mins',
-      availability: 'In-Person &\nOnline',
+      availability: [AppointmentType.online, AppointmentType.inPerson],
       summary: 'General consultation for any health issues',
     ),
     const ServiceDetail(
       name: 'Dental Checkup',
       price: 150,
       duration: '1 hour',
-      availability: 'In-Person',
+      availability: [AppointmentType.inPerson],
       summary: 'Routine dental checkup and cleaning',
     ),
     const ServiceDetail(
       name: 'Vaccination',
       price: 50,
       duration: '30 mins',
-      availability: 'In-Person',
+      availability: [AppointmentType.inPerson],
       summary: 'Vaccination for children and adults',
     ),
   ];

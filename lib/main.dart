@@ -26,6 +26,7 @@ void main() async {
     persistenceEnabled: true,
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
+
   logger.i('Firestore persistence (cache) enabled');
 
   logger.i('Assigning Bloc observer');
@@ -57,11 +58,6 @@ void main() async {
   logger.i('Running application took ${stopwatch.elapsedMilliseconds}ms');
 
   // final mockService = FirestoreMockDataService();
-
-  // Create mock users
-  // Create chat room between first two users
-  // final chatRoomId = await mockService.createMockChatRoom(
-  //     "OIBkRV4PRMYcZTodlm5HHCAvHKJ3", "j6OGfC4BhRguGUSNycrCHy71GfJ3");
 
   runApp(App(authenticationRepository: authenticationRepository));
 }
@@ -112,5 +108,94 @@ class FirestoreMockDataService {
     await batch.commit();
 
     return chatRoomId;
+  }
+
+  Future<List<String>> batchInsertDoctors(
+      List<Map<String, dynamic>> doctorDataList) async {
+    final List<String> insertedIds = [];
+    final batch = FirebaseFirestore.instance.batch();
+    final doctorsCollection = FirebaseFirestore.instance.collection('doctors');
+
+    try {
+      // Process in chunks of 500 (Firestore batch limit)
+      for (var i = 0; i < doctorDataList.length; i += 500) {
+        final chunk = doctorDataList.skip(i).take(500).toList();
+
+        // Create a new batch for each chunk
+        final currentBatch = FirebaseFirestore.instance.batch();
+
+        for (var doctorData in chunk) {
+          // Convert DateTime fields to Timestamps
+          final processedData = {
+            ...doctorData,
+            'createdAt': doctorData['createdAt'] is DateTime
+                ? Timestamp.fromDate(doctorData['createdAt'])
+                : doctorData['createdAt'],
+            'updatedAt': doctorData['updatedAt'] is DateTime
+                ? Timestamp.fromDate(doctorData['updatedAt'])
+                : doctorData['updatedAt'],
+          };
+
+          // Remove null values
+          processedData.removeWhere((key, value) => value == null);
+
+          // Create document reference with auto-generated ID
+          final docRef = doctorsCollection.doc();
+          insertedIds.add(docRef.id);
+
+          // Add to batch
+          currentBatch.set(docRef, processedData);
+        }
+
+        // Commit the current batch
+        await currentBatch.commit();
+      }
+
+      return insertedIds;
+    } catch (e) {
+      throw Exception('Failed to batch insert doctors: ${e.toString()}');
+    }
+  }
+
+// Example usage with 45 doctors:
+  Future<void> insert45Doctors() async {
+    final List<Map<String, dynamic>> doctors = List.generate(
+      45,
+      (index) => {
+        'email': 'doctor$index@hospital.com',
+        'uid': 'uid$index',
+        'active': true,
+        'sex': index % 2 == 0 ? 'M' : 'F',
+        'name': 'Doctor Name $index',
+        'state': 'NY',
+        'licNum': 'MC${10000 + index}',
+        'govIdUrl': 'https://storage.url/govid$index',
+        'medicalLicenseUrl': 'https://storage.url/license$index',
+        'role': 'Specialist',
+        'createdAt': DateTime.now(),
+        'updatedAt': DateTime.now(),
+        'appointments': [],
+        'busy': false,
+        'tokens': 100,
+        'paymentIds': [],
+        'specialties': ['General Medicine'],
+        'reviewIds': [],
+        'availability': {
+          'monday': ['9:00-17:00'],
+          'tuesday': ['9:00-17:00'],
+          'wednesday': ['9:00-17:00'],
+          'thursday': ['9:00-17:00'],
+          'friday': ['9:00-17:00']
+        }
+      },
+    );
+
+    try {
+      final insertedIds = await batchInsertDoctors(doctors);
+      print('Successfully inserted ${insertedIds.length} doctors');
+      print('First few doctor IDs: ${insertedIds.take(5).join(", ")}');
+    } catch (e) {
+      print('Error inserting doctors: $e');
+    }
   }
 }

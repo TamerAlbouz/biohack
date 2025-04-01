@@ -22,7 +22,7 @@ class Patient extends User {
     super.biography,
     this.medicalRecords,
     this.recentDoctors,
-    this.sex,
+    super.sex,
     this.dateOfBirth,
     this.bloodType,
     this.weight,
@@ -35,10 +35,7 @@ class Patient extends User {
   /// List of recent doctors. MAX 3
   final List<String>? recentDoctors;
 
-  /// The current user's sex.
-  final String? sex;
-
-  /// The current user's age.
+  /// The current user's date of birth.
   final DateTime? dateOfBirth;
 
   /// The current user's blood type.

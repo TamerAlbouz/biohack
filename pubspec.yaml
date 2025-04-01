@@ -60,7 +60,7 @@ dependencies:
   permission_handler: ^11.3.1
 
   # Agora
-  agora_rtc_engine: ^6.3.2
+  agora_rtc_engine: ^6.5.0
 
   # Local packages
   p_logger:

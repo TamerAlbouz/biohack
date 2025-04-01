@@ -15,6 +15,7 @@ class User extends Equatable implements IUser {
   const User({
     required this.uid,
     this.role,
+    this.sex,
     required this.email,
     this.name,
     this.busy = false,
@@ -26,6 +27,10 @@ class User extends Equatable implements IUser {
     this.paymentIds,
     this.biography,
   });
+
+  /// The sex of the user
+  @override
+  final String? sex;
 
   /// The current user's role.
   @override
@@ -85,6 +90,7 @@ class User extends Equatable implements IUser {
   User copyWith({
     String? email,
     String? name,
+    String? sex,
     bool? firstTime,
     String? profilePictureUrl,
     DateTime? updatedAt,
@@ -97,6 +103,7 @@ class User extends Equatable implements IUser {
     return User(
       email: email ?? this.email,
       name: name ?? this.name,
+      sex: sex ?? this.sex,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       updatedAt: updatedAt ?? this.updatedAt,
       appointments: appointments ?? this.appointments,
@@ -116,6 +123,7 @@ class User extends Equatable implements IUser {
         name,
         role,
         profilePictureUrl,
+        sex,
         createdAt,
         updatedAt,
         appointments,

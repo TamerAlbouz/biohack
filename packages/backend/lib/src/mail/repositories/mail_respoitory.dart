@@ -25,7 +25,7 @@ class MailRepository implements IMailRepository {
         templateData: templateData,
       );
 
-      logger.i('Sending mail: $mail');
+      logger.i('Sending mail: ${mail.to}');
       await _firestore.collection('mail').add(mail.toFirestore());
     } catch (e) {
       logger.e('Failed to send mail: $e');

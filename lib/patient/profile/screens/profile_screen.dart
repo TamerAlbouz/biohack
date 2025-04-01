@@ -138,8 +138,8 @@ class PatientProfileScreen extends StatelessWidget {
                             fontSize: Font.smallExtra,
                           ),
                         ),
-                        //
                       ),
+                      kGap5
                     ],
                   ),
                 ),
@@ -148,16 +148,17 @@ class PatientProfileScreen extends StatelessWidget {
                   shadow: false,
                   child: Column(
                     children: [
+                      kGap5,
                       _buildActionButton(
                           'Appointment History', Icons.calendar_today),
-                      const CardDivider(),
+                      kGap12,
                       _buildActionButton('Payment Methods', Icons.payment),
-                      kGap10,
+                      kGap12,
                       _buildActionButton('Payment History', Icons.history),
-                      const CardDivider(),
+                      kGap12,
                       _buildActionButton(
                           'Contact Support', Icons.support_agent),
-                      kGap10,
+                      kGap12,
                       _buildActionButton(
                           'Terms & Conditions', Icons.description),
                     ],
@@ -212,34 +213,45 @@ class PatientProfileScreen extends StatelessWidget {
   Widget _buildActionButton(String title, IconData icon) {
     return GestureDetector(
       onTap: () {},
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: MyColors.selectionCardEmpty,
-          borderRadius: kRadius12,
-          border: Border.all(color: MyColors.selectionCardStroke),
-        ),
-        child: Row(
-          children: [
-            kGap16,
-            Icon(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: kPadd6,
+            decoration: BoxDecoration(
+              color: MyColors.primary.withOpacity(0.20),
+              borderRadius: kRadius10,
+            ),
+            child: Icon(
               icon,
               color: MyColors.primary,
             ),
-            kGap10,
-            Text(
-              title,
-              style: const TextStyle(
-                color: MyColors.textBlack,
-                fontSize: Font.smallExtra,
-                fontWeight: FontWeight.bold,
-              ),
+          ),
+          kGap10,
+          Expanded(
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: MyColors.textBlack,
+                        fontSize: Font.smallExtra,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    const Icon(Icons.arrow_forward_ios, size: 16),
+                  ],
+                ),
+                const CardDivider(
+                  height: 22,
+                ),
+              ],
             ),
-            const Spacer(),
-            const Icon(Icons.arrow_forward_ios, size: 16),
-            kGap16,
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

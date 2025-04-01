@@ -7,6 +7,8 @@ class CardDivider extends StatelessWidget {
   final double thickness;
   final Color color;
   final double padding;
+  final double? startIndent;
+  final double? endIndent;
 
   const CardDivider({
     super.key,
@@ -14,6 +16,8 @@ class CardDivider extends StatelessWidget {
     this.thickness = 1.5,
     this.color = MyColors.cardDivider,
     this.padding = 0,
+    this.startIndent,
+    this.endIndent,
   });
 
   @override
@@ -22,8 +26,8 @@ class CardDivider extends StatelessWidget {
       color: color,
       height: height,
       thickness: thickness,
-      indent: padding,
-      endIndent: padding,
+      indent: startIndent ?? padding,
+      endIndent: endIndent ?? padding,
     );
   }
 }

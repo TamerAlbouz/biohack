@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:backend/backend.dart';
 import 'package:flutter/gestures.dart';
@@ -9,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:medtalk/common/functions/generate_random_password.dart';
 import 'package:medtalk/common/widgets/random_hexagons.dart';
 import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
@@ -23,7 +23,7 @@ import '../../../common/widgets/dividers/section_divider.dart';
 import '../../../common/widgets/dropdown/custom_simple_dropdown.dart';
 import '../../../styles/colors.dart';
 import '../../../styles/styles/text.dart';
-import '../cubit/signup_patient_bloc.dart';
+import '../bloc/signup_patient_bloc.dart';
 
 class SignUpPatientScreen extends StatefulWidget {
   const SignUpPatientScreen({super.key});
@@ -95,7 +95,7 @@ class _SignUpPatientScreenState extends State<SignUpPatientScreen>
       'confirmPassword': TextEditingController(),
       'fullName': TextEditingController(),
     };
-    recoveryCode = _generateRandomCode(14);
+    recoveryCode = generateRandomCode(14);
   }
 
   @override
@@ -143,23 +143,6 @@ class _SignUpPatientScreenState extends State<SignUpPatientScreen>
               children: [
                 const Stack(
                   children: [
-                    // card with circular loading with a lock icon in the middle
-                    Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Generating Encryption Keys',
-                            style: TextStyle(
-                              fontSize: Font.large,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          CircularProgressIndicator(),
-                        ],
-                      ),
-                    ),
                     HexagonPatternBox(
                       height: 180,
                       width: double.infinity,
@@ -441,13 +424,6 @@ class _SignUpPatientScreenState extends State<SignUpPatientScreen>
         ),
       ),
     );
-  }
-
-  String _generateRandomCode(int length) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    final random = Random.secure();
-    return List.generate(length, (index) => chars[random.nextInt(chars.length)])
-        .join();
   }
 
   Widget _buildFullNameInput(BuildContext context) {

@@ -33,7 +33,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
     Emitter<RouteState> emit,
   ) {
     // empty roles
-    _userPreferences.clear();
+    _userPreferences.clearRole();
     emit(AuthChooseRole());
   }
 
@@ -132,7 +132,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
   }
 
   Future<void> signOut() async {
-    await _userPreferences.clear();
+    await _userPreferences.clearRole();
 
     // empty the secure storage
     ISecureStorageRepository secureEncryptionStorage =

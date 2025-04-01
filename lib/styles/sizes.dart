@@ -25,6 +25,8 @@ const kGap100 = Gap(100);
 const kGap128 = Gap(128);
 final kRadius20 = BorderRadius.circular(20);
 final kRadius10 = BorderRadius.circular(10);
+final kRadius4 = BorderRadius.circular(4);
+final kRadius6 = BorderRadius.circular(6);
 final kRadius8 = BorderRadius.circular(8);
 final kRadius12 = BorderRadius.circular(12);
 final kRadiusAll = BorderRadius.circular(999);
@@ -73,3 +75,7 @@ const kPaddL15R15T20B20 =
 const kPaddL15R15T10B20 =
     EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 20);
 const kPaddL15R15T50 = EdgeInsets.only(left: 15, right: 15, top: 50);
+const kPaddV8 = EdgeInsets.symmetric(vertical: 8);
+const kPadd6 = EdgeInsets.all(6);
+const kPaddH20V14 = EdgeInsets.symmetric(horizontal: 20, vertical: 14);
+const kPaddV6 = EdgeInsets.symmetric(vertical: 6);

@@ -8,6 +8,8 @@ import '../enums/enums.dart';
 abstract class IUser extends Equatable {
   const IUser();
 
+  String? get sex;
+
   /// The current user's role.
   Role? get role;
 
@@ -52,6 +54,7 @@ abstract class IUser extends Equatable {
   IUser copyWith({
     String? email,
     String? name,
+    String? sex,
     String? profilePictureUrl,
     DateTime? updatedAt,
     List<String>? appointments,
@@ -67,6 +70,7 @@ abstract class IUser extends Equatable {
         uid,
         name,
         role,
+        sex,
         profilePictureUrl,
         createdAt,
         updatedAt,
@@ -86,6 +90,7 @@ class _UserImpl extends IUser {
     this.name,
     this.busy = false,
     this.profilePictureUrl,
+    this.sex,
     // ignore: unused_element
     this.createdAt,
     this.updatedAt,
@@ -97,6 +102,9 @@ class _UserImpl extends IUser {
 
   @override
   final Role? role;
+
+  @override
+  final String? sex;
 
   @override
   final String? profilePictureUrl;
@@ -136,6 +144,7 @@ class _UserImpl extends IUser {
     String? email,
     bool? firstTime,
     String? name,
+    String? sex,
     String? profilePictureUrl,
     DateTime? updatedAt,
     List<String>? appointments,
@@ -147,6 +156,7 @@ class _UserImpl extends IUser {
     return _UserImpl(
       email: email ?? this.email,
       name: name ?? this.name,
+      sex: sex ?? this.sex,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       updatedAt: updatedAt ?? this.updatedAt,
       appointments: appointments ?? this.appointments,
@@ -162,6 +172,7 @@ class _UserImpl extends IUser {
   Map<String, dynamic> get toMap => {
         'email': email,
         'name': name,
+        'sex': sex,
         'role': role,
         'profilePictureUrl': profilePictureUrl,
         'createdAt': createdAt,

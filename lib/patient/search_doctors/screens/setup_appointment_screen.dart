@@ -28,11 +28,26 @@ import '../widgets/selection_group.dart';
 import '../widgets/services_widget.dart';
 
 class SetupAppointmentScreen extends StatefulWidget {
-  const SetupAppointmentScreen({super.key});
+  const SetupAppointmentScreen(
+      {super.key,
+      required this.doctorId,
+      required this.doctorName,
+      required this.specialty});
 
-  static Route<void> route() {
+  final String doctorId;
+  final String doctorName;
+  final String specialty;
+
+  static Route<void> route(
+      {required String doctorId,
+      required doctorName,
+      required String specialty}) {
     return MaterialPageRoute<void>(
-        builder: (_) => const SetupAppointmentScreen());
+        builder: (_) => SetupAppointmentScreen(
+              doctorId: doctorId,
+              doctorName: doctorName,
+              specialty: specialty,
+            ));
   }
 
   @override
@@ -61,7 +76,12 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
     return BlocProvider(
       create: (context) => SetupAppointmentBloc(
         mailRepository: getIt<IMailRepository>(),
-      ),
+        appointmentRepository: getIt<IAppointmentRepository>(),
+        authenticationRepository: getIt<IAuthenticationRepository>(),
+      )..add(UpdateDoctorInfo(
+          widget.doctorId,
+          widget.specialty,
+        )),
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 40,
@@ -215,23 +235,25 @@ class _ChooseServiceType extends StatelessWidget {
               title: 'Treatment',
               subtitle: '1 hr',
               price: 100,
+              value: 60,
             ),
             SelectionItem(
               title: 'Consultation',
               subtitle: '30 mins',
               price: 50,
+              value: 30,
             ),
             SelectionItem(
               title: 'Checkup',
               subtitle: '15 mins',
               price: 30,
+              value: 15,
             ),
           ],
           onSelected: (item, index) {
             context.read<SetupAppointmentBloc>().add(UpdateServiceType(item));
             controller.updateStepResult(controller.currentStep, index);
             controller.markStepComplete();
-            controller.goToNextStep();
           },
         ),
       ],
@@ -258,21 +280,26 @@ class _ChooseAppointmentType extends StatelessWidget {
             selectedIndex: controller.getStepResult(controller.currentStep),
             items: [
               SelectionItem(
-                title: 'In-Person',
+                title: "In Person",
                 subtitle: '1234 Clinic St, Portland, OR 97205',
+                value: AppointmentType.inPerson,
               ),
               SelectionItem(
-                title: 'Online',
+                title: "Online",
                 subtitle: 'Video Call',
+                value: AppointmentType.online,
+              ),
+              SelectionItem(
+                title: "Home Visit",
+                subtitle: 'Your Home',
+                value: AppointmentType.homeVisit,
               ),
             ],
             onSelected: (item, index) {
-              context
-                  .read<SetupAppointmentBloc>()
-                  .add(UpdateAppointmentType(item.title, item.subtitle));
+              context.read<SetupAppointmentBloc>().add(UpdateAppointmentType(
+                  item.value as AppointmentType, item.subtitle));
               controller.updateStepResult(controller.currentStep, index);
               controller.markStepComplete();
-              controller.goToNextStep();
             }),
       ],
     );
@@ -312,7 +339,6 @@ class _ChoosePaymentType extends StatelessWidget {
                   .add(UpdatePaymentType(item.title));
               controller.updateStepResult(controller.currentStep, index);
               controller.markStepComplete();
-              controller.goToNextStep();
             }),
         // add card button
         kGap10,
@@ -342,7 +368,7 @@ class _Summary extends StatelessWidget {
         final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
         final TimeOfDay time = state.appointmentTime;
         final SelectionItem? service = state.selectedService;
-        final String appointmentType = state.selectedAppointment;
+        final String appointmentType = state.selectedAppointment!.value;
         final String appointmentLocation = state.appointmentLocation;
         final String paymentType = state.selectedPayment;
 
@@ -555,8 +581,6 @@ class _PayButton extends StatelessWidget {
       padding: kPaddT15,
       child: ElevatedButton.icon(
         onPressed: () {
-          // show payment dialog. replace this screen onclick with the dashboard screen so when the user dismisses
-          // the payment screen, they are taken back to the dashboard
           context.read<SetupAppointmentBloc>().add(BookAppointment());
           AppGlobal.navigatorKey.currentState!.pushAndRemoveUntil(
             AppointmentConfirmedScreen.route(),
@@ -622,20 +646,25 @@ class _PatientReviewsScreen extends StatelessWidget {
                 alignment: Alignment.centerRight,
               ),
               onPressed: null,
-              child: const Text(
-                '256',
-                textAlign: TextAlign.right,
-                style: kButtonHint,
+              child: TextButton(
+                onPressed: () {
+                  // navigate to all reviews screen
+                },
+                child: const Text(
+                  'View All',
+                  style: kButtonHint,
+                ),
               ),
             ),
           ],
         ),
         kGap10,
         SizedBox(
-          height: 250,
+          height: 175,
           child: ListView.separated(
             shrinkWrap: true,
-            itemCount: 8,
+            itemCount: 2,
+            physics: const NeverScrollableScrollPhysics(),
             separatorBuilder: (context, index) => kGap14,
             itemBuilder: (context, index) {
               return _ReviewCard(
@@ -719,7 +748,7 @@ class _ClinicDetails extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: MyColors.selectionAddCard,
+                color: MyColors.primary.withOpacity(0.25),
                 borderRadius: kRadiusAll,
               ),
               width: 25,
@@ -728,7 +757,7 @@ class _ClinicDetails extends StatelessWidget {
               alignment: Alignment.center,
               child: const FaIcon(
                 FontAwesomeIcons.phone,
-                color: MyColors.textGrey,
+                color: MyColors.primary,
                 size: 14,
               ),
             ),
@@ -747,13 +776,13 @@ class _ClinicDetails extends StatelessWidget {
               height: 25,
               padding: kPadd4,
               decoration: BoxDecoration(
-                color: MyColors.selectionAddCard,
+                color: MyColors.primary.withOpacity(0.25),
                 borderRadius: kRadiusAll,
               ),
               alignment: Alignment.center,
               child: const FaIcon(
                 FontAwesomeIcons.mapLocation,
-                color: MyColors.textGrey,
+                color: MyColors.primary,
                 size: 14,
               ),
             ),
@@ -771,7 +800,7 @@ class _ClinicDetails extends StatelessWidget {
             Container(
               padding: kPadd4,
               decoration: BoxDecoration(
-                color: MyColors.selectionAddCard,
+                color: MyColors.primary.withOpacity(0.25),
                 borderRadius: kRadiusAll,
               ),
               width: 25,
@@ -779,7 +808,7 @@ class _ClinicDetails extends StatelessWidget {
               alignment: Alignment.center,
               child: const FaIcon(
                 FontAwesomeIcons.circleInfo,
-                color: MyColors.textGrey,
+                color: MyColors.primary,
                 size: 14,
               ),
             ),
@@ -836,7 +865,7 @@ class _ClinicLocationState extends State<_ClinicLocation> {
                 borderRadius: kRadius10,
                 color: Colors.grey[300],
               ),
-              height: 150,
+              height: 175,
               width: double.infinity,
               child: ClipRRect(
                 borderRadius: kRadius10,
@@ -882,6 +911,15 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
   Color unselectedColor = MyColors.selectionCardEmpty;
   Color unselectedTextColor = MyColors.textBlack;
   Color borderColor = MyColors.grey;
+
+  @override
+  void initState() {
+    super.initState();
+    // auto set initial date
+    context
+        .read<SetupAppointmentBloc>()
+        .add(UpdateAppointmentDate(DateTime.now()));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -935,12 +973,13 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
           ],
           decoration: BoxDecoration(
             color: MyColors.selectionCardEmpty,
-            borderRadius: kRadius10,
+            borderRadius: kRadius6,
             border: Border.all(
               color: borderColor,
               width: 1,
             ),
           ),
+          columns: 3,
           selectedIndex:
               widget.controller.getStepResult(widget.controller.currentStep),
           contentPadding: kPaddH10V2,
@@ -973,7 +1012,6 @@ class _ChooseAppointmentDateState extends State<_ChooseAppointmentDate> {
                 index,
               );
               widget.controller.markStepComplete();
-              widget.controller.goToNextStep();
             });
           },
         ),

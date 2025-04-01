@@ -7,8 +7,6 @@ import 'package:crypton/crypton.dart';
 import 'package:injectable/injectable.dart';
 import 'package:p_logger/p_logger.dart';
 
-import '../interfaces/secure_encryption_repository_interface.dart';
-
 @LazySingleton(as: ISecureEncryptionStorage)
 class SecureEncryptionStorageRepository implements ISecureEncryptionStorage {
   final ICryptoRepository _cryptoRepository;
@@ -18,48 +16,6 @@ class SecureEncryptionStorageRepository implements ISecureEncryptionStorage {
       this._cryptoRepository, this._secureStorageRepository);
 
   /// Decrypts the private key using the user's password and saves it in the secure storage.
-  @override
-  Future<PrivateKeyDecryptionResult> decryptAndSaveKey(
-      PrivateKeyEncryptionResult encryptedResult, String password) async {
-    try {
-      logger.i('Decrypting private key');
-
-      // Step 1: Generate pbkdfKey using the random salt stored in DB and user's password
-      logger.i('Step 1: Generating PBKDF key');
-      Uint8List pbkdfKey = await _cryptoRepository.generateKey(
-        password,
-        encryptedResult.randomSaltOne,
-      );
-
-      // Step 2: Decrypt private key using the pbkdfKey generated above
-      // and the second random slat stored in DB
-      logger.i('Step 2: Decrypting private key');
-      final Uint8List decryptedPrivateKey = _cryptoRepository.symmetricDecrypt(
-        pbkdfKey,
-        Uint8List.fromList(encryptedResult.randomSaltTwo.codeUnits),
-        Uint8List.fromList(encryptedResult.encryptedPrivateKey.codeUnits),
-      );
-
-      final PrivateKeyDecryptionResult result = PrivateKeyDecryptionResult(
-        publicKey: encryptedResult.publicKey,
-        privateKey: String.fromCharCodes(decryptedPrivateKey),
-        randomSaltOne: encryptedResult.randomSaltOne,
-        randomSaltTwo: encryptedResult.randomSaltTwo,
-      );
-
-      // Step 3: Save the private key in secure storage
-      logger.i('Step 3: Saving private key in secure storage');
-      await _secureStorageRepository.write(
-          'rsaKeys', jsonEncode(result.toJson()));
-
-      logger.i('Private key decrypted and saved');
-      return result;
-    } catch (e) {
-      logger.e('Error decrypting private key: $e');
-      throw Exception('Error decrypting private key');
-    }
-  }
-
   Future<PrivateKeyDecryptionResult?> getKeys() async {
     try {
       final result = await _secureStorageRepository.read('rsaKeys');
@@ -160,7 +116,7 @@ class SecureEncryptionStorageRepository implements ISecureEncryptionStorage {
   }
 
   @override
-  Future<CryptoResult> decrypt(String data) async {
+  Future<CryptoResult> decrypt(Uint8List data) async {
     try {
       final PrivateKeyDecryptionResult? keys = await getKeys();
 

@@ -28,5 +28,5 @@ abstract class ICryptoRepository {
   CryptoResult asymmetricEncrypt(String plainText, RSAPublicKey pubKey);
 
   /// method to decrypt a piece of text using the private key, returns a CryptoResult
-  CryptoResult asymmetricDecrypt(String cipherText, RSAPrivateKey privKey);
+  CryptoResult asymmetricDecrypt(Uint8List cipherText, RSAPrivateKey privKey);
 }

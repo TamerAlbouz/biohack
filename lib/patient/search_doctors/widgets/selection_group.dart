@@ -62,7 +62,7 @@ class _SelectionGroupState extends State<SelectionGroup> {
 class _SelectionCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final double? price;
+  final int? price;
   final bool isSelected;
   final VoidCallback onTap;
 

@@ -418,6 +418,7 @@ class RoundedRadioButton extends StatelessWidget {
     return GestureDetector(
       onTap: onSelected,
       child: Container(
+        alignment: Alignment.center,
         padding: contentPadding ??
             const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: decoration?.copyWith(

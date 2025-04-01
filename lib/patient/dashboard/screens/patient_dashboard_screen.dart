@@ -34,6 +34,7 @@ class DashboardView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocBuilder<PatientBloc, PatientState>(
+        // check that the user has all his data filled. if not, prompt him to fill it by opening a popup
         builder: (context, patientState) {
           switch (patientState) {
             case PatientInitial():
@@ -53,11 +54,12 @@ class DashboardView extends StatelessWidget {
                       kGap6,
                       AppointmentWidget(
                         specialty: 'Ophthalmology',
-                        doctor: 'Dr. John Doe',
+                        name: 'Dr. John Doe',
                         date: 'Sep 20, 2023',
                         time: '10:00 AM',
                         location: 'Room 402',
                         service: 'Eye Checkup',
+                        isReady: true,
                         fee: '100',
                         onJoinCall: () =>
                             AppGlobal.navigatorKey.currentState!.push(
@@ -139,8 +141,9 @@ class _AppointmentContent extends StatelessWidget {
                 time: DateFormat('HH:mm').format(appointment.appointmentDate),
                 location: appointment.location ?? "Online Consultation",
                 specialty:
-                    appointment.specialtyId == "1" ? "Cardiology" : "Dentistry",
-                doctor: "Dr. John Doe",
+                    appointment.specialty == "1" ? "Cardiology" : "Dentistry",
+                isReady: true,
+                name: "Dr. John Doe",
                 service: appointment.serviceName,
                 fee: appointment.fee.toString(),
                 onJoinCall: () {

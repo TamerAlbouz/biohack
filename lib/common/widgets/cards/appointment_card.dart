@@ -11,50 +11,59 @@ class AppointmentWidget extends StatelessWidget {
   const AppointmentWidget({
     super.key,
     required this.specialty,
-    required this.doctor,
+    required this.name,
     required this.date,
     required this.time,
     required this.location,
     required this.service,
     required this.fee,
+    required this.isReady,
     required this.onJoinCall,
+    this.onCardTap,
   });
 
+  // In your AppointmentWidget class, add:
+  final VoidCallback? onCardTap;
   final String specialty;
-  final String doctor;
+  final String name;
   final String date;
   final String time;
   final String location;
   final String service;
+  final bool isReady;
   final String fee;
   final void Function() onJoinCall;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: MyColors.cardUnderpart,
-        borderRadius: kRadius20,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _AppointmentCard(
-            specialty: specialty,
-            doctor: doctor,
-            date: date,
-            time: time,
-            location: location,
-            onJoinCall: onJoinCall,
-          ),
-          kGap4,
-          _CardAppointmentMetadata(
-            doctor: doctor,
-            service: service,
-            fee: fee,
-          ),
-        ],
+    return GestureDetector(
+      onTap: onCardTap,
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: MyColors.cardUnderpart,
+          borderRadius: kRadius20,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _AppointmentCard(
+              specialty: specialty,
+              doctor: name,
+              date: date,
+              time: time,
+              location: location,
+              onJoinCall: onJoinCall,
+              isReady: isReady,
+            ),
+            kGap4,
+            _CardAppointmentMetadata(
+              name: name,
+              service: service,
+              fee: fee,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -83,7 +92,8 @@ class _AppointmentCard extends StatelessWidget {
       required this.date,
       required this.time,
       required this.location,
-      required this.onJoinCall});
+      required this.onJoinCall,
+      required this.isReady});
 
   /// The medical specialty of the appointment (e.g., 'Cardiology').
   ///
@@ -135,6 +145,8 @@ class _AppointmentCard extends StatelessWidget {
   /// ```
   final void Function() onJoinCall;
 
+  final bool isReady;
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -175,29 +187,57 @@ class _AppointmentCard extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: Font.extraSmall, color: Colors.black)),
             kGap6,
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: onJoinCall,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(32),
-                  // Adjust the height as needed
-                  backgroundColor: MyColors.primary,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: kRadiusAll,
+            if (isReady) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: onJoinCall,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(32),
+                    // Adjust the height as needed
+                    backgroundColor: MyColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: kRadiusAll,
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Join Call',
-                  style: TextStyle(
-                    fontSize: Font.small,
-                    fontWeight: FontWeight.bold,
-                    color: MyColors.buttonText,
+                  child: const Text(
+                    'Join Call',
+                    style: TextStyle(
+                      fontSize: Font.small,
+                      fontWeight: FontWeight.bold,
+                      color: MyColors.buttonText,
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
+            if (!isReady) ...[
+              // keep the button but make it disabled and right Waiting for scheduled time
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: null,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(32),
+                    // Adjust the height as needed
+                    backgroundColor: MyColors.primary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: kRadiusAll,
+                    ),
+                  ),
+                  child: const Text(
+                    'Waiting for scheduled time',
+                    style: TextStyle(
+                      fontSize: Font.small,
+                      fontWeight: FontWeight.bold,
+                      color: MyColors.textGrey,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -213,7 +253,7 @@ class _CardAppointmentMetadata extends StatelessWidget {
   ///
   /// ### Properties:
   ///
-  /// * [doctor] (required): The name of the doctor (used in informational text).
+  /// * [name] (required): The name of the doctor (used in informational text).
   /// * [service] (required): The type of service provided in the appointment (e.g., 'Consultation').
   /// * [fee] (required): The fee for the service (e.g., '100').
   ///
@@ -222,7 +262,7 @@ class _CardAppointmentMetadata extends StatelessWidget {
   /// This section is displayed below the main appointment information and includes metadata items such as service and fee,
   /// followed by an informational section on the doctor’s background.
   const _CardAppointmentMetadata({
-    required this.doctor,
+    required this.name,
     required this.service,
     required this.fee,
   });
@@ -233,7 +273,7 @@ class _CardAppointmentMetadata extends StatelessWidget {
   /// ```dart
   /// 'Dr. John Doe'
   /// ```
-  final String doctor;
+  final String name;
 
   /// The type of service provided in the appointment.
   ///
@@ -274,23 +314,11 @@ class _CardAppointmentMetadata extends StatelessWidget {
             thickness: 1,
           ),
           kGap6,
-          Text("Before starting, some info on $doctor",
-              style: const TextStyle(
+          const Text("Click to view more details",
+              style: TextStyle(
                   fontSize: Font.extraSmall,
                   color: Colors.black,
                   fontWeight: FontWeight.bold)),
-          // bullet points
-          kGap6,
-          const Text("•  10+ years of experience",
-              style: TextStyle(
-                  fontSize: Font.tag,
-                  color: Colors.black,
-                  fontWeight: FontWeight.normal)),
-          const Text("•  Specializes in Glaucoma",
-              style: TextStyle(
-                  fontSize: Font.tag,
-                  color: Colors.black,
-                  fontWeight: FontWeight.normal)),
         ],
       ),
     );

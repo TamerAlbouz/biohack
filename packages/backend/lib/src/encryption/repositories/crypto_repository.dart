@@ -121,7 +121,7 @@ class CryptoRepository extends ICryptoRepository {
   Future<Uint8List> generateKey(
     String password,
     String salt, {
-    Argon2Profile profile = Argon2Profile.highMemory,
+    Argon2Profile profile = Argon2Profile.balanced,
   }) async {
     final params = Argon2Config.profiles[profile]!;
     final passwordBytes = utf8.encode(password);
@@ -165,23 +165,24 @@ class CryptoRepository extends ICryptoRepository {
   CryptoResult asymmetricEncrypt(String plainText, RSAPublicKey pubKey) {
     try {
       logger.i('Encrypting text using asymmetric algorithm');
-      String encrypted = pubKey.encrypt(plainText);
+      //  return as Uint8List
+      Uint8List encrypted = pubKey.encryptData(utf8.encode(plainText));
       logger.i('Text encrypted');
-      return CryptoResult(data: encrypted, status: true);
+      return CryptoResult(data: BinaryData(encrypted.toList()), status: true);
     } catch (err) {
-      return CryptoResult(data: err.toString(), status: false);
+      return CryptoResult(error: err.toString(), status: false);
     }
   }
 
   @override
-  CryptoResult asymmetricDecrypt(String cipherText, RSAPrivateKey privKey) {
+  CryptoResult asymmetricDecrypt(Uint8List cipherText, RSAPrivateKey privKey) {
     try {
       logger.i('Decrypting text using asymmetric algorithm');
-      String decoded = privKey.decrypt(cipherText);
+      String decoded = privKey.decrypt(utf8.decode(cipherText));
       logger.i('Text decrypted');
-      return CryptoResult(data: decoded, status: true);
+      return CryptoResult(data: StringData(decoded), status: true);
     } catch (err) {
-      return CryptoResult(data: err.toString(), status: false);
+      return CryptoResult(error: err.toString(), status: false);
     }
   }
 }

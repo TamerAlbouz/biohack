@@ -36,8 +36,18 @@ class UserPreferences {
     }
   }
 
+  // clear all
+  Future<void> clearAll() async {
+    try {
+      await _sharedPreferences.clear();
+    } on Exception catch (e) {
+      logger.e('Error clearing user data: $e');
+      rethrow;
+    }
+  }
+
   // Clear user data
-  Future<void> clear() async {
+  Future<void> clearRole() async {
     try {
       await _sharedPreferences.remove(_keyRole);
     } on Exception catch (e) {

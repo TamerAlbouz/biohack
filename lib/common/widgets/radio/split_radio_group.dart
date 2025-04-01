@@ -14,6 +14,7 @@ class AmPmSplitRadioGroup extends StatefulWidget {
   final Color? unselectedColor;
   final EdgeInsets? contentPadding;
   final Color? unselectedTextColor;
+  final int? columns;
   final TextStyle? textStyle;
   final void Function(String, int) onChanged;
   final int? selectedIndex;
@@ -28,6 +29,7 @@ class AmPmSplitRadioGroup extends StatefulWidget {
     this.unselectedColor,
     this.contentPadding,
     this.unselectedTextColor,
+    this.columns,
     this.textStyle,
     this.selectedIndex,
     required this.onChanged,
@@ -47,10 +49,74 @@ class _AmPmSplitRadioGroupState extends State<AmPmSplitRadioGroup> {
   }
 
   Widget _buildRadioButtonsWrapper(List<String> options, int startIndex) {
-    return Wrap(
-      runSpacing: 8.0,
-      children: _buildRadioButtons(options, startIndex),
+    final int columns = widget.columns ?? 1;
+
+    if (columns > 1) {
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
+          mainAxisSpacing: 8.0,
+          crossAxisSpacing: 8.0,
+          childAspectRatio: 4,
+        ),
+        itemCount: options.length,
+        itemBuilder: (context, index) {
+          return _buildRadioButton(options, startIndex, index);
+        },
+      );
+    } else {
+      return Wrap(
+        runSpacing: 8.0,
+        children: _buildRadioButtons(options, startIndex),
+      );
+    }
+  }
+
+  Widget _buildRadioButton(List<String> options, int startIndex, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: RoundedRadioButton(
+        label: options[index],
+        isSelected: _selectedIndex == (startIndex + index),
+        decoration: widget.decoration,
+        selectedColor: widget.selectedColor,
+        unselectedColor: widget.unselectedColor,
+        contentPadding: widget.contentPadding,
+        unselectedTextColor: widget.unselectedTextColor,
+        textStyle: widget.textStyle,
+        onSelected: () {
+          setState(() {
+            if (widget.onSelected != null) {
+              widget.onSelected!(true);
+            }
+            _selectedIndex = startIndex + index;
+
+            // Convert to 24-hour format
+            final isAm = startIndex == 0;
+            String twentyFourHourTime =
+                _convertTo24HourFormat(options[index], isAm: isAm);
+
+            widget.onChanged(twentyFourHourTime, _selectedIndex!);
+          });
+        },
+      ),
     );
+  }
+
+  String _convertTo24HourFormat(String time, {bool isAm = true}) {
+    List<String> parts = time.split(':');
+    int hours = int.parse(parts[0]);
+    String minutes = parts[1];
+
+    if (!isAm && hours != 12) {
+      hours += 12;
+    } else if (isAm && hours == 12) {
+      hours = 0;
+    }
+
+    return '${hours.toString().padLeft(2, '0')}:$minutes';
   }
 
   List<Widget> _buildRadioButtons(List<String> options, int startIndex) {
@@ -74,30 +140,11 @@ class _AmPmSplitRadioGroupState extends State<AmPmSplitRadioGroup> {
                 }
                 _selectedIndex = startIndex + i;
 
-                // get the 24 hour format
-                // Convert to 24-hour format
-                String convertTo24HourFormat(String time, {bool isAm = true}) {
-                  // Split the time into hours and minutes
-                  List<String> parts = time.split(':');
-                  int hours = int.parse(parts[0]);
-                  String minutes = parts[1];
-
-                  // Determine if it's PM and adjust hours accordingly
-                  if (!isAm && hours != 12) {
-                    hours += 12;
-                  } else if (isAm && hours == 12) {
-                    hours = 0;
-                  }
-
-                  // Remove AM/PM and pad with zero if needed
-                  return '${hours.toString().padLeft(2, '0')}:$minutes';
-                }
-
                 // check if it's AM or PM by looking at the startIndex
                 final isAm = startIndex == 0;
 
                 String twentyFourHourTime =
-                    convertTo24HourFormat(options[i], isAm: isAm);
+                    _convertTo24HourFormat(options[i], isAm: isAm);
 
                 widget.onChanged(twentyFourHourTime, _selectedIndex!);
               });

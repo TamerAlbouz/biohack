@@ -1,6 +1,21 @@
+sealed class CryptoData {}
+
+class StringData extends CryptoData {
+  final String value;
+
+  StringData(this.value);
+}
+
+class BinaryData extends CryptoData {
+  final List<int> value;
+
+  BinaryData(this.value);
+}
+
 class CryptoResult {
   final bool status;
-  final String data;
+  final CryptoData? data;
+  final String? error;
 
-  CryptoResult({required this.data, required this.status});
+  CryptoResult({this.data, required this.status, this.error});
 }

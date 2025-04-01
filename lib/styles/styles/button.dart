@@ -4,6 +4,22 @@ import 'package:medtalk/styles/font.dart';
 
 import '../sizes.dart';
 
+final kElevatedButtonCommonStyleOutline = ElevatedButton.styleFrom(
+  shape: RoundedRectangleBorder(
+      borderRadius: kRadius10,
+      side: const BorderSide(color: MyColors.primary, width: 2)),
+  backgroundColor: MyColors.selectionCardEmpty,
+  foregroundColor: MyColors.primary,
+  textStyle: const TextStyle(
+    fontFamily: Font.family,
+    fontSize: Font.mediumExtra,
+    fontWeight: FontWeight.bold,
+  ),
+  elevation: 0,
+  minimumSize: const Size(double.infinity, 50),
+  alignment: Alignment.center,
+);
+
 final kElevatedButtonCommonStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(borderRadius: kRadius10),
   backgroundColor: MyColors.primary,

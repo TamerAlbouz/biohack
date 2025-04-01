@@ -50,106 +50,68 @@ class _CustomStepperControlsState extends State<CustomStepperControls> {
         widget.darkMode ? Colors.grey[200] : Colors.grey[200];
 
     return SafeArea(
-      child: Container(
-        padding: kPaddH20V10,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            GestureDetector(
-                onTap: widget.controller.currentStep > 0
-                    ? widget.controller.goToPreviousStep
-                    : null,
-                child: Container(
-                  padding: kPaddH10V8,
-                  width: 110,
-                  decoration: BoxDecoration(
-                    color: widget.controller.currentStep > 0
-                        ? activeColor
-                        : inactiveColor,
-                    borderRadius: kRadius8,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.arrow_back_ios,
-                        size: 15,
-                        color: widget.controller.currentStep > 0
-                            ? (widget.darkMode
-                                ? MyColors.primary
-                                : MyColors.white)
-                            : disabledTextColor,
-                      ),
-                      Text(
-                        'Previous',
-                        style: TextStyle(
-                          fontSize: Font.smallExtra,
-                          color: widget.controller.currentStep > 0
-                              ? (widget.darkMode
-                                  ? MyColors.primary
-                                  : MyColors.white)
-                              : disabledTextColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
-            // Step Indicator
-            Text(
-              '${widget.controller.currentStep + 1} of ${widget.controller.completedSteps.length}',
-              style: TextStyle(
-                fontSize: Font.small,
-                fontWeight: FontWeight.w600,
-                color: textColor,
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: widget.controller.currentStep > 0
+                ? widget.controller.goToPreviousStep
+                : null,
+            child: Padding(
+              padding: kPaddV8,
+              child: SizedBox(
+                width: 40,
+                child: Icon(
+                  Icons.arrow_back_ios,
+                  size: 24,
+                  color: widget.controller.currentStep > 0
+                      ? activeColor
+                      : inactiveColor,
+                ),
               ),
             ),
-            if (widget.controller.currentStep <
-                widget.controller.completedSteps.length - 1)
-              GestureDetector(
-                onTap: (widget.controller
-                            .completedSteps[widget.controller.currentStep]) &&
-                        widget.controller.currentStep <
-                            widget.controller.completedSteps.length - 1
-                    ? () => widget.controller
-                        .goToNextStep(delay: const Duration(milliseconds: 0))
-                    : null,
-                child: Container(
-                  alignment: Alignment.center,
-                  width: 110,
-                  padding: kPaddH10V8,
-                  decoration: BoxDecoration(
-                    color: (widget.controller.completedSteps[
-                                widget.controller.currentStep]) &&
-                            widget.controller.currentStep <
-                                widget.controller.completedSteps.length - 1
-                        ? activeColor
-                        : inactiveColor,
-                    borderRadius: kRadius8,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Next',
-                        style: TextStyle(
-                          fontSize: Font.smallExtra,
-                          color: (widget.controller.completedSteps[
-                                      widget.controller.currentStep]) &&
-                                  widget.controller.currentStep <
-                                      widget.controller.completedSteps.length -
-                                          1
-                              ? (widget.darkMode
-                                  ? MyColors.primary
-                                  : MyColors.white)
-                              : disabledTextColor,
-                        ),
-                      ),
-                      kGap8,
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        size: 15,
+          ),
+          kGap8,
+          // Step Indicator
+          Text(
+            '${widget.controller.currentStep + 1} of ${widget.controller.completedSteps.length}',
+            style: TextStyle(
+              fontSize: Font.small,
+              fontWeight: FontWeight.w600,
+              color: textColor,
+            ),
+          ),
+          const Spacer(),
+          if (widget.controller.currentStep <
+              widget.controller.completedSteps.length - 1)
+            GestureDetector(
+              onTap: (widget.controller
+                          .completedSteps[widget.controller.currentStep]) &&
+                      widget.controller.currentStep <
+                          widget.controller.completedSteps.length - 1
+                  ? () => widget.controller
+                      .goToNextStep(delay: const Duration(milliseconds: 0))
+                  : null,
+              child: Container(
+                alignment: Alignment.center,
+                width: 110,
+                padding: kPaddH10V8,
+                decoration: BoxDecoration(
+                  color: (widget.controller
+                              .completedSteps[widget.controller.currentStep]) &&
+                          widget.controller.currentStep <
+                              widget.controller.completedSteps.length - 1
+                      ? activeColor
+                      : inactiveColor,
+                  borderRadius: kRadius8,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Next',
+                      style: TextStyle(
+                        fontSize: Font.smallExtra,
                         color: (widget.controller.completedSteps[
                                     widget.controller.currentStep]) &&
                                 widget.controller.currentStep <
@@ -159,18 +121,31 @@ class _CustomStepperControlsState extends State<CustomStepperControls> {
                                 : MyColors.white)
                             : disabledTextColor,
                       ),
-                    ],
-                  ),
+                    ),
+                    kGap8,
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 15,
+                      color: (widget.controller.completedSteps[
+                                  widget.controller.currentStep]) &&
+                              widget.controller.currentStep <
+                                  widget.controller.completedSteps.length - 1
+                          ? (widget.darkMode
+                              ? MyColors.primary
+                              : MyColors.white)
+                          : disabledTextColor,
+                    ),
+                  ],
                 ),
               ),
-            // Next Button
-            if (!(widget.controller.currentStep <
-                widget.controller.completedSteps.length - 1))
-              const SizedBox(
-                width: 110,
-              ),
-          ],
-        ),
+            ),
+          // Next Button
+          if (!(widget.controller.currentStep <
+              widget.controller.completedSteps.length - 1))
+            const SizedBox(
+              width: 110,
+            ),
+        ],
       ),
     );
   }

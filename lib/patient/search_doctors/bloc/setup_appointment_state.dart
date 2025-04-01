@@ -2,60 +2,65 @@ part of 'setup_appointment_bloc.dart';
 
 final class SetupAppointmentState extends Equatable {
   final bool reBuild;
-  final String serviceType;
+  final String specialty;
+  final String doctorId;
   final DateTime? appointmentDate;
   final TimeOfDay appointmentTime;
   final SelectionItem? selectedService;
-  final String selectedAppointment;
+  final AppointmentType? selectedAppointment;
   final String appointmentLocation;
   final String selectedPayment;
-  final List<String> serviceTypes;
+  final String errorMessage;
 
   const SetupAppointmentState(
       {this.reBuild = false,
-      this.serviceTypes = const [],
-      this.serviceType = '',
+      this.specialty = '',
       this.appointmentDate,
+      this.doctorId = '',
       this.appointmentTime = const TimeOfDay(hour: 0, minute: 0),
       this.appointmentLocation = '',
       this.selectedService,
-      this.selectedAppointment = '',
-      this.selectedPayment = ''});
+      this.selectedAppointment,
+      this.selectedPayment = '',
+      this.errorMessage = ''});
 
   SetupAppointmentState copyWith({
     bool? reBuild,
-    String? serviceType,
+    String? specialty,
+    String? doctorId,
     DateTime? appointmentDate,
     TimeOfDay? appointmentTime,
     String? appointmentLocation,
     SelectionItem? selectedService,
-    String? selectedAppointment,
+    AppointmentType? selectedAppointment,
     String? selectedPayment,
-    List<String>? serviceTypes,
+    String? errorMessage,
   }) {
     return SetupAppointmentState(
       reBuild: reBuild ?? this.reBuild,
-      serviceTypes: serviceTypes ?? this.serviceTypes,
+      doctorId: doctorId ?? this.doctorId,
       appointmentDate: appointmentDate ?? this.appointmentDate,
       appointmentLocation: appointmentLocation ?? this.appointmentLocation,
       appointmentTime: appointmentTime ?? this.appointmentTime,
       selectedService: selectedService ?? this.selectedService,
       selectedAppointment: selectedAppointment ?? this.selectedAppointment,
       selectedPayment: selectedPayment ?? this.selectedPayment,
-      serviceType: serviceType ?? this.serviceType,
+      specialty: specialty ?? this.specialty,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
   @override
   List<Object?> get props => [
         reBuild,
-        serviceTypes,
-        serviceType,
+        doctorId,
+        specialty,
         appointmentDate,
         appointmentTime,
         appointmentLocation,
         selectedService,
         selectedAppointment,
-        selectedPayment
+        selectedPayment,
+        errorMessage
       ];
 }

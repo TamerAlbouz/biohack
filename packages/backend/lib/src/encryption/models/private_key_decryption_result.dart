@@ -18,7 +18,6 @@ class PrivateKeyDecryptionResult extends Equatable {
   });
 
   @override
-  // TODO: implement props
   List<Object?> get props =>
       [publicKey, privateKey, randomSaltOne, randomSaltTwo];
 

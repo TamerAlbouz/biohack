@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/app/screens/auth_screen.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/doctor/navigation/screens/navigation_doctor_screen.dart';
-import 'package:medtalk/login/bloc/login_bloc.dart';
 import 'package:medtalk/patient/dashboard/bloc/patient/patient_bloc.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
 import 'package:medtalk/styles/themes.dart';
@@ -49,15 +48,6 @@ class App extends StatelessWidget {
             create: (_) => PatientBloc(
               patientRepo: getIt<IPatientRepository>(),
               authRepo: getIt<IAuthenticationRepository>(),
-            ),
-          ),
-          BlocProvider(
-            lazy: false,
-            create: (_) => LoginBloc(
-              getIt<IAuthenticationRepository>(),
-              getIt<IEncryptionRepository>(),
-              getIt<ISecureStorageRepository>(),
-              getIt<ICryptoRepository>(),
             ),
           ),
         ],

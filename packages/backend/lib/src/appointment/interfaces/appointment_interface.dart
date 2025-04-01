@@ -1,28 +1,25 @@
-import '../models/appointment.dart';
+import 'package:backend/backend.dart';
 
 abstract class IAppointmentRepository {
-  /// Stream of [Appointment] which will emit a list of appointments.
-  ///
-  /// Emits an empty list if there are no appointments.
-  Future<List<Appointment>> getAppointments();
+  /// Get a specific appointment by ID
+  Future<Appointment?> getAppointment(String id);
 
-  /// Stream of [Appointment] which will emit the appointment with the given [appointmentId].
-  ///
-  /// Emits an empty stream if the appointment is not found.
-  Future<Appointment> getAppointment(String appointmentId);
+  /// Get all appointments for a specific doctor
+  Future<List<Appointment>> getDoctorAppointments(String doctorId);
 
-  /// Adds a new appointment to the collection.
-  ///
-  /// Throws a [FirebaseException] if an exception occurs.
-  Future<void> addAppointment(Appointment appointment);
+  /// Get all appointments for a specific patient
+  Future<List<Appointment>> getPatientAppointments(String patientId);
 
-  /// Updates the appointment with the given [appointmentId].
-  ///
-  /// Throws a [FirebaseException] if an exception occurs.
+  /// Create a new appointment
+  Future<void> createAppointment(Appointment appointment);
+
+  /// Update an existing appointment
   Future<void> updateAppointment(Appointment appointment);
 
-  /// Deletes the appointment with the given [appointmentId].
-  ///
-  /// Throws a [FirebaseException] if an exception occurs.
-  Future<void> deleteAppointment(String appointmentId);
+  /// Update only the status of an appointment
+  Future<void> updateAppointmentStatus(
+      String appointmentId, AppointmentStatus status);
+
+  /// Cancel an appointment
+  Future<void> cancelAppointment(String appointmentId);
 }

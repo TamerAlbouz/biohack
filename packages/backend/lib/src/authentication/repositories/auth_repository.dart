@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:http/http.dart' as http;
 import 'package:injectable/injectable.dart';
+import 'package:p_logger/p_logger.dart';
 
 import '../../../backend.dart';
 
@@ -11,9 +14,11 @@ import '../../../backend.dart';
 class AuthenticationRepository implements IAuthenticationRepository {
   /// {@macro authentication_repository}
   final firebase_auth.FirebaseAuth _firebaseAuth;
-  final GoogleSignIn _googleSignIn;
+  final FirebaseFunctions functions;
+  final String _functionUrl =
+      'https://us-central1-medtalk-aefa8.cloudfunctions.net/';
 
-  AuthenticationRepository(this._firebaseAuth, this._googleSignIn);
+  AuthenticationRepository(this._firebaseAuth, this.functions);
 
   /// Stream of [User] which will emit the current user when
   /// the authentication state changes.
@@ -27,6 +32,26 @@ class AuthenticationRepository implements IAuthenticationRepository {
     });
   }
 
+  /// Gets the uid of the provided email
+  ///
+  /// Throws a [Exception] if an exception occurs.
+  @override
+  Future<String> getUidFromEmail({required String email}) async {
+    try {
+      final uid = await functions.httpsCallable('getUidFromEmail').call({
+        'email': email,
+      });
+
+      return uid.data;
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      logger.e('${e.code} - ${e.message}');
+      rethrow;
+    } catch (exception) {
+      logger.e(exception.toString());
+      rethrow;
+    }
+  }
+
   /// Delete the currently authenticated user.
   ///
   /// Throws a [Exception] if an exception occurs.
@@ -34,16 +59,30 @@ class AuthenticationRepository implements IAuthenticationRepository {
   Future<void> deleteUser() async {
     try {
       await _firebaseAuth.currentUser?.delete();
-    } catch (_) {
-      throw Exception('Unable to delete user');
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      logger.e('${e.code} - ${e.message}');
+      rethrow;
+    } catch (exception) {
+      logger.e(exception.toString());
+      rethrow;
     }
   }
 
   /// Returns the current user.
-  /// Defaults to [User.empty] if there is no user.
+  /// Uses custom user data if set, otherwise falls back to Firebase user data
   @override
   User get currentUser {
     return _firebaseAuth.currentUser?.toUser ?? User.empty;
+  }
+
+  /// Sets custom user data for the current user
+  @override
+  Future<void> updateProfile(User user) async {
+    // Set the display name and photo URL
+    await _firebaseAuth.currentUser?.updateProfile(
+      displayName: user.name,
+      photoURL: user.profilePictureUrl,
+    );
   }
 
   /// Returns if the user is anonymous.
@@ -89,8 +128,10 @@ class AuthenticationRepository implements IAuthenticationRepository {
       // Send verification email right after sign up
       await userCredential.user?.sendEmailVerification();
     } on firebase_auth.FirebaseAuthException catch (e) {
+      logger.e('${e.code} - ${e.message}');
       throw SignUpWithEmailAndPasswordFailure.fromCode(e.code);
-    } catch (_) {
+    } catch (exception) {
+      logger.e(exception.toString());
       throw const SignUpWithEmailAndPasswordFailure();
     }
   }
@@ -132,8 +173,10 @@ class AuthenticationRepository implements IAuthenticationRepository {
         password: password,
       );
     } on firebase_auth.FirebaseAuthException catch (e) {
+      logger.e('${e.code} - ${e.message}');
       throw LogInWithEmailAndPasswordFailure.fromCode(e.code);
     } catch (e) {
+      logger.e(e.toString());
       throw LogInWithEmailAndPasswordFailure(e.toString());
     }
   }
@@ -145,7 +188,8 @@ class AuthenticationRepository implements IAuthenticationRepository {
   Future<void> logInAnonymously() async {
     try {
       await _firebaseAuth.signInAnonymously();
-    } catch (_) {
+    } catch (e) {
+      logger.e(e.toString());
       throw LogInAnonymouslyFailure();
     }
   }
@@ -159,9 +203,9 @@ class AuthenticationRepository implements IAuthenticationRepository {
     try {
       await Future.wait([
         _firebaseAuth.signOut(),
-        _googleSignIn.signOut(),
       ]);
-    } catch (_) {
+    } catch (e) {
+      logger.e(e.toString());
       throw LogOutFailure();
     }
   }
@@ -172,12 +216,61 @@ class AuthenticationRepository implements IAuthenticationRepository {
   @override
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email);
-    } on firebase_auth.FirebaseAuthException catch (e) {
-      throw SendResetPasswordException(e.code);
-    } catch (_) {
-      throw SendResetPasswordException(
-          "An error occurred while sending the password reset email.");
+      // Make an HTTP POST to the onRequest function endpoint
+      final response = await http.post(
+        Uri.parse("$_functionUrl/generateResetCode"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        if (responseData['success'] == true) {
+          // Password reset code sent successfully
+          logger.i('Password reset code sent successfully');
+        } else {
+          // The function responded with something other than { success: true }
+          logger.e('Failed to send reset code');
+          throw Exception('Failed to send reset code');
+        }
+      } else {
+        // Non-200 HTTP status code indicates an error.
+        logger.e('Failed to send password reset email');
+        final errorData = jsonDecode(response.body);
+        final errorMsg = errorData['error'] ?? 'Unknown error';
+        throw Exception('Error: $errorMsg');
+      }
+    } catch (e) {
+      logger.e(e.toString());
+      // Handle or propagate the error as needed
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool> verifyResetCode({
+    required String email,
+    required String code,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$_functionUrl/verifyResetCode"),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'code': code}),
+      );
+
+      if (response.statusCode != 200) {
+        final responseData = jsonDecode(response.body);
+        logger.e('Failed to verify reset code: ${responseData['error']}');
+        return false;
+      }
+
+      logger.i('Reset code verified successfully');
+      final responseData = jsonDecode(response.body);
+      return responseData['success'] == true;
+    } catch (e) {
+      logger.e(e.toString());
+      return false;
     }
   }
 
@@ -185,16 +278,30 @@ class AuthenticationRepository implements IAuthenticationRepository {
   ///
   /// Throws a [ResetPasswordException] if an exception occurs.
   @override
-  Future<void> confirmResetPassword(
-      {required String code, required String password}) async {
+  Future<void> resetPasswordWithCode({
+    required String email,
+    required String code,
+    required String newPassword,
+  }) async {
     try {
-      await _firebaseAuth.confirmPasswordReset(
-          code: code, newPassword: password);
+      final result = await functions.httpsCallable('updateUserPassword').call({
+        'email': email,
+        'code': code,
+        'newPassword': newPassword,
+      });
+
+      if (result.data['success'] == true) {
+        logger.i('Password reset successfully');
+      } else {
+        logger.e('Failed to reset password');
+        throw ResetPasswordException('Failed to reset password');
+      }
     } on firebase_auth.FirebaseAuthException catch (e) {
+      logger.e('${e.code} - ${e.message}');
       throw ResetPasswordException(e.code);
-    } catch (_) {
-      throw ResetPasswordException(
-          "An error occurred while resetting the password.");
+    } catch (e) {
+      logger.e(e.toString());
+      throw ResetPasswordException('Failed to reset password');
     }
   }
 }

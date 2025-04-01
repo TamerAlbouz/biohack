@@ -11,7 +11,7 @@
 // import 'package:medtalk/styles/sizes.dart';
 //
 // import '../../../common/widgets/wave_gradient.dart';
-// import '../cubit/signup_patient_cubit.dart';
+// import '../bloc/signup_patient_cubit.dart';
 //
 // class SignUpPatientScreen extends StatefulWidget {
 //   const SignUpPatientScreen({super.key});

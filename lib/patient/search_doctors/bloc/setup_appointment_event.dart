@@ -23,6 +23,19 @@ class UpdateServiceType extends SetupAppointmentEvent {
   List<Object?> get props => [serviceType];
 }
 
+class UpdateDoctorInfo extends SetupAppointmentEvent {
+  final String doctorId;
+  final String specialty;
+
+  const UpdateDoctorInfo(
+    this.doctorId,
+    this.specialty,
+  );
+
+  @override
+  List<Object?> get props => [specialty, doctorId];
+}
+
 class UpdateAppointmentTime extends SetupAppointmentEvent {
   final TimeOfDay time;
 
@@ -42,7 +55,7 @@ class UpdateAppointmentDate extends SetupAppointmentEvent {
 }
 
 class UpdateAppointmentType extends SetupAppointmentEvent {
-  final String appointmentType;
+  final AppointmentType appointmentType;
   final String appointmentLocation;
 
   const UpdateAppointmentType(this.appointmentType, this.appointmentLocation);

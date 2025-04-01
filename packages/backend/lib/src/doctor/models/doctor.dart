@@ -9,6 +9,11 @@ class Doctor extends User {
   const Doctor({
     required super.email,
     required super.uid,
+    required this.state,
+    required this.licNum,
+    required this.govIdUrl,
+    required this.medicalLicenseUrl,
+    required this.active,
     super.name,
     required super.role,
     super.busy,
@@ -16,16 +21,31 @@ class Doctor extends User {
     super.createdAt,
     super.updatedAt,
     super.appointments,
+    super.sex,
     super.tokens,
     super.paymentIds,
     super.biography,
-    this.sessionLength,
     this.specialties,
     this.reviewIds,
-    this.availability,
+    required this.availability,
     this.notes,
     this.clinicId,
   });
+
+  /// URL of the doctor's government ID.
+  final String govIdUrl;
+
+  /// URL of the doctor's medical license.
+  final String medicalLicenseUrl;
+
+  /// Whether the doctor is active or not.
+  final bool active;
+
+  /// The state in which the doctor is licensed.
+  final String state;
+
+  /// License Number
+  final String licNum;
 
   /// list of doctor specialties (simple titles)
   final List<String>? specialties;
@@ -34,10 +54,7 @@ class Doctor extends User {
   final List<String>? reviewIds;
 
   /// Example: {'monday': ['09:00', '10:00']}
-  final Map<String, List<String>>? availability;
-
-  /// The length of each session in minutes.
-  final int? sessionLength;
+  final Map<String, List<String>?> availability;
 
   /// IDs of Notes taken by the doctor during or after a consultation.
   final List<String>? notes;
@@ -51,6 +68,12 @@ class Doctor extends User {
     String? email,
     String? name,
     bool? firstTime,
+    String? sex,
+    String? state,
+    String? licNum,
+    String? govIdUrl,
+    String? medicalLicenseUrl,
+    bool? active,
     String? profilePictureUrl,
     DateTime? updatedAt,
     List<String>? appointments,
@@ -60,15 +83,20 @@ class Doctor extends User {
     String? biography,
     List<String>? specialties,
     List<String>? reviewIds,
-    Map<String, List<String>>? availability,
-    int? sessionLength,
+    Map<String, List<String>?>? availability,
     List<String>? notes,
     String? clinicId,
   }) {
     return Doctor(
+      active: active ?? this.active,
       email: email ?? this.email,
       uid: uid,
       name: name ?? this.name,
+      sex: sex ?? this.sex,
+      state: state ?? this.state,
+      licNum: licNum ?? this.licNum,
+      govIdUrl: govIdUrl ?? this.govIdUrl,
+      medicalLicenseUrl: medicalLicenseUrl ?? this.medicalLicenseUrl,
       role: role,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       createdAt: createdAt,
@@ -78,7 +106,6 @@ class Doctor extends User {
       tokens: tokens ?? this.tokens,
       paymentIds: paymentIds ?? this.paymentIds,
       biography: biography ?? this.biography,
-      sessionLength: sessionLength ?? this.sessionLength,
       specialties: specialties ?? this.specialties,
       reviewIds: reviewIds ?? this.reviewIds,
       availability: availability ?? this.availability,
@@ -92,8 +119,14 @@ class Doctor extends User {
     return Doctor(
       email: data['email'],
       uid: docId,
+      active: data['active'],
       name: data['name'],
-      role: Role.values.byName(data['role']),
+      state: data['state'],
+      sex: data['sex'],
+      licNum: data['licNum'],
+      govIdUrl: data['govIdUrl'],
+      medicalLicenseUrl: data['medicalLicenseUrl'],
+      role: Role.doctor,
       profilePictureUrl: data['profilePictureUrl'],
       createdAt: data['createdAt'].toDate(),
       updatedAt: data['updatedAt']?.toDate(),
@@ -101,8 +134,8 @@ class Doctor extends User {
           ? List<String>.from(data['appointments'])
           : [],
       busy: data['busy'],
-      tokens: data['tokens'],
-      paymentIds: data['paymentIds'],
+      tokens: ["100"],
+      paymentIds: [],
       biography: data['biography'],
       specialties: data['specialties'] != null
           ? List<String>.from(data['specialties'])
@@ -110,11 +143,8 @@ class Doctor extends User {
       reviewIds: data['reviewIds'] != null
           ? List<String>.from(data['reviewIds'])
           : null,
-      availability: data['availability'] != null
-          ? (data['availability'] as Map<String, dynamic>)
-              .map((k, v) => MapEntry(k, List<String>.from(v)))
-          : null,
-      sessionLength: data['sessionLength'],
+      availability: (data['availability'] as Map<String, dynamic>)
+          .map((k, v) => MapEntry(k, List<String>.from(v))),
       notes: data['notes'] != null ? List<String>.from(data['notes']) : null,
       clinicId: data['clinicId'],
     );
@@ -125,7 +155,13 @@ class Doctor extends User {
     return {
       'email': email,
       'uid': uid,
+      'active': active,
+      'sex': sex,
       'name': name,
+      'state': state,
+      'licNum': licNum,
+      'govIdUrl': govIdUrl,
+      'medicalLicenseUrl': medicalLicenseUrl,
       'role': role!.name,
       'profilePictureUrl': profilePictureUrl,
       'createdAt': createdAt,
@@ -138,7 +174,6 @@ class Doctor extends User {
       'specialties': specialties,
       'reviewIds': reviewIds,
       'availability': availability,
-      'sessionLength': sessionLength,
       'notes': notes,
       'clinicId': clinicId,
     };
@@ -149,9 +184,15 @@ class Doctor extends User {
         email,
         uid,
         name,
+        state,
+        licNum,
+        govIdUrl,
+        medicalLicenseUrl,
         role,
+        sex,
         profilePictureUrl,
         createdAt,
+        active,
         updatedAt,
         appointments,
         busy,
@@ -161,7 +202,6 @@ class Doctor extends User {
         specialties,
         reviewIds,
         availability,
-        sessionLength,
         notes,
         clinicId,
       ];

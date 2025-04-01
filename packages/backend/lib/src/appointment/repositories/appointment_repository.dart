@@ -1,9 +1,8 @@
+import 'package:backend/backend.dart';
 import 'package:backend/src/extensions/object.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 import 'package:p_logger/p_logger.dart';
-
-import '../../../backend.dart';
 
 @LazySingleton(as: IAppointmentRepository)
 class AppointmentRepository implements IAppointmentRepository {
@@ -15,73 +14,96 @@ class AppointmentRepository implements IAppointmentRepository {
   }
 
   @override
-  Future<List<Appointment>> getAppointments() {
+  Future<Appointment?> getAppointment(String id) async {
     try {
-      return _appointmentCollection.get().then((querySnapshot) {
-        return querySnapshot.docs
-            .map((doc) => Appointment.fromMap(doc.id, doc.data().toMap()))
-            .toList();
-      });
-    } on FirebaseException catch (e) {
-      logger.e(e.message);
-      throw AppointmentException.fromCode(e.code);
+      final doc = await _appointmentCollection.doc(id).get();
+      if (doc.exists) {
+        return Appointment.fromMap(id, doc.data()!.toMap());
+      }
+      return null;
     } catch (e) {
-      logger.e(e);
+      logger.e('Error getting appointment: $e');
       rethrow;
     }
   }
 
   @override
-  Future<Appointment> getAppointment(String appointmentId) {
+  Future<List<Appointment>> getDoctorAppointments(String doctorId) async {
     try {
-      return _appointmentCollection.doc(appointmentId).get().then(
-          (doc) => Appointment.fromMap(appointmentId, doc.data().toMap()));
-    } on FirebaseException catch (e) {
-      logger.e(e.message);
-      throw AppointmentException.fromCode(e.code);
+      final query = await _appointmentCollection
+          .where('doctorId', isEqualTo: doctorId)
+          .get();
+
+      return query.docs
+          .map((doc) => Appointment.fromMap(doc.id, doc.data().toMap()))
+          .toList();
     } catch (e) {
-      logger.e(e);
+      logger.e('Error getting doctor appointments: $e');
       rethrow;
     }
   }
 
   @override
-  Future<void> addAppointment(Appointment appointment) {
+  Future<List<Appointment>> getPatientAppointments(String patientId) async {
     try {
-      return _appointmentCollection.add(appointment.toMap());
-    } on FirebaseException catch (e) {
-      logger.e(e.message);
-      throw AppointmentException.fromCode(e.code);
+      final query = await _appointmentCollection
+          .where('patientId', isEqualTo: patientId)
+          .get();
+
+      return query.docs
+          .map((doc) => Appointment.fromMap(doc.id, doc.data().toMap()))
+          .toList();
     } catch (e) {
-      logger.e(e);
+      logger.e('Error getting patient appointments: $e');
       rethrow;
     }
   }
 
   @override
-  Future<void> updateAppointment(Appointment appointment) {
+  Future<void> createAppointment(Appointment appointment) async {
     try {
-      return _appointmentCollection
+      await _appointmentCollection.add(appointment.toMap());
+    } catch (e) {
+      logger.e('Error creating appointment: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateAppointment(Appointment appointment) async {
+    try {
+      await _appointmentCollection
           .doc(appointment.appointmentId)
           .update(appointment.toMap());
-    } on FirebaseException catch (e) {
-      logger.e(e.message);
-      throw AppointmentException.fromCode(e.code);
     } catch (e) {
-      logger.e(e);
+      logger.e('Error updating appointment: $e');
       rethrow;
     }
   }
 
   @override
-  Future<void> deleteAppointment(String appointmentId) {
+  Future<void> updateAppointmentStatus(
+      String appointmentId, AppointmentStatus status) async {
     try {
-      return _appointmentCollection.doc(appointmentId).delete();
-    } on FirebaseException catch (e) {
-      logger.e(e.message);
-      throw AppointmentException.fromCode(e.code);
+      await _appointmentCollection.doc(appointmentId).update({
+        'status': status.toString(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
     } catch (e) {
-      logger.e(e);
+      logger.e('Error updating appointment status: $e');
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> cancelAppointment(String appointmentId) async {
+    try {
+      await _appointmentCollection.doc(appointmentId).update({
+        'status': AppointmentStatus.canceled.toString(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      logger.e('Error cancelling appointment: $e');
       rethrow;
     }
   }

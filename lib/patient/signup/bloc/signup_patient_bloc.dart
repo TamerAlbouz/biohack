@@ -314,16 +314,17 @@ class SignUpPatientBloc extends Bloc<SignUpPatientEvent, SignUpPatientState> {
 
       await _patientRepository.addPatient(patient);
       _authenticationRepository.sendEmailVerification();
+      _authenticationRepository.updateProfile(patient);
       logger.i('Patient profile created successfully');
       emit(state.copyWith(
           status: FormzSubmissionStatus.inProgress,
           requiresEmailVerification: true));
-    } catch (e) {
-      logger.e('Error during signup submission: $e');
+    } on SignUpWithEmailAndPasswordFailure catch (exception) {
+      logger.e('Error during signup submission: ${exception.message}');
       emit(state.copyWith(
         status: FormzSubmissionStatus.failure,
         requiresEmailVerification: false,
-        errorMessage: e.toString(),
+        errorMessage: exception.message,
       ));
     }
   }

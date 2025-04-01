@@ -1,4 +1,5 @@
 enum AppointmentStatus {
+  initiated,
   confirmed,
   canceled,
   inProgress,
