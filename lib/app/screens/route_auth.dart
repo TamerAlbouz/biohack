@@ -4,11 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/app/screens/auth_screen.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/doctor/navigation/screens/navigation_doctor_screen.dart';
-import 'package:medtalk/patient/dashboard/bloc/patient/patient_bloc.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
 import 'package:medtalk/styles/themes.dart';
 
 import '../../login/screens/login_screen.dart';
+import '../../patient/dashboard/bloc/patient/patient_bloc.dart';
 import '../bloc/auth/route_bloc.dart';
 
 class App extends StatelessWidget {
@@ -45,11 +45,10 @@ class App extends StatelessWidget {
               ..add(AuthSubscriptionRequested()),
           ),
           BlocProvider(
-            create: (_) => PatientBloc(
-              patientRepo: getIt<IPatientRepository>(),
-              authRepo: getIt<IAuthenticationRepository>(),
-            ),
-          ),
+              create: (_) => PatientBloc(
+                    patientRepo: getIt<IPatientRepository>(),
+                    authRepo: getIt<IAuthenticationRepository>(),
+                  )..add(LoadPatient())),
         ],
         child: _AppView(
           authenticationRepository: _authenticationRepository,
@@ -62,7 +61,7 @@ class App extends StatelessWidget {
 class _AppView extends StatefulWidget {
   final IAuthenticationRepository authenticationRepository;
 
-  const _AppView({super.key, required this.authenticationRepository});
+  const _AppView({required this.authenticationRepository});
 
   @override
   State<_AppView> createState() => _AppViewState();

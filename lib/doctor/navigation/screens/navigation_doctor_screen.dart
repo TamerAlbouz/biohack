@@ -3,10 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/doctor/appointments/bloc/doctor_appointments_bloc.dart';
+import 'package:medtalk/doctor/dashboard/screens/doctor_dashboard_screen.dart';
+import 'package:medtalk/doctor/design/screens/design_screen.dart';
+import 'package:medtalk/doctor/patients/screens/patients_screen.dart';
 
-import '../../../app/bloc/auth/route_bloc.dart';
 import '../../../common/widgets/custom_bottom_navbar.dart';
 import '../../appointments/screens/appointments_screen.dart';
+import '../../dashboard/bloc/doctor_dashboard_bloc.dart';
+import '../../patients/bloc/patients_list_bloc.dart';
+import '../../stats/bloc/statistics_bloc.dart';
+import '../../stats/screens/statistics_screen.dart';
 import '../cubit/navigation_doctor_cubit.dart';
 import '../enums/navbar_screen_items_doctor.dart';
 
@@ -29,6 +35,24 @@ class NavigationDoctorScreen extends StatelessWidget {
                   getIt<IAppointmentRepository>(),
                   context.read<IAuthenticationRepository>(),
                   getIt<IPatientRepository>(),
+                )..add(LoadDoctorAppointments())),
+        BlocProvider<DoctorDashboardBloc>(
+            create: (context) => DoctorDashboardBloc(
+                  getIt<IAuthenticationRepository>(),
+                  getIt<IAppointmentRepository>(),
+                  getIt<IPatientRepository>(),
+                )),
+        BlocProvider<DoctorStatsBloc>(
+            create: (context) => DoctorStatsBloc(
+                  getIt<IAuthenticationRepository>(),
+                  getIt<IAppointmentRepository>(),
+                  getIt<IPatientRepository>(),
+                )),
+        BlocProvider<PatientsBloc>(
+            create: (context) => PatientsBloc(
+                  getIt<IAuthenticationRepository>(),
+                  getIt<IPatientRepository>(),
+                  getIt<IAppointmentRepository>(),
                 )),
       ],
       child: const NavigationPatientView(),
@@ -72,9 +96,9 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
             label: 'Design',
           ),
           BottomNavigationBarItem(
-            activeIcon: Icon(Icons.settings, size: 27),
-            icon: Icon(Icons.settings_outlined, size: 27),
-            label: 'Settings',
+            activeIcon: Icon(Icons.people_alt, size: 27),
+            icon: Icon(Icons.people_alt_outlined, size: 27),
+            label: 'Patients',
           ),
         ],
         onTap: _onItemTapped,
@@ -102,7 +126,7 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
         break;
       case 4:
         BlocProvider.of<NavigationDoctorCubit>(context)
-            .getCurrentNavbarItem(NavbarScreenItemsDoctor.settings);
+            .getCurrentNavbarItem(NavbarScreenItemsDoctor.patients);
         break;
       default:
         BlocProvider.of<NavigationDoctorCubit>(context)
@@ -121,39 +145,16 @@ class _Body extends StatelessWidget {
         builder: (context, state) {
       switch (state.navbarItem) {
         case NavbarScreenItemsDoctor.dashboard:
-          return const Column(
-            children: [
-              Text('Dashboard Screen'),
-              // logout button
-              _LogoutButton(),
-            ],
-          );
+          return const DoctorDashboardScreen();
         case NavbarScreenItemsDoctor.appointments:
           return const DoctorAppointmentsScreen();
         case NavbarScreenItemsDoctor.stats:
-          return const Text('Stats Screen');
+          return const DoctorStatsScreen();
         case NavbarScreenItemsDoctor.design:
-          return const Text('Design Screen');
-        case NavbarScreenItemsDoctor.settings:
-          return const Text('Settings Screen');
-        default:
-          return const Text('Dashboard Screen');
+          return const DesignScreen();
+        case NavbarScreenItemsDoctor.patients:
+          return const PatientsScreen();
       }
     });
-  }
-}
-
-class _LogoutButton extends StatelessWidget {
-  const _LogoutButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      child: const Text('Logout'),
-      onPressed: () {
-        context.read<RouteBloc>().add(AuthLogoutPressed());
-        // navigate to the auth screen
-      },
-    );
   }
 }

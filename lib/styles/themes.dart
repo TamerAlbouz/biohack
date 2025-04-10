@@ -8,6 +8,55 @@ ThemeData get lightTheme {
     fontFamily: Font.family,
     fontFamilyFallback: const [Font.family],
     scaffoldBackgroundColor: MyColors.background,
+    // This sets the color for all progress indicators including RefreshIndicator
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: MyColors.primary,
+      // This specifically controls RefreshIndicator color
+      primary: MyColors.primary,
+    ),
+    // You can also set it directly here, though colorScheme is preferred in newer Flutter versions
+    primaryColor: MyColors.primary,
+    timePickerTheme: TimePickerThemeData(
+      helpTextStyle: const TextStyle(
+        fontSize: Font.medium,
+        fontWeight: FontWeight.normal,
+        color: MyColors.textBlack,
+      ),
+      backgroundColor: MyColors.cardBackground,
+      hourMinuteShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      dayPeriodShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      dayPeriodColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.selected)
+              ? MyColors.primary
+              : Colors.transparent),
+      dayPeriodTextColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.selected)
+              ? Colors.white
+              : MyColors.textBlack),
+      hourMinuteColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.selected)
+              ? MyColors.primary.withValues(alpha: 0.2)
+              : Colors.transparent),
+      hourMinuteTextColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.selected)
+              ? MyColors.primary
+              : MyColors.textBlack),
+      dialBackgroundColor: MyColors.cardBackground,
+      dialHandColor: MyColors.primary,
+      dialTextColor: WidgetStateColor.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? Colors.white
+            : MyColors.textBlack,
+      ),
+      entryModeIconColor: MyColors.primary,
+    ),
+    dialogTheme: const DialogTheme(
+      backgroundColor: MyColors.cardBackground,
+    ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: MyColors.primary,

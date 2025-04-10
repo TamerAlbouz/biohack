@@ -14,11 +14,18 @@ class AppointmentRepository implements IAppointmentRepository {
   }
 
   @override
-  Future<Appointment?> getAppointment(String id) async {
+  Future<Appointment?> getPatientAppointmentLatest(String patientId) async {
     try {
-      final doc = await _appointmentCollection.doc(id).get();
-      if (doc.exists) {
-        return Appointment.fromMap(id, doc.data()!.toMap());
+      // get the appointment by patientId. only the one with the latest date
+      final doc = await _appointmentCollection
+          .where('patientId', isEqualTo: patientId)
+          .orderBy('appointmentDate', descending: false)
+          .limit(1)
+          .get()
+          .then((query) => query.docs.isNotEmpty ? query.docs.first : null);
+
+      if (doc != null) {
+        return Appointment.fromMap(doc.id, doc.data()!.toMap());
       }
       return null;
     } catch (e) {
@@ -86,7 +93,7 @@ class AppointmentRepository implements IAppointmentRepository {
       String appointmentId, AppointmentStatus status) async {
     try {
       await _appointmentCollection.doc(appointmentId).update({
-        'status': status.toString(),
+        'status': status.name,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
@@ -99,7 +106,7 @@ class AppointmentRepository implements IAppointmentRepository {
   Future<void> cancelAppointment(String appointmentId) async {
     try {
       await _appointmentCollection.doc(appointmentId).update({
-        'status': AppointmentStatus.canceled.toString(),
+        'status': AppointmentStatus.cancelled.name,
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {

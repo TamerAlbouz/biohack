@@ -1,5 +1,5 @@
 enum MedicalDocumentType {
   prescription,
-  report,
-  other,
+  labReport,
+  imaging,
 }

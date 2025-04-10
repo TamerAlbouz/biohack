@@ -1,8 +1,8 @@
 import 'package:backend/backend.dart';
 
 abstract class IAppointmentRepository {
-  /// Get a specific appointment by ID
-  Future<Appointment?> getAppointment(String id);
+  /// Get a specific appointment by Patient ID
+  Future<Appointment?> getPatientAppointmentLatest(String id);
 
   /// Get all appointments for a specific doctor
   Future<List<Appointment>> getDoctorAppointments(String doctorId);

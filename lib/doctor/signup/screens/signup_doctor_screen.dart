@@ -243,32 +243,3 @@ class _SignUpDoctorScreenState extends State<SignUpDoctorScreen> {
     );
   }
 }
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color color;
-
-  const _SectionTitle({
-    required this.title,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, color: color),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-}

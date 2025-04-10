@@ -12,4 +12,6 @@ abstract class IDoctorRepository extends IUserRepository {
 
   Future<(List<Doctor> doctors, DocumentSnapshot? lastDoc)> getDoctorsPaginated(
       int limit, DocumentSnapshot? lastDocument);
+
+  Future<List<Doctor>> getPatientDoctors(String patientId);
 }

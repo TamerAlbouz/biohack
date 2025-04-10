@@ -1,4 +1,6 @@
 // https://github.com/furkansarihan/firestore_collection/blob/master/lib/firestore_document.dart
+// ignore_for_file: file_names
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 extension FirestoreDocumentExtension on DocumentReference {

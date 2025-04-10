@@ -1,8 +1,9 @@
 import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:medtalk/doctor/appointments/models/appointment_card.dart';
 import 'package:p_logger/p_logger.dart';
+
+import '../models/appointments_models.dart';
 
 part 'doctor_appointments_event.dart';
 part 'doctor_appointments_state.dart';
@@ -20,9 +21,12 @@ class DoctorAppointmentsBloc
   ) : super(DoctorAppointmentsInitial()) {
     on<LoadDoctorAppointments>(_onLoadDoctorAppointments);
     on<FilterDoctorAppointments>(_onFilterDoctorAppointments);
+    on<FilterAppointments>(_onFilterAppointments);
+    on<ResetFilters>(_onResetFilters);
     on<UpdateAppointmentStatus>(_onUpdateAppointmentStatus);
     on<MarkAppointmentViewed>(_onMarkAppointmentViewed);
     on<ClearAllViewedBadges>(_onClearAllViewedBadges);
+    on<ClearTabViewedBadges>(_onClearTabViewedBadges);
   }
 
   void _onMarkAppointmentViewed(
@@ -47,12 +51,51 @@ class DoctorAppointmentsBloc
   ) {
     if (state is DoctorAppointmentsLoaded) {
       final currentState = state as DoctorAppointmentsLoaded;
-      final allAppointmentIds = currentState.upcomingAppointments
+      final allAppointmentIds = [
+        ...currentState.upcomingAppointments,
+        ...currentState.missedAppointments,
+      ]
           .map((appointment) => appointment.appointment.appointmentId as String)
           .toSet();
 
       emit(currentState.copyWith(
         viewedAppointmentIds: allAppointmentIds,
+      ));
+    }
+  }
+
+  void _onClearTabViewedBadges(
+    ClearTabViewedBadges event,
+    Emitter<DoctorAppointmentsState> emit,
+  ) {
+    if (state is DoctorAppointmentsLoaded) {
+      final currentState = state as DoctorAppointmentsLoaded;
+
+      Set<String> tabAppointmentIds;
+
+      switch (event.tab) {
+        case AppointmentTab.upcoming:
+          tabAppointmentIds = currentState.upcomingAppointments
+              .map((appointment) =>
+                  appointment.appointment.appointmentId as String)
+              .toSet();
+          break;
+        case AppointmentTab.missed:
+          tabAppointmentIds = currentState.missedAppointments
+              .map((appointment) =>
+                  appointment.appointment.appointmentId as String)
+              .toSet();
+          break;
+        default:
+          return; // No action needed for other tabs
+      }
+
+      final updatedViewedIds =
+          Set<String>.from(currentState.viewedAppointmentIds)
+            ..addAll(tabAppointmentIds);
+
+      emit(currentState.copyWith(
+        viewedAppointmentIds: updatedViewedIds,
       ));
     }
   }
@@ -75,73 +118,74 @@ class DoctorAppointmentsBloc
 
       logger.d('Retrieved ${appointments.length} appointments');
 
-      // Separate today's appointments and upcoming appointments
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final tomorrow = today.add(const Duration(days: 1));
-
-      final List<AppointmentPatientCard> todayAppointments = await Future.wait(
-        appointments.where((appointment) {
-          final appointmentDate = appointment.appointmentDate;
-          return appointmentDate
-                  .isAfter(now.subtract(const Duration(hours: 2))) &&
-              appointmentDate.isBefore(tomorrow);
-        }).map((appointment) async {
-          final patient =
-              await _patientRepository.getPatient(appointment.patientId);
-
-          // error if patient is null
-          if (patient == null) {
-            logger.e(
-                'Patient not found for appointment: ${appointment.appointmentId}');
-            emit(DoctorAppointmentsError(
-                'Patient not found for appointment: ${appointment.appointmentId}'));
-          }
-
-          return AppointmentPatientCard(
-            appointment: appointment,
-            patient: patient!,
-          );
-        }).toList(),
+      // Process the appointments
+      await _processAndEmitAppointments(
+        emit,
+        appointments,
+        null,
+        null,
+        const AppointmentFilterCriteria(),
       );
-
-// Sort today's appointments by time
-      todayAppointments.sort((a, b) => a.appointment.appointmentDate
-          .compareTo(b.appointment.appointmentDate));
-
-      final List<AppointmentPatientCard> upcomingAppointments =
-          await Future.wait(
-        appointments.where((appointment) {
-          return appointment.appointmentDate.isAfter(tomorrow);
-        }).map((appointment) async {
-          final patient =
-              await _patientRepository.getPatient(appointment.patientId);
-
-          // error if patient is null
-          if (patient == null) {
-            logger.e(
-                'Patient not found for appointment: ${appointment.appointmentId}');
-            emit(DoctorAppointmentsError(
-                'Patient not found for appointment: ${appointment.appointmentId}'));
-          }
-
-          return AppointmentPatientCard(
-            appointment: appointment,
-            patient: patient!,
-          );
-        }).toList(),
-      );
-
-// Sort upcoming appointments by date
-      upcomingAppointments.sort((a, b) => a.appointment.appointmentDate
-          .compareTo(b.appointment.appointmentDate));
-
-      emit(DoctorAppointmentsLoaded(
-        todayAppointments: todayAppointments,
-        upcomingAppointments: upcomingAppointments,
-      ));
     } catch (e) {
       logger.e('Error loading doctor appointments: $e');
+      emit(DoctorAppointmentsError(e.toString()));
+    }
+  }
+
+  Future<void> _onResetFilters(
+    ResetFilters event,
+    Emitter<DoctorAppointmentsState> emit,
+  ) async {
+    if (state is DoctorAppointmentsLoaded) {
+      try {
+        emit(DoctorAppointmentsLoading());
+
+        // Get the current doctor ID
+        final currentUser = _authRepository.currentUser;
+
+        // Get appointments for the doctor
+        final appointments =
+            await _appointmentRepository.getDoctorAppointments(currentUser.uid);
+
+        // Process with no filters
+        await _processAndEmitAppointments(
+          emit,
+          appointments,
+          null,
+          null,
+          const AppointmentFilterCriteria(),
+        );
+      } catch (e) {
+        logger.e('Error resetting filters: $e');
+        emit(DoctorAppointmentsError(e.toString()));
+      }
+    }
+  }
+
+  Future<void> _onFilterAppointments(
+    FilterAppointments event,
+    Emitter<DoctorAppointmentsState> emit,
+  ) async {
+    try {
+      emit(DoctorAppointmentsLoading());
+
+      // Get the current doctor ID
+      final currentUser = _authRepository.currentUser;
+
+      // Get all appointments for the doctor
+      final appointments =
+          await _appointmentRepository.getDoctorAppointments(currentUser.uid);
+
+      // Process and apply the filter criteria
+      await _processAndEmitAppointments(
+        emit,
+        appointments,
+        event.filterCriteria.fromDate,
+        event.filterCriteria.toDate,
+        event.filterCriteria,
+      );
+    } catch (e) {
+      logger.e('Error filtering appointments: $e');
       emit(DoctorAppointmentsError(e.toString()));
     }
   }
@@ -160,91 +204,175 @@ class DoctorAppointmentsBloc
       final appointments =
           await _appointmentRepository.getDoctorAppointments(currentUser.uid);
 
-      // Apply date filters if specified
-      final filteredAppointments = appointments.where((appointment) {
-        if (event.fromDate != null &&
-            appointment.appointmentDate.isBefore(event.fromDate!)) {
-          return false;
-        }
-        if (event.toDate != null &&
-            appointment.appointmentDate
-                .isAfter(event.toDate!.add(const Duration(days: 1)))) {
-          return false;
-        }
-        return true;
-      }).toList();
-
-      // Separate today's appointments and upcoming appointments
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      final tomorrow = today.add(const Duration(days: 1));
-
-      final List<AppointmentPatientCard> todayAppointments = await Future.wait(
-        filteredAppointments.where((appointment) {
-          final appointmentDate = appointment.appointmentDate;
-          return appointmentDate
-                  .isAfter(now.subtract(const Duration(hours: 2))) &&
-              appointmentDate.isBefore(tomorrow);
-        }).map((appointment) async {
-          final patient =
-              await _patientRepository.getPatient(appointment.patientId);
-
-          // error if patient is null
-          if (patient == null) {
-            logger.e(
-                'Patient not found for appointment: ${appointment.appointmentId}');
-            emit(DoctorAppointmentsError(
-                'Patient not found for appointment: ${appointment.appointmentId}'));
-          }
-
-          return AppointmentPatientCard(
-            appointment: appointment,
-            patient: patient!,
-          );
-        }).toList(),
-      );
-
-// Sort today's appointments by time
-      todayAppointments.sort((a, b) => a.appointment.appointmentDate
-          .compareTo(b.appointment.appointmentDate));
-
-      final List<AppointmentPatientCard> upcomingAppointments =
-          await Future.wait(
-        filteredAppointments.where((appointment) {
-          return appointment.appointmentDate.isAfter(tomorrow);
-        }).map((appointment) async {
-          final patient =
-              await _patientRepository.getPatient(appointment.patientId);
-
-          // error if patient is null
-          if (patient == null) {
-            logger.e(
-                'Patient not found for appointment: ${appointment.appointmentId}');
-            emit(DoctorAppointmentsError(
-                'Patient not found for appointment: ${appointment.appointmentId}'));
-          }
-
-          return AppointmentPatientCard(
-            appointment: appointment,
-            patient: patient!,
-          );
-        }).toList(),
-      );
-
-// Sort upcoming appointments by date
-      upcomingAppointments.sort((a, b) => a.appointment.appointmentDate
-          .compareTo(b.appointment.appointmentDate));
-
-      emit(DoctorAppointmentsLoaded(
-        todayAppointments: todayAppointments,
-        upcomingAppointments: upcomingAppointments,
+      // Create filter criteria from legacy event
+      final filterCriteria = AppointmentFilterCriteria(
         fromDate: event.fromDate,
         toDate: event.toDate,
-      ));
+      );
+
+      // Process and emit appointments
+      await _processAndEmitAppointments(
+        emit,
+        appointments,
+        event.fromDate,
+        event.toDate,
+        filterCriteria,
+      );
     } catch (e) {
       logger.e('Error filtering doctor appointments: $e');
       emit(DoctorAppointmentsError(e.toString()));
     }
+  }
+
+  Future<void> _processAndEmitAppointments(
+    Emitter<DoctorAppointmentsState> emit,
+    List<Appointment> appointments,
+    DateTime? fromDate,
+    DateTime? toDate,
+    AppointmentFilterCriteria filterCriteria,
+  ) async {
+    // Apply date and other filters if specified
+    final filteredAppointments = appointments.where((appointment) {
+      // Date range filter
+      if (fromDate != null && appointment.appointmentDate.isBefore(fromDate)) {
+        return false;
+      }
+      if (toDate != null &&
+          appointment.appointmentDate
+              .isAfter(toDate.add(const Duration(days: 1)))) {
+        return false;
+      }
+
+      // Status filter
+      if (filterCriteria.statusFilter != null &&
+          !filterCriteria.statusFilter!.contains(appointment.status)) {
+        return false;
+      }
+
+      // Service name filter
+      if (filterCriteria.serviceNameFilter != null &&
+          !appointment.serviceName
+              .toLowerCase()
+              .contains(filterCriteria.serviceNameFilter!.toLowerCase())) {
+        return false;
+      }
+
+      // Location filter
+      if (filterCriteria.locationFilter != null &&
+          (appointment.location == null ||
+              !appointment.location!
+                  .toLowerCase()
+                  .contains(filterCriteria.locationFilter!.toLowerCase()))) {
+        return false;
+      }
+
+      return true;
+    }).toList();
+
+    // Categorize appointments
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+
+    // Create lists to hold categorized appointments
+    final List<Appointment> todayAppointmentsList = [];
+    final List<Appointment> upcomingAppointmentsList = [];
+    final List<Appointment> pastAppointmentsList = [];
+    final List<Appointment> missedAppointmentsList = [];
+
+    // Categorize appointments
+    for (final appointment in filteredAppointments) {
+      final appointmentDate = appointment.appointmentDate;
+      final appointmentDay = DateTime(
+          appointmentDate.year, appointmentDate.month, appointmentDate.day);
+
+      // Check if it's a missed appointment
+      if (appointment.status == AppointmentStatus.cancelled ||
+          (appointmentDate.isBefore(now) &&
+              appointment.status != AppointmentStatus.completed)) {
+        missedAppointmentsList.add(appointment);
+      }
+      // Check if it's today's appointment
+      else if (appointmentDate
+              .isAfter(now.subtract(const Duration(hours: 2))) &&
+          appointmentDay.isAtSameMomentAs(today)) {
+        todayAppointmentsList.add(appointment);
+      }
+      // Check if it's an upcoming appointment
+      else if (appointmentDate.isAfter(tomorrow)) {
+        upcomingAppointmentsList.add(appointment);
+      }
+      // Otherwise, it's a past appointment
+      else if (appointmentDate.isBefore(now)) {
+        pastAppointmentsList.add(appointment);
+      }
+    }
+
+    // Create AppointmentPatientCard objects for each category
+    final todayAppointments =
+        await _createAppointmentCards(todayAppointmentsList);
+    final upcomingAppointments =
+        await _createAppointmentCards(upcomingAppointmentsList);
+    final pastAppointments =
+        await _createAppointmentCards(pastAppointmentsList);
+    final missedAppointments =
+        await _createAppointmentCards(missedAppointmentsList);
+
+    // Sort appointments by date
+    todayAppointments.sort((a, b) =>
+        a.appointment.appointmentDate.compareTo(b.appointment.appointmentDate));
+    upcomingAppointments.sort((a, b) =>
+        a.appointment.appointmentDate.compareTo(b.appointment.appointmentDate));
+    pastAppointments.sort((a, b) => b.appointment.appointmentDate
+        .compareTo(a.appointment.appointmentDate)); // Reverse for past
+    missedAppointments.sort((a, b) => b.appointment.appointmentDate
+        .compareTo(a.appointment.appointmentDate)); // Reverse for missed
+
+    // Get viewed appointment IDs from current state if possible
+    Set<String> viewedAppointmentIds = {};
+    if (state is DoctorAppointmentsLoaded) {
+      viewedAppointmentIds =
+          (state as DoctorAppointmentsLoaded).viewedAppointmentIds;
+    }
+
+    // Emit loaded state with categorized appointments
+    emit(DoctorAppointmentsLoaded(
+      todayAppointments: todayAppointments,
+      upcomingAppointments: upcomingAppointments,
+      pastAppointments: pastAppointments,
+      missedAppointments: missedAppointments,
+      fromDate: fromDate,
+      toDate: toDate,
+      viewedAppointmentIds: viewedAppointmentIds,
+      filterCriteria: filterCriteria,
+    ));
+  }
+
+  Future<List<AppointmentPatientCard>> _createAppointmentCards(
+      List<Appointment> appointments) async {
+    final cards = <AppointmentPatientCard>[];
+
+    for (final appointment in appointments) {
+      try {
+        final patient =
+            await _patientRepository.getPatient(appointment.patientId);
+        if (patient != null) {
+          cards.add(AppointmentPatientCard(
+            appointment: appointment,
+            patient: patient,
+          ));
+        } else {
+          logger.e(
+              'Patient not found for appointment: ${appointment.appointmentId}');
+        }
+      } catch (e) {
+        logger.e(
+            'Error loading patient for appointment ${appointment.appointmentId}: $e');
+        // Continue with other appointments
+      }
+    }
+
+    return cards;
   }
 
   Future<void> _onUpdateAppointmentStatus(
@@ -263,42 +391,68 @@ class DoctorAppointmentsBloc
       await _appointmentRepository.updateAppointmentStatus(
           event.appointmentId, event.newStatus);
 
-      final updatedTodayAppointments =
-          currentState.todayAppointments.map((appointment) {
-        if (appointment.appointment.appointmentId == event.appointmentId) {
-          return AppointmentPatientCard(
-            appointment:
-                appointment.appointment.copyWith(status: event.newStatus),
-            patient: appointment.patient,
-          );
-        }
-        return appointment;
-      }).toList();
+      // Update all categories of appointments
+      final updatedTodayAppointments = _updateAppointmentStatus(
+          currentState.todayAppointments, event.appointmentId, event.newStatus);
 
-      final updatedUpcomingAppointments =
-          currentState.upcomingAppointments.map((appointment) {
-        if (appointment.appointment.appointmentId == event.appointmentId) {
-          return AppointmentPatientCard(
-            appointment:
-                appointment.appointment.copyWith(status: event.newStatus),
-            patient: appointment.patient,
-          );
+      final updatedUpcomingAppointments = _updateAppointmentStatus(
+          currentState.upcomingAppointments,
+          event.appointmentId,
+          event.newStatus);
+
+      final updatedPastAppointments = _updateAppointmentStatus(
+          currentState.pastAppointments, event.appointmentId, event.newStatus);
+
+      final updatedMissedAppointments = _updateAppointmentStatus(
+          currentState.missedAppointments,
+          event.appointmentId,
+          event.newStatus);
+
+      // Recategorize appointments if needed
+      final allAppointments = [
+        ...updatedTodayAppointments,
+        ...updatedUpcomingAppointments,
+        ...updatedPastAppointments,
+        ...updatedMissedAppointments,
+      ];
+
+      // If status changed to canceled, recategorize
+      if (event.newStatus == AppointmentStatus.cancelled) {
+        // Get the appointment
+        final appointmentCard = allAppointments.firstWhere(
+          (card) => card.appointment.appointmentId == event.appointmentId,
+          orElse: () =>
+              updatedTodayAppointments.first, // Fallback (shouldn't happen)
+        );
+
+        // Recategorize if needed
+        final now = DateTime.now();
+        if (appointmentCard.appointment.appointmentDate.isAfter(now)) {
+          // Move to missed if it was upcoming
+          if (updatedUpcomingAppointments.any((card) =>
+              card.appointment.appointmentId == event.appointmentId)) {
+            updatedUpcomingAppointments.removeWhere((card) =>
+                card.appointment.appointmentId == event.appointmentId);
+            updatedMissedAppointments.add(appointmentCard);
+          }
         }
-        return appointment;
-      }).toList();
+      }
 
       // Emit updated state
       emit(DoctorAppointmentsLoaded(
         todayAppointments: updatedTodayAppointments,
         upcomingAppointments: updatedUpcomingAppointments,
+        pastAppointments: updatedPastAppointments,
+        missedAppointments: updatedMissedAppointments,
         fromDate: currentState.fromDate,
         toDate: currentState.toDate,
+        viewedAppointmentIds: currentState.viewedAppointmentIds,
+        filterCriteria: currentState.filterCriteria,
       ));
     } catch (e) {
       logger.e('Error updating appointment status: $e');
       // Emit error state with message, but keep the data from current state
       if (state is DoctorAppointmentsLoaded) {
-        final currentState = state as DoctorAppointmentsLoaded;
         emit(DoctorAppointmentsError(
           'Failed to update appointment status: ${e.toString()}',
         ));
@@ -307,5 +461,21 @@ class DoctorAppointmentsBloc
             'Failed to update appointment: ${e.toString()}'));
       }
     }
+  }
+
+  List<AppointmentPatientCard> _updateAppointmentStatus(
+    List<AppointmentPatientCard> appointments,
+    String appointmentId,
+    AppointmentStatus newStatus,
+  ) {
+    return appointments.map((appointment) {
+      if (appointment.appointment.appointmentId == appointmentId) {
+        return AppointmentPatientCard(
+          appointment: appointment.appointment.copyWith(status: newStatus),
+          patient: appointment.patient,
+        );
+      }
+      return appointment;
+    }).toList();
   }
 }

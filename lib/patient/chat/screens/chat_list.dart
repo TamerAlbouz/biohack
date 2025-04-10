@@ -103,7 +103,7 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
                       ),
                     ),
                     title: Text(
-                      '$otherUserId',
+                      otherUserId,
                       // Replace with actual user name
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),

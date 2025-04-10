@@ -23,11 +23,8 @@ class NavigationDoctorCubit extends Cubit<NavigationDoctorState> {
       case NavbarScreenItemsDoctor.design:
         emit(NavigationDoctorState(NavbarScreenItemsDoctor.design, 3));
         break;
-      case NavbarScreenItemsDoctor.settings:
-        emit(NavigationDoctorState(NavbarScreenItemsDoctor.settings, 4));
-        break;
-      default:
-        emit(NavigationDoctorState(NavbarScreenItemsDoctor.dashboard, 0));
+      case NavbarScreenItemsDoctor.patients:
+        emit(NavigationDoctorState(NavbarScreenItemsDoctor.patients, 4));
         break;
     }
   }

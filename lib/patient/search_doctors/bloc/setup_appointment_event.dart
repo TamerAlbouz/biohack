@@ -1,18 +1,25 @@
 part of 'setup_appointment_bloc.dart';
 
-sealed class SetupAppointmentEvent extends Equatable {
+abstract class SetupAppointmentEvent extends Equatable {
   const SetupAppointmentEvent();
-}
 
-class ToggleRebuild extends SetupAppointmentEvent {
   @override
   List<Object?> get props => [];
 }
 
-class LoadServiceTypes extends SetupAppointmentEvent {
+class ToggleRebuild extends SetupAppointmentEvent {}
+
+class LoadInitialData extends SetupAppointmentEvent {
+  final String doctorId;
+  final String specialty;
+
+  const LoadInitialData(this.doctorId, this.specialty);
+
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [doctorId, specialty];
 }
+
+class LoadServiceTypes extends SetupAppointmentEvent {}
 
 class UpdateServiceType extends SetupAppointmentEvent {
   final SelectionItem serviceType;
@@ -27,22 +34,10 @@ class UpdateDoctorInfo extends SetupAppointmentEvent {
   final String doctorId;
   final String specialty;
 
-  const UpdateDoctorInfo(
-    this.doctorId,
-    this.specialty,
-  );
+  const UpdateDoctorInfo(this.doctorId, this.specialty);
 
   @override
-  List<Object?> get props => [specialty, doctorId];
-}
-
-class UpdateAppointmentTime extends SetupAppointmentEvent {
-  final TimeOfDay time;
-
-  const UpdateAppointmentTime(this.time);
-
-  @override
-  List<Object?> get props => [time];
+  List<Object?> get props => [doctorId, specialty];
 }
 
 class UpdateAppointmentDate extends SetupAppointmentEvent {
@@ -52,6 +47,15 @@ class UpdateAppointmentDate extends SetupAppointmentEvent {
 
   @override
   List<Object?> get props => [date];
+}
+
+class UpdateAppointmentTime extends SetupAppointmentEvent {
+  final TimeOfDay time;
+
+  const UpdateAppointmentTime(this.time);
+
+  @override
+  List<Object?> get props => [time];
 }
 
 class UpdateAppointmentType extends SetupAppointmentEvent {
@@ -64,11 +68,6 @@ class UpdateAppointmentType extends SetupAppointmentEvent {
   List<Object?> get props => [appointmentType, appointmentLocation];
 }
 
-class BookAppointment extends SetupAppointmentEvent {
-  @override
-  List<Object?> get props => [];
-}
-
 class UpdatePaymentType extends SetupAppointmentEvent {
   final String paymentType;
 
@@ -77,3 +76,14 @@ class UpdatePaymentType extends SetupAppointmentEvent {
   @override
   List<Object?> get props => [paymentType];
 }
+
+class ToggleTermsAccepted extends SetupAppointmentEvent {
+  final bool value;
+
+  const ToggleTermsAccepted(this.value);
+
+  @override
+  List<Object?> get props => [value];
+}
+
+class BookAppointment extends SetupAppointmentEvent {}

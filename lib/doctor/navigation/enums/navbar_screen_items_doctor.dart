@@ -3,5 +3,5 @@ enum NavbarScreenItemsDoctor {
   appointments,
   stats,
   design,
-  settings
+  patients
 }

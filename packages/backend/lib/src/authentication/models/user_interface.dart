@@ -32,15 +32,8 @@ abstract class IUser extends Equatable {
   /// The current state of the user in a video call.
   bool get busy;
 
-  /// The current user's appointments.
-  List<String>? get appointments;
-
   /// tokens FCM
   List<String>? get tokens;
-
-  /// Payment IDs Payment records for the doctor.
-  /// Example: {'transactionId': 'xyz123', 'amount': 100.0, 'currency': 'USD'}
-  List<String>? get paymentIds;
 
   /// Biography of the user.
   String? get biography;
@@ -57,11 +50,9 @@ abstract class IUser extends Equatable {
     String? sex,
     String? profilePictureUrl,
     DateTime? updatedAt,
-    List<String>? appointments,
     bool? busy,
     String? biography,
     List<String>? tokens,
-    List<String>? paymentIds,
   });
 
   @override
@@ -74,10 +65,8 @@ abstract class IUser extends Equatable {
         profilePictureUrl,
         createdAt,
         updatedAt,
-        appointments,
         busy,
         tokens,
-        paymentIds,
         biography,
       ];
 }
@@ -91,13 +80,10 @@ class _UserImpl extends IUser {
     this.busy = false,
     this.profilePictureUrl,
     this.sex,
-    // ignore: unused_element
-    this.createdAt,
     this.updatedAt,
-    this.appointments,
     this.tokens,
-    this.paymentIds,
     this.biography,
+    this.createdAt,
   });
 
   @override
@@ -128,13 +114,7 @@ class _UserImpl extends IUser {
   final bool busy;
 
   @override
-  final List<String>? appointments;
-
-  @override
   final List<String>? tokens;
-
-  @override
-  final List<String>? paymentIds;
 
   @override
   final String? biography;
@@ -147,11 +127,10 @@ class _UserImpl extends IUser {
     String? sex,
     String? profilePictureUrl,
     DateTime? updatedAt,
-    List<String>? appointments,
     bool? busy,
     String? biography,
     List<String>? tokens,
-    List<String>? paymentIds,
+    DateTime? createdAt,
   }) {
     return _UserImpl(
       email: email ?? this.email,
@@ -159,13 +138,12 @@ class _UserImpl extends IUser {
       sex: sex ?? this.sex,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       updatedAt: updatedAt ?? this.updatedAt,
-      appointments: appointments ?? this.appointments,
       busy: busy ?? this.busy,
       biography: biography ?? this.biography,
       tokens: tokens ?? this.tokens,
-      paymentIds: paymentIds ?? this.paymentIds,
       role: role,
       uid: uid,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -177,10 +155,8 @@ class _UserImpl extends IUser {
         'profilePictureUrl': profilePictureUrl,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
-        'appointments': appointments,
         'busy': busy,
         'tokens': tokens,
-        'paymentIds': paymentIds,
         'biography': biography,
       };
 }

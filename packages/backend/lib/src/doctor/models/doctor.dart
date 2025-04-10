@@ -6,31 +6,28 @@ part 'doctor.g.dart';
 
 @JsonSerializable()
 class Doctor extends User {
-  const Doctor({
-    required super.email,
-    required super.uid,
-    required this.state,
-    required this.licNum,
-    required this.govIdUrl,
-    required this.medicalLicenseUrl,
-    required this.active,
-    super.name,
-    required super.role,
-    super.busy,
-    super.profilePictureUrl,
-    super.createdAt,
-    super.updatedAt,
-    super.appointments,
-    super.sex,
-    super.tokens,
-    super.paymentIds,
-    super.biography,
-    this.specialties,
-    this.reviewIds,
-    required this.availability,
-    this.notes,
-    this.clinicId,
-  });
+  const Doctor(
+      {required super.email,
+      required super.uid,
+      required this.state,
+      required this.licNum,
+      required this.govIdUrl,
+      required this.medicalLicenseUrl,
+      required this.active,
+      super.name,
+      required super.role,
+      super.busy,
+      super.profilePictureUrl,
+      super.createdAt,
+      super.updatedAt,
+      super.sex,
+      super.tokens,
+      super.biography,
+      this.specialties,
+      required this.availability,
+      this.notes,
+      this.clinicId,
+      this.patientIds});
 
   /// URL of the doctor's government ID.
   final String govIdUrl;
@@ -50,9 +47,6 @@ class Doctor extends User {
   /// list of doctor specialties (simple titles)
   final List<String>? specialties;
 
-  /// List of review document IDs
-  final List<String>? reviewIds;
-
   /// Example: {'monday': ['09:00', '10:00']}
   final Map<String, List<String>?> availability;
 
@@ -61,6 +55,9 @@ class Doctor extends User {
 
   /// ID of clinic
   final String? clinicId;
+
+  /// List of patient IDs associated with this doctor.
+  final List<String>? patientIds;
 
   /// Returns a new [Doctor] with updated fields.
   @override
@@ -76,16 +73,14 @@ class Doctor extends User {
     bool? active,
     String? profilePictureUrl,
     DateTime? updatedAt,
-    List<String>? appointments,
     bool? busy,
     List<String>? tokens,
-    List<String>? paymentIds,
     String? biography,
     List<String>? specialties,
-    List<String>? reviewIds,
     Map<String, List<String>?>? availability,
     List<String>? notes,
     String? clinicId,
+    List<String>? patientIds,
   }) {
     return Doctor(
       active: active ?? this.active,
@@ -101,16 +96,14 @@ class Doctor extends User {
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
-      appointments: appointments ?? this.appointments,
       busy: busy ?? this.busy,
       tokens: tokens ?? this.tokens,
-      paymentIds: paymentIds ?? this.paymentIds,
       biography: biography ?? this.biography,
       specialties: specialties ?? this.specialties,
-      reviewIds: reviewIds ?? this.reviewIds,
       availability: availability ?? this.availability,
       notes: notes ?? this.notes,
       clinicId: clinicId ?? this.clinicId,
+      patientIds: patientIds ?? this.patientIds,
     );
   }
 
@@ -130,23 +123,19 @@ class Doctor extends User {
       profilePictureUrl: data['profilePictureUrl'],
       createdAt: data['createdAt'].toDate(),
       updatedAt: data['updatedAt']?.toDate(),
-      appointments: data['appointments'] != null
-          ? List<String>.from(data['appointments'])
-          : [],
       busy: data['busy'],
-      tokens: ["100"],
-      paymentIds: [],
+      tokens: const ["100"],
       biography: data['biography'],
       specialties: data['specialties'] != null
           ? List<String>.from(data['specialties'])
-          : null,
-      reviewIds: data['reviewIds'] != null
-          ? List<String>.from(data['reviewIds'])
           : null,
       availability: (data['availability'] as Map<String, dynamic>)
           .map((k, v) => MapEntry(k, List<String>.from(v))),
       notes: data['notes'] != null ? List<String>.from(data['notes']) : null,
       clinicId: data['clinicId'],
+      patientIds: data['patientIds'] != null
+          ? List<String>.from(data['patientIds'])
+          : null,
     );
   }
 
@@ -166,16 +155,14 @@ class Doctor extends User {
       'profilePictureUrl': profilePictureUrl,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
-      'appointments': appointments,
       'busy': busy,
       'tokens': tokens,
-      'paymentIds': paymentIds,
       'biography': biography,
       'specialties': specialties,
-      'reviewIds': reviewIds,
       'availability': availability,
       'notes': notes,
       'clinicId': clinicId,
+      'patientIds': patientIds,
     };
   }
 
@@ -194,16 +181,14 @@ class Doctor extends User {
         createdAt,
         active,
         updatedAt,
-        appointments,
         busy,
         tokens,
-        paymentIds,
         biography,
         specialties,
-        reviewIds,
         availability,
         notes,
         clinicId,
+        patientIds,
       ];
 
   factory Doctor.fromJson(Map<String, dynamic> json) => _$DoctorFromJson(json);

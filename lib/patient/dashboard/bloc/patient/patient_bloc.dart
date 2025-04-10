@@ -29,10 +29,10 @@ class PatientBloc extends Bloc<PatientEvent, PatientState> {
       } else {
         _patient = await _patientRepo.getPatient(_authRepo.currentUser.uid);
 
-        logger.i('Patient found in database: $_patient');
         if (_patient == null) {
           emit(const PatientError('Patient not found'));
         } else {
+          logger.i('Patient found in database: $_patient]');
           emit(PatientLoaded(_patient!));
         }
       }

@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:medtalk/styles/colors.dart';
+import 'package:medtalk/styles/sizes.dart';
 
 import '../../../styles/font.dart';
-import '../../../styles/sizes.dart';
+import '../base/custom_base.dart';
 import '../dummy/profile_picture.dart';
-import '../radio/rounded_radio_button.dart';
 
 class DoctorCard extends StatelessWidget {
   final String name;
   final String specialty;
   final String availability;
   final List<String> timeSlots;
+  final String date;
+  final String month;
+  final String? imageUrl;
   final Function()? onCardTap;
   final void Function(String, int)? onTimeSlotSelected;
+  final int? selectedTimeSlot;
 
   const DoctorCard({
     super.key,
@@ -20,106 +25,81 @@ class DoctorCard extends StatelessWidget {
     required this.specialty,
     required this.availability,
     required this.timeSlots,
+    this.date = '12',
+    this.month = 'Oct',
+    this.imageUrl,
     this.onCardTap,
     this.onTimeSlotSelected,
+    this.selectedTimeSlot,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onCardTap,
-      child: Card(
-        margin: kPadd0,
-        shape: RoundedRectangleBorder(
-          borderRadius: kRadius20,
-        ),
-        elevation: 0,
-        child: Padding(
-          padding: kPadd15,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return CustomBase(
+      shadow: false,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Row(
-                // space between
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const ProfilePicture(),
-                  kGap20,
-                  _DoctorInfo(
-                    name: name,
-                    specialty: specialty,
-                    availability: availability,
-                  ),
-                  const Spacer(),
-                  // show date
-                  Container(
-                    // outlined
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: MyColors.green,
-                        width: 1,
-                      ),
-                      borderRadius: kRadius10,
-                    ),
-                    width: 50,
-                    height: 60,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          '12',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: MyColors.green,
-                            fontSize: Font.medium,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Divider(
-                          color: MyColors.green.withOpacity(0.5),
-                          thickness: 1,
-                          height: 3,
-                        ),
-                        const Text(
-                          'Oct',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: MyColors.green,
-                            fontSize: Font.extraSmall,
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-              kGap14,
-              RadioButtonGroup(
-                options: timeSlots,
+              // Profile Picture with shadow
+              Container(
                 decoration: BoxDecoration(
-                  color: MyColors.primary,
-                  borderRadius: kRadiusAll,
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 1.5,
-                ),
-                selectedColor: MyColors.primary,
-                unselectedColor: MyColors.primary,
-                unselectedTextColor: Colors.white,
-                textStyle: const TextStyle(
-                  color: Colors.white,
-                  fontSize: Font.extraSmall,
-                ),
-                onChanged: onTimeSlotSelected ?? (value, index) {},
+                child: imageUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Image.network(
+                          imageUrl!,
+                          width: 70,
+                          height: 70,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : const ProfilePicture(
+                        height: 70,
+                        width: 70,
+                      ),
               ),
+              kGap16,
+              // Doctor Info
+              Expanded(
+                child: _DoctorInfo(
+                  name: name,
+                  specialty: specialty,
+                  availability: availability,
+                ),
+              ),
+              // Date Container
+              _DateContainer(date: date, month: month),
             ],
           ),
-        ),
+          kGap4,
+
+          // Horizontal divider with gradient
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8),
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  MyColors.black.withValues(alpha: 0.5),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+          kGap4,
+          // Time Slots
+          _TimeSlots(
+            timeSlots: timeSlots,
+            onTimeSlotSelected: onTimeSlotSelected,
+          ),
+        ],
       ),
     );
   }
@@ -144,27 +124,157 @@ class _DoctorInfo extends StatelessWidget {
         Text(
           name,
           style: const TextStyle(
-            fontSize: Font.mediumSmall,
-            color: MyColors.black,
+            fontSize: Font.medium,
+            color: Colors.black87,
             fontWeight: FontWeight.bold,
+            letterSpacing: -0.3,
           ),
         ),
-        Text(
-          specialty,
-          style: const TextStyle(
-            fontSize: Font.extraSmall,
-            color: MyColors.textGrey,
-          ),
+        kGap4,
+        Row(
+          children: [
+            const Icon(
+              Icons.medical_services_outlined,
+              size: 12,
+              color: MyColors.textGrey,
+            ),
+            kGap4,
+            Text(
+              specialty,
+              style: const TextStyle(
+                fontSize: Font.extraSmall,
+                color: MyColors.textGrey,
+              ),
+            ),
+          ],
         ),
         kGap8,
-        Text(
-          availability,
-          style: const TextStyle(
-            fontSize: Font.extraSmall,
-            color: MyColors.green,
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: MyColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.access_time_rounded,
+                size: 12,
+                color: MyColors.primary,
+              ),
+              kGap4,
+              Text(
+                availability,
+                style: const TextStyle(
+                  fontSize: Font.extraSmall,
+                  color: MyColors.primary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DateContainer extends StatelessWidget {
+  final String date;
+  final String month;
+
+  const _DateContainer({
+    required this.date,
+    required this.month,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: kPaddH10V6,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: MyColors.primary,
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        color: MyColors.primary.withValues(alpha: 0.05),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            date,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: MyColors.primary,
+              fontSize: Font.medium,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 2),
+            width: 24,
+            height: 1,
+            color: MyColors.primary.withValues(alpha: 0.5),
+          ),
+          Text(
+            month,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: MyColors.primary,
+              fontSize: Font.extraSmall,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimeSlots extends StatelessWidget {
+  final List<String> timeSlots;
+  final void Function(String, int)? onTimeSlotSelected;
+
+  const _TimeSlots({
+    required this.timeSlots,
+    this.onTimeSlotSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: List.generate(
+        timeSlots.length,
+        (index) => GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            if (onTimeSlotSelected != null) {
+              onTimeSlotSelected!(timeSlots[index], index);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: kPaddH8V4,
+            decoration: BoxDecoration(
+              color: MyColors.primary,
+              borderRadius: kRadius10,
+            ),
+            child: Text(
+              timeSlots[index],
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: Font.extraSmall,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

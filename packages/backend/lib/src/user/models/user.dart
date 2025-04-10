@@ -22,9 +22,7 @@ class User extends Equatable implements IUser {
     this.profilePictureUrl,
     this.createdAt,
     this.updatedAt,
-    this.appointments,
     this.tokens,
-    this.paymentIds,
     this.biography,
   });
 
@@ -62,18 +60,9 @@ class User extends Equatable implements IUser {
   @override
   final bool busy;
 
-  /// The current user's appointments.
-  @override
-  final List<String>? appointments;
-
   /// tokens FCM
   @override
   final List<String>? tokens;
-
-  /// Payment IDs Payment records for the doctor.
-  /// Example: {'transactionId': 'xyz123', 'amount': 100.0, 'currency': 'USD'}
-  @override
-  final List<String>? paymentIds;
 
   /// Biography of the user.
   @override
@@ -94,11 +83,9 @@ class User extends Equatable implements IUser {
     bool? firstTime,
     String? profilePictureUrl,
     DateTime? updatedAt,
-    List<String>? appointments,
     bool? busy,
     String? biography,
     List<String>? tokens,
-    List<String>? paymentIds,
   }) {
     return User(
       email: email ?? this.email,
@@ -106,11 +93,9 @@ class User extends Equatable implements IUser {
       sex: sex ?? this.sex,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       updatedAt: updatedAt ?? this.updatedAt,
-      appointments: appointments ?? this.appointments,
       busy: busy ?? this.busy,
       biography: biography ?? this.biography,
       tokens: tokens ?? this.tokens,
-      paymentIds: paymentIds ?? this.paymentIds,
       role: role,
       uid: uid,
     );
@@ -126,10 +111,8 @@ class User extends Equatable implements IUser {
         sex,
         createdAt,
         updatedAt,
-        appointments,
         busy,
         tokens,
-        paymentIds,
         biography,
       ];
 

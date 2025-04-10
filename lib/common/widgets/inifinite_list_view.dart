@@ -24,7 +24,7 @@ class InfiniteScrollListView<T> extends StatefulWidget {
     required this.headerBuilder,
     this.hasReachedMax = false,
     this.expandedHeaderHeight = 350,
-    this.collapsedHeaderHeight = 70,
+    this.collapsedHeaderHeight = 75,
     this.controller,
     this.onRefresh, // Add this line
   });
@@ -125,7 +125,7 @@ class _InfiniteScrollListViewState<T> extends State<InfiniteScrollListView<T>> {
                             ? LinearProgressIndicator(
                                 color: MyColors.primary,
                                 backgroundColor:
-                                    MyColors.primary.withOpacity(0.1),
+                                    MyColors.primary.withValues(alpha: 0.1),
                               )
                             : const SizedBox(),
                       ),

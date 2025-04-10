@@ -45,7 +45,7 @@ const kErrorText = TextStyle(
 const kDropdownText = TextStyle(
   fontFamily: Font.family,
   color: MyColors.primary,
-  fontSize: Font.medium,
+  fontSize: Font.mediumSmall,
   fontWeight: FontWeight.bold,
 );
 
@@ -63,7 +63,7 @@ const kAppBarText = TextStyle(
   fontWeight: FontWeight.bold,
 );
 
-const kAppointmentSetupSectionTitle = TextStyle(
+const kSectionTitle = TextStyle(
   fontFamily: Font.family,
   color: MyColors.textBlack,
   fontSize: Font.mediumSmall,
@@ -103,6 +103,16 @@ const kServiceCardSummary = TextStyle(
   color: MyColors.textBlack,
   fontSize: Font.extraSmall,
   fontWeight: FontWeight.normal,
+);
+
+const kBoxCancelButtonText = TextStyle(
+  fontSize: Font.smallExtra,
+  fontWeight: FontWeight.w500,
+);
+
+const kBoxConfirmButtonText = TextStyle(
+  fontSize: Font.smallExtra,
+  fontWeight: FontWeight.bold,
 );
 
 const kServiceDetailText = TextStyle(

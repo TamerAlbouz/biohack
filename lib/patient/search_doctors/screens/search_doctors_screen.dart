@@ -2,18 +2,22 @@ import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/common/widgets/common_error_widget.dart';
 import 'package:medtalk/common/widgets/dividers/section_divider.dart';
 import 'package:medtalk/common/widgets/dropdown/custom_complex_dropdown.dart';
 import 'package:medtalk/common/widgets/inifinite_list_view.dart';
 import 'package:medtalk/patient/search_doctors/bloc/search_doctors_bloc.dart';
 import 'package:medtalk/patient/search_doctors/screens/setup_appointment_screen.dart';
 import 'package:medtalk/styles/sizes.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../common/globals/globals.dart';
+import '../../../common/widgets/base/custom_base.dart';
 import '../../../common/widgets/cards/doctor_card.dart';
 import '../../../common/widgets/custom_input_field.dart';
 import '../../../styles/colors.dart';
 import '../../../styles/font.dart';
+import '../../../styles/styles/text.dart';
 
 class SearchDoctorsScreen extends StatefulWidget {
   const SearchDoctorsScreen({super.key});
@@ -72,24 +76,21 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
                   // Show loading indicator when in initial or loading state
                   if (state is SearchDoctorsInitial ||
                       (state is SearchDoctorsLoading && _doctors.isEmpty)) {
-                    return const Expanded(
-                      child: Center(child: CircularProgressIndicator()),
-                    );
+                    return _buildLoadingState();
                   }
 
                   // Show error message when in error state
                   if (state is SearchDoctorsError) {
-                    return Expanded(
-                      child: Center(child: Text(state.message)),
-                    );
+                    return CommonErrorWidget(onRetry: () {
+                      _searchDoctorsBloc.add(SearchDoctorsLoad());
+                    });
                   }
 
                   // Show the list when doctors are loaded
                   return InfiniteScrollListView(
                     controller: _infiniteScrollController,
                     isLoading: _isLoading,
-                    hasReachedMax:
-                        !_hasMoreData, // Note: the property is inverted in your implementation
+                    hasReachedMax: !_hasMoreData,
                     items: _doctors,
                     onLoadMore: () {
                       context
@@ -115,7 +116,7 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
                         onCardTap: () {
                           AppGlobal.navigatorKey.currentState?.push<void>(
                             SetupAppointmentScreen.route(
-                              doctorId: doctor.uid ?? '',
+                              doctorId: doctor.uid,
                               doctorName: doctor.name ?? 'Unknown Doctor',
                               specialty: doctor.specialties?.join(', ') ??
                                   'General Practice',
@@ -127,6 +128,152 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
                   );
                 },
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Expanded(
+      child: Skeletonizer(
+        enabled: true,
+        enableSwitchAnimation: true,
+        switchAnimationConfig: const SwitchAnimationConfig(
+          duration: Duration(milliseconds: 500),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Skeleton search header
+              Container(height: 24, width: 180, color: Colors.grey[300]),
+              kGap4,
+              Container(height: 16, width: 150, color: Colors.grey[300]),
+              kGap28,
+              // Skeleton dropdown filters
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 60,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: MyColors.primary),
+                        borderRadius: kRadiusAll,
+                        color: MyColors.cardBackground,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              kGap10,
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 60,
+                      decoration: BoxDecoration(
+                          border: Border.all(color: MyColors.primary),
+                          borderRadius: kRadiusAll,
+                          color: MyColors.cardBackground),
+                    ),
+                  ),
+                ],
+              ),
+              kGap10,
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: MyColors.cardBackground,
+                  borderRadius: kRadiusAll,
+                ),
+              ),
+              kGap20,
+
+              // dont forget the 'Available Doctors' text
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Available Doctors',
+                    style: kSectionTitle,
+                  ),
+                  Text(
+                    '0 found',
+                    style: TextStyle(
+                      fontSize: Font.small,
+                      color: MyColors.primary,
+                    ),
+                  ),
+                ],
+              ),
+              kGap20,
+
+              // Skeleton doctors
+              for (int i = 0; i < 3; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: CustomBase(
+                    shadow: false,
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 60,
+                              height: 60,
+                              decoration: const BoxDecoration(
+                                color: Colors.grey,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            kGap10,
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                      height: 16,
+                                      width: 150,
+                                      color: Colors.grey[300]),
+                                  kGap4,
+                                  Container(
+                                      height: 14,
+                                      width: 100,
+                                      color: Colors.grey[300]),
+                                  kGap8,
+                                  Container(
+                                      height: 12,
+                                      width: 120,
+                                      color: Colors.grey[300]),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: 50,
+                              height: 60,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey[300]!),
+                                borderRadius: kRadius10,
+                              ),
+                            ),
+                          ],
+                        ),
+                        kGap10,
+                        const Divider(),
+                        kGap10,
+                        Container(
+                          height: 30,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: kRadius10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
@@ -183,16 +330,15 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Search Doctors',
-          textAlign: TextAlign.start,
+          'Find a Doctor',
           style: TextStyle(
             fontSize: Font.sectionTitleSize,
             fontWeight: FontWeight.bold,
+            color: MyColors.primary,
           ),
         ),
         const Text(
-          'Find the right doctor for you',
-          textAlign: TextAlign.start,
+          "Select a doctor for your appointment",
           style: TextStyle(
             fontSize: Font.small,
             color: MyColors.subtitleDark,
@@ -200,6 +346,8 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
         ),
         const SectionDivider(),
         kGap10,
+
+        // Specialty filter
         CustomComplexDropDown(
           title: 'Specialty',
           items: const [
@@ -234,9 +382,11 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
           borderRadius: kRadiusAll,
           defaultOption: "All Specialties",
           icon: const FaIcon(FontAwesomeIcons.stethoscope,
-              color: MyColors.primary),
+              color: MyColors.primary, size: 16),
         ),
         kGap10,
+
+        // Availability filter
         CustomComplexDropDown(
           title: 'Availability',
           items: const [
@@ -262,10 +412,12 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
           onChanged: (value) {},
           borderRadius: kRadiusAll,
           defaultOption: "Today, Oct 11",
-          icon:
-              const FaIcon(FontAwesomeIcons.calendar, color: MyColors.primary),
+          icon: const FaIcon(FontAwesomeIcons.calendar,
+              color: MyColors.primary, size: 16),
         ),
-        kGap20,
+        kGap10,
+
+        // Search field
         CustomInputField(
           hintText: 'Search by name',
           onChanged: (value) {},
@@ -273,8 +425,28 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
           errorText: null,
           height: 50,
           borderRadius: kRadiusAll,
+          leadingWidget:
+              const Icon(Icons.search, color: MyColors.primary, size: 20),
         ),
-        kGap10,
+        kGap16,
+
+        // Results section header
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Available Doctors',
+              style: kSectionTitle,
+            ),
+            Text(
+              '${_doctors.length} found',
+              style: const TextStyle(
+                fontSize: Font.small,
+                color: MyColors.primary,
+              ),
+            ),
+          ],
+        ),
         const SectionDivider(),
         kGap10,
       ],
@@ -282,48 +454,87 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
   }
 
   Widget _buildCollapsedHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: CustomInputField(
-            hintText: 'Search by name',
-            onChanged: (value) {},
-            keyboardType: TextInputType.text,
-            errorText: null,
-            borderRadius: kRadiusAll,
+    return Padding(
+      padding: kPaddH16V8,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Search field and filter buttons in a row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: CustomInputField(
+                  hintText: 'Search by name',
+                  onChanged: (value) {},
+                  keyboardType: TextInputType.text,
+                  errorText: null,
+                  borderRadius: kRadiusAll,
+                  height: 50,
+                  leadingWidget: const Icon(Icons.search,
+                      color: MyColors.primary, size: 18),
+                ),
+              ),
+              kGap8,
+              _FilterIconButton(
+                icon: const FaIcon(FontAwesomeIcons.stethoscope,
+                    color: MyColors.primary, size: 16),
+                onTap: () {
+                  // Show specialty filter
+                },
+              ),
+              kGap8,
+              _FilterIconButton(
+                icon: const FaIcon(FontAwesomeIcons.calendar,
+                    color: MyColors.primary, size: 16),
+                onTap: () {
+                  // Show date filter
+                },
+              ),
+            ],
           ),
+        ],
+      ),
+    );
+  }
+
+  String _getGreeting(int hour) {
+    if (hour < 12) {
+      return 'Good morning,';
+    } else if (hour < 17) {
+      return 'Good afternoon,';
+    } else {
+      return 'Good evening,';
+    }
+  }
+}
+
+class _FilterIconButton extends StatelessWidget {
+  final FaIcon icon;
+  final VoidCallback onTap;
+
+  const _FilterIconButton({
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: MyColors.primary.withValues(alpha: 0.1),
+        borderRadius: kRadiusAll,
+      ),
+      child: IconButton(
+        icon: icon,
+        onPressed: onTap,
+        padding: const EdgeInsets.all(8),
+        constraints: const BoxConstraints(
+          minWidth: 36,
+          minHeight: 36,
         ),
-        kGap10,
-        Container(
-          decoration: BoxDecoration(
-            color: MyColors.primary.withOpacity(0.2),
-            borderRadius: kRadiusAll,
-          ),
-          child: IconButton(
-            icon: const FaIcon(FontAwesomeIcons.stethoscope,
-                color: MyColors.primary),
-            onPressed: () {
-              // Show specialty dropdown
-            },
-          ),
-        ),
-        kGap10,
-        Container(
-          decoration: BoxDecoration(
-            color: MyColors.primary.withOpacity(0.2),
-            borderRadius: kRadiusAll,
-          ),
-          child: IconButton(
-            icon: const FaIcon(FontAwesomeIcons.calendar,
-                color: MyColors.primary),
-            onPressed: () {
-              // Show date dropdown
-            },
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

@@ -4,6 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:p_logger/p_logger.dart';
 
+part 'appointment.g.dart';
+
 @JsonSerializable(explicitToJson: true)
 class Appointment extends Equatable {
   const Appointment({

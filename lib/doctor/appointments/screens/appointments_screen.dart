@@ -5,14 +5,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:medtalk/agora/screens/call.dart';
 import 'package:medtalk/common/globals/globals.dart';
-import 'package:medtalk/common/widgets/cards/appointment_card.dart';
-import 'package:medtalk/common/widgets/dividers/section_divider.dart';
-import 'package:medtalk/doctor/appointments/models/appointment_card.dart';
+import 'package:medtalk/common/widgets/cards/appointment_doctor_card.dart';
 import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
 
 import '../bloc/doctor_appointments_bloc.dart';
+import '../models/appointments_models.dart';
 
 class DoctorAppointmentsScreen extends StatelessWidget {
   const DoctorAppointmentsScreen({super.key});
@@ -42,7 +41,7 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -57,44 +56,67 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
       appBar: AppBar(
         backgroundColor: MyColors.background,
         foregroundColor: MyColors.primary,
+        title: const Text('Appointments'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight),
           child: BlocBuilder<DoctorAppointmentsBloc, DoctorAppointmentsState>(
             builder: (context, state) {
-              int unviewedCount = 0;
+              int unviewedUpcomingCount = 0;
+              int unviewedMissedCount = 0;
+
               if (state is DoctorAppointmentsLoaded) {
-                unviewedCount = state.unviewedAppointmentsCount;
+                unviewedUpcomingCount = state.unviewedAppointmentsCount;
+                unviewedMissedCount = state.unviewedMissedCount;
               }
 
               return Container(
                   decoration: const BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: Colors.grey,
-                        width: 0.5,
+                        color: MyColors.softStroke,
+                        width: 1,
                       ),
                     ),
                   ),
                   child: TabBar(
                     controller: _tabController,
-                    indicatorSize: TabBarIndicatorSize.tab,
+                    indicatorSize: TabBarIndicatorSize.label,
                     indicatorColor: MyColors.primary,
+                    unselectedLabelColor: Colors.grey,
+                    isScrollable: true,
                     tabs: [
                       const _BadgedTab(
                         text: 'Today',
+                        icon: FontAwesomeIcons.calendarDay,
                       ),
                       _BadgedTab(
                         text: 'Upcoming',
-                        badgeCount: unviewedCount,
+                        icon: FontAwesomeIcons.calendarPlus,
+                        badgeCount: unviewedUpcomingCount,
                         badgeColor: MyColors.primary,
+                      ),
+                      const _BadgedTab(
+                        text: 'Past',
+                        icon: FontAwesomeIcons.clockRotateLeft,
+                      ),
+                      _BadgedTab(
+                        text: 'Missed',
+                        icon: FontAwesomeIcons.calendarXmark,
+                        badgeCount: unviewedMissedCount,
+                        badgeColor: Colors.red,
                       ),
                     ],
                     onTap: (index) {
-                      // If tapping on "Upcoming" tab and there are unviewed appointments, clear the badge
-                      if (index == 1 && unviewedCount > 0) {
-                        context
-                            .read<DoctorAppointmentsBloc>()
-                            .add(ClearAllViewedBadges());
+                      // Clear badge counts when tapping tabs
+                      if (index == 1 && unviewedUpcomingCount > 0) {
+                        context.read<DoctorAppointmentsBloc>().add(
+                              ClearTabViewedBadges(
+                                  tab: AppointmentTab.upcoming),
+                            );
+                      } else if (index == 3 && unviewedMissedCount > 0) {
+                        context.read<DoctorAppointmentsBloc>().add(
+                              ClearTabViewedBadges(tab: AppointmentTab.missed),
+                            );
                       }
                     },
                   ));
@@ -102,11 +124,38 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
           ),
         ),
         actions: [
-          IconButton(
-            icon: const FaIcon(FontAwesomeIcons.filter),
-            onPressed: () {
-              // Show filter dialog
-              _showFilterDialog(context);
+          BlocBuilder<DoctorAppointmentsBloc, DoctorAppointmentsState>(
+            builder: (context, state) {
+              bool hasActiveFilters = false;
+              if (state is DoctorAppointmentsLoaded) {
+                hasActiveFilters = state.filterCriteria.hasActiveFilters;
+              }
+
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const FaIcon(FontAwesomeIcons.filter),
+                    onPressed: () {
+                      // Show enhanced filter dialog
+                      _showEnhancedFilterDialog(context);
+                    },
+                  ),
+                  if (hasActiveFilters)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              );
             },
           ),
         ],
@@ -134,9 +183,9 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
             case DoctorAppointmentsLoaded():
               return TabBarView(
                 controller: _tabController,
-                physics: const BouncingScrollPhysics(), // Add smooth physics
+                physics: const BouncingScrollPhysics(),
                 children: [
-                  // Today's Appointments Tab with fade transition
+                  // Today's Appointments Tab
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: _AppointmentsListView(
@@ -144,12 +193,28 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                       emptyMessage: "No appointments scheduled for today",
                     ),
                   ),
-                  // Upcoming Appointments Tab with fade transition
+                  // Upcoming Appointments Tab
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     child: _AppointmentsListView(
                       appointments: state.upcomingAppointments,
                       emptyMessage: "No upcoming appointments",
+                    ),
+                  ),
+                  // Past Appointments Tab
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _AppointmentsListView(
+                      appointments: state.pastAppointments,
+                      emptyMessage: "No past appointments",
+                    ),
+                  ),
+                  // Missed Appointments Tab
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _AppointmentsListView(
+                      appointments: state.missedAppointments,
+                      emptyMessage: "No missed appointments",
                     ),
                   ),
                 ],
@@ -172,39 +237,342 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
     );
   }
 
-  void _showFilterDialog(BuildContext context) {
-    // Show date range filter dialog
-    showDateRangePicker(
+  void _showEnhancedFilterDialog(BuildContext context) {
+    // Get current filter criteria from state
+    AppointmentFilterCriteria currentCriteria =
+        const AppointmentFilterCriteria();
+    if (context.read<DoctorAppointmentsBloc>().state
+        is DoctorAppointmentsLoaded) {
+      currentCriteria = (context.read<DoctorAppointmentsBloc>().state
+              as DoctorAppointmentsLoaded)
+          .filterCriteria;
+    }
+
+    // Create controllers for text inputs
+    final patientNameController =
+        TextEditingController(text: currentCriteria.patientNameFilter);
+    final serviceNameController =
+        TextEditingController(text: currentCriteria.serviceNameFilter);
+    final locationController =
+        TextEditingController(text: currentCriteria.locationFilter);
+
+    // Track selected date range
+    DateTime? fromDate = currentCriteria.fromDate;
+    DateTime? toDate = currentCriteria.toDate;
+
+    // Track selected status filters
+    final selectedStatuses =
+        currentCriteria.statusFilter?.toSet() ?? <AppointmentStatus>{};
+
+    showDialog(
       context: context,
-      firstDate: DateTime.now().subtract(const Duration(days: 30)),
-      lastDate: DateTime.now().add(const Duration(days: 90)),
-      builder: (context, child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: MyColors.primary,
-              onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: Colors.black,
-            ),
-          ),
-          child: child!,
-        );
-      },
-    ).then((dateRange) {
-      if (dateRange != null && context.mounted) {
-        context.read<DoctorAppointmentsBloc>().add(
-              FilterDoctorAppointments(
-                fromDate: dateRange.start,
-                toDate: dateRange.end,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Filter Appointments'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Date Range Section
+                  const Text(
+                    'Date Range',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextButton.icon(
+                          icon: const Icon(Icons.calendar_today),
+                          label: Text(
+                            fromDate != null
+                                ? DateFormat('MMM dd, yyyy').format(fromDate!)
+                                : 'From Date',
+                          ),
+                          onPressed: () async {
+                            final selectedDate = await showDatePicker(
+                              context: context,
+                              initialDate: fromDate ?? DateTime.now(),
+                              firstDate: DateTime.now()
+                                  .subtract(const Duration(days: 365)),
+                              lastDate:
+                                  DateTime.now().add(const Duration(days: 365)),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: ThemeData.light().copyWith(
+                                    colorScheme: const ColorScheme.light(
+                                      primary: MyColors.primary,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (selectedDate != null) {
+                              setState(() {
+                                fromDate = selectedDate;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: TextButton.icon(
+                          icon: const Icon(Icons.calendar_today),
+                          label: Text(
+                            toDate != null
+                                ? DateFormat('MMM dd, yyyy').format(toDate!)
+                                : 'To Date',
+                          ),
+                          onPressed: () async {
+                            final selectedDate = await showDatePicker(
+                              context: context,
+                              initialDate: toDate ?? DateTime.now(),
+                              firstDate: DateTime.now()
+                                  .subtract(const Duration(days: 365)),
+                              lastDate:
+                                  DateTime.now().add(const Duration(days: 365)),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: ThemeData.light().copyWith(
+                                    colorScheme: const ColorScheme.light(
+                                      primary: MyColors.primary,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
+                            );
+                            if (selectedDate != null) {
+                              setState(() {
+                                toDate = selectedDate;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Status Filter Section
+                  const Text(
+                    'Status',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      _FilterChip(
+                        label: 'Scheduled',
+                        selected: selectedStatuses
+                            .contains(AppointmentStatus.scheduled),
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              selectedStatuses.add(AppointmentStatus.scheduled);
+                            } else {
+                              selectedStatuses
+                                  .remove(AppointmentStatus.scheduled);
+                            }
+                          });
+                        },
+                      ),
+                      _FilterChip(
+                        label: 'In Progress',
+                        selected: selectedStatuses
+                            .contains(AppointmentStatus.inProgress),
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              selectedStatuses
+                                  .add(AppointmentStatus.inProgress);
+                            } else {
+                              selectedStatuses
+                                  .remove(AppointmentStatus.inProgress);
+                            }
+                          });
+                        },
+                      ),
+                      _FilterChip(
+                        label: 'Completed',
+                        selected: selectedStatuses
+                            .contains(AppointmentStatus.completed),
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              selectedStatuses.add(AppointmentStatus.completed);
+                            } else {
+                              selectedStatuses
+                                  .remove(AppointmentStatus.completed);
+                            }
+                          });
+                        },
+                      ),
+                      _FilterChip(
+                        label: 'Canceled',
+                        selected: selectedStatuses
+                            .contains(AppointmentStatus.cancelled),
+                        onSelected: (selected) {
+                          setState(() {
+                            if (selected) {
+                              selectedStatuses.add(AppointmentStatus.cancelled);
+                            } else {
+                              selectedStatuses
+                                  .remove(AppointmentStatus.cancelled);
+                            }
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Patient Name Filter
+                  const Text(
+                    'Patient Name',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: patientNameController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search by patient name',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Service Name Filter
+                  const Text(
+                    'Service',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: serviceNameController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search by service',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Location Filter
+                  const Text(
+                    'Location',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: locationController,
+                    decoration: const InputDecoration(
+                      hintText: 'Search by location',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                  ),
+                ],
               ),
-            );
-      }
-    });
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  // Reset all filters
+                  context.read<DoctorAppointmentsBloc>().add(ResetFilters());
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('Reset', style: TextStyle(color: Colors.red)),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext);
+                },
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  // Apply filter
+                  final newFilterCriteria = AppointmentFilterCriteria(
+                    fromDate: fromDate,
+                    toDate: toDate,
+                    statusFilter: selectedStatuses.isNotEmpty
+                        ? selectedStatuses.toList()
+                        : null,
+                    patientNameFilter: patientNameController.text.isNotEmpty
+                        ? patientNameController.text
+                        : null,
+                    serviceNameFilter: serviceNameController.text.isNotEmpty
+                        ? serviceNameController.text
+                        : null,
+                    locationFilter: locationController.text.isNotEmpty
+                        ? locationController.text
+                        : null,
+                  );
+
+                  context.read<DoctorAppointmentsBloc>().add(
+                        FilterAppointments(filterCriteria: newFilterCriteria),
+                      );
+
+                  Navigator.pop(dialogContext);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: MyColors.primary,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Apply'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }
 
-// The rest of the widget classes remain the same...
+// Filter chip widget
+class _FilterChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final Function(bool) onSelected;
+
+  const _FilterChip({
+    required this.label,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return FilterChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: onSelected,
+      backgroundColor: Colors.grey[200],
+      selectedColor: MyColors.primary.withValues(alpha: 0.2),
+      checkmarkColor: MyColors.primary,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: selected ? MyColors.primary : Colors.transparent,
+        ),
+      ),
+    );
+  }
+}
+
 class _AppointmentsListView extends StatelessWidget {
   final List<AppointmentPatientCard> appointments;
   final String emptyMessage;
@@ -247,7 +615,9 @@ class _AppointmentItem extends StatelessWidget {
     final appointment = appointmentPatientCard.appointment;
 
     final isUpcoming = appointment.appointmentDate.isAfter(DateTime.now());
-    final statusColor = _getStatusColor(appointment.status);
+    final isPast = appointment.appointmentDate.isBefore(DateTime.now()) &&
+        appointment.status != AppointmentStatus.cancelled;
+    final isMissed = appointment.status == AppointmentStatus.cancelled;
 
     // Check if this appointment has been viewed
     bool isViewed = true;
@@ -256,23 +626,34 @@ class _AppointmentItem extends StatelessWidget {
       isViewed = state.isAppointmentViewed(appointment.appointmentId ?? '');
     }
 
-    bool isAppointmentReady(bool isUpcoming) {
+    bool isAppointmentReady() {
       if (isUpcoming) return false;
+      if (isPast && appointment.status == AppointmentStatus.completed) {
+        return false;
+      }
+      if (isMissed) return false;
+
+      return true;
+    }
+
+    bool isAppointmentPastOrMissing() {
+      if (isPast || isMissed) return false;
 
       return true;
     }
 
     return Stack(
       children: [
-        AppointmentWidget(
-          date: DateFormat('MMM dd, yyyy').format(appointment.appointmentDate),
-          time: DateFormat('h:mm a').format(appointment.appointmentDate),
+        AppointmentWidgetDoctor(
+          appointmentDate: appointment.appointmentDate,
           location: appointment.location ?? "Online Consultation",
           specialty: appointment.specialty,
           name: appointmentPatientCard.patient.name!,
-          service: appointment.serviceName,
-          fee: appointment.fee.toString(),
-          isReady: isAppointmentReady(isUpcoming),
+          serviceName: appointment.serviceName,
+          fee: appointment.fee,
+          isReady: isAppointmentReady(),
+          status: appointment.status,
+          showButton: isAppointmentPastOrMissing(),
           onJoinCall: () {
             _handleJoinCall(context, appointment);
           },
@@ -282,39 +663,34 @@ class _AppointmentItem extends StatelessWidget {
                   MarkAppointmentViewed(
                       appointmentId: appointment.appointmentId ?? ''),
                 );
-            _showAppointmentDetails(context, appointmentPatientCard);
           },
+          onCancel: () {
+            context.read<DoctorAppointmentsBloc>().add(
+                  UpdateAppointmentStatus(
+                    appointmentId: appointment.appointmentId ?? '',
+                    newStatus: AppointmentStatus.cancelled,
+                  ),
+                );
+          },
+          isPast: isPast,
         ),
 
-        // Show a badge for unviewed upcoming appointments
-        if (!isViewed && isUpcoming)
+        // Show a badge for unviewed appointments
+        if (!isViewed && (isUpcoming || isMissed))
           Positioned(
             top: 8,
             right: 8,
             child: Container(
               width: 12,
               height: 12,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.red,
+                color: isMissed ? Colors.red : Colors.blue,
               ),
             ),
           ),
       ],
     );
-  }
-
-  Color _getStatusColor(AppointmentStatus? status) {
-    switch (status) {
-      case AppointmentStatus.completed:
-        return Colors.green;
-      case AppointmentStatus.canceled:
-        return Colors.red;
-      case AppointmentStatus.inProgress:
-        return Colors.orange;
-      default:
-        return MyColors.primary;
-    }
   }
 
   void _handleJoinCall(BuildContext context, Appointment appointment) {
@@ -338,269 +714,6 @@ class _AppointmentItem extends StatelessWidget {
         ),
       );
     }
-  }
-
-  void _showAppointmentDetails(
-      BuildContext context, AppointmentPatientCard appointmentPatientCard) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => _AppointmentDetailsSheet(
-          appointmentPatientCard: appointmentPatientCard),
-    );
-  }
-}
-
-class _AppointmentDetailsSheet extends StatelessWidget {
-  final AppointmentPatientCard appointmentPatientCard;
-
-  const _AppointmentDetailsSheet({required this.appointmentPatientCard});
-
-  @override
-  Widget build(BuildContext context) {
-    final appointment = appointmentPatientCard.appointment;
-
-    return Container(
-      padding: kPadd20,
-      decoration: BoxDecoration(
-        color: MyColors.cardBackground,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 5,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-          kGap20,
-          const Text(
-            'Appointment Details',
-            style: TextStyle(
-              fontSize: Font.mediumLarge,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          kGap14,
-          const SectionDivider(),
-          kGap14,
-          _DetailRow(
-            icon: FontAwesomeIcons.user,
-            title: 'Patient',
-            value: appointmentPatientCard.patient.name ?? 'Unknown Patient',
-          ),
-          _DetailRow(
-            icon: FontAwesomeIcons.calendar,
-            title: 'Date',
-            value: DateFormat('EEEE, MMM dd, yyyy')
-                .format(appointment.appointmentDate),
-          ),
-          _DetailRow(
-            icon: FontAwesomeIcons.clock,
-            title: 'Time',
-            value: DateFormat('h:mm a').format(appointment.appointmentDate),
-          ),
-          _DetailRow(
-            icon: FontAwesomeIcons.stethoscope,
-            title: 'Service',
-            value: appointment.serviceName,
-          ),
-          _DetailRow(
-            icon: FontAwesomeIcons.locationDot,
-            title: 'Location',
-            value: appointment.location ?? 'Online Consultation',
-          ),
-          _DetailRow(
-            icon: FontAwesomeIcons.tag,
-            title: 'Status',
-            value: _capitalizeStatus(appointment.status),
-          ),
-          _DetailRow(
-            icon: FontAwesomeIcons.dollarSign,
-            title: 'Fee',
-            value: '\$${appointment.fee}',
-          ),
-          kGap14,
-          _DetailTextArea(
-            icon: FontAwesomeIcons.comment,
-            title: 'Patient Biography',
-            value: appointmentPatientCard.patient.biography ?? 'No Biography',
-          ),
-          kGap20,
-          if (_canJoinCall(appointment))
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                  AppGlobal.navigatorKey.currentState!.push(
-                    VideoCallScreen.route(),
-                  );
-                },
-                icon: const FaIcon(FontAwesomeIcons.video),
-                label: const Text('Join Call'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: MyColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: kPaddV14,
-                ),
-              ),
-            ),
-          kGap14,
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Close',
-                  style: TextStyle(color: MyColors.primary)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  bool _canJoinCall(Appointment appointment) {
-    final now = DateTime.now();
-    final startWindow =
-        appointment.appointmentDate.subtract(const Duration(minutes: 10));
-    final endWindow = appointment.appointmentDate
-        .add(Duration(minutes: appointment.duration ?? 30));
-
-    return now.isAfter(startWindow) && now.isBefore(endWindow);
-  }
-
-  String _capitalizeStatus(AppointmentStatus? status) {
-    if (status == null) return "Scheduled";
-
-    return status
-        .toString()
-        .split('.')
-        .last
-        .split('_')
-        .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
-        .join(' ');
-  }
-}
-
-class _DetailTextArea extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String value;
-
-  const _DetailTextArea({
-    required this.icon,
-    required this.title,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: kPaddV6,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              FaIcon(
-                icon,
-                size: 16,
-                color: MyColors.primary,
-              ),
-              kGap10,
-              SizedBox(
-                width: 180,
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: Font.small,
-                    color: MyColors.subtitleDark,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          kGap10,
-          Container(
-            padding: kPadd10,
-            decoration: BoxDecoration(
-              color: MyColors.background,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: Font.small,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String value;
-
-  const _DetailRow({
-    required this.icon,
-    required this.title,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: kPaddV6,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          FaIcon(
-            icon,
-            size: 16,
-            color: MyColors.primary,
-          ),
-          kGap10,
-          SizedBox(
-            width: 80,
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: Font.small,
-                color: MyColors.subtitleDark,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: Font.small,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
@@ -680,14 +793,16 @@ class _AppointmentsError extends StatelessWidget {
   }
 }
 
-// Create a new widget for tabs with badges
+// Create a new widget for tabs with badges and icons
 class _BadgedTab extends StatelessWidget {
   final String text;
+  final IconData? icon;
   final int badgeCount;
   final Color badgeColor;
 
   const _BadgedTab({
     required this.text,
+    this.icon,
     this.badgeCount = 0,
     this.badgeColor = Colors.red,
   });
@@ -698,8 +813,14 @@ class _BadgedTab extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(width: 8),
-          Text(text),
+          if (icon != null) ...[
+            FaIcon(icon, size: 16),
+            const SizedBox(width: 6),
+          ],
+          Text(text,
+              style: const TextStyle(
+                fontSize: Font.mediumSmall,
+              )),
           if (badgeCount > 0) ...[
             const SizedBox(width: 4),
             Container(

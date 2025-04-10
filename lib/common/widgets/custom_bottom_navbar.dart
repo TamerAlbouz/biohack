@@ -29,7 +29,7 @@ class CustomBottomNavBar<T extends Cubit<S>, S extends NavbarStateBase>
             decoration: const BoxDecoration(
               color: MyColors.primary,
             ),
-            height: 78,
+            height: 88,
             child: BottomNavigationBar(
               currentIndex: state.index,
               items: items.map((item) {

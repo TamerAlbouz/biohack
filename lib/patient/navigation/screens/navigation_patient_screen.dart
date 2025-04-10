@@ -2,6 +2,7 @@ import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medtalk/patient/dashboard/bloc/appointment/appointment_bloc.dart';
+import 'package:medtalk/patient/dashboard/bloc/doctor/doctor_bloc.dart';
 import 'package:medtalk/patient/profile/screens/profile_screen.dart';
 import 'package:medtalk/patient/search_doctors/screens/search_doctors_screen.dart';
 
@@ -11,7 +12,9 @@ import '../../../styles/sizes.dart';
 import '../../chat/bloc/chat_list/chat_list_bloc.dart';
 import '../../chat/bloc/chat_list/chat_list_event.dart';
 import '../../chat/screens/chat_list.dart';
+import '../../dashboard/bloc/document/document_bloc.dart';
 import '../../dashboard/screens/patient_dashboard_screen.dart';
+import '../../documents/screens/document_management_screen.dart';
 import '../../profile/bloc/patient_profile_bloc.dart';
 import '../cubit/navigation_patient_cubit.dart';
 import '../enums/navbar_screen_items_patients.dart';
@@ -33,10 +36,9 @@ class NavigationPatientScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => PatientAppointmentBloc(
-            appointmentRepo: getIt<IAppointmentRepository>(),
-          ),
-        ),
+            create: (_) => PatientAppointmentBloc(
+                  appointmentRepo: getIt<IAppointmentRepository>(),
+                )),
         BlocProvider<NavigationPatientCubit>(
             create: (context) => NavigationPatientCubit()),
         BlocProvider(
@@ -51,6 +53,15 @@ class NavigationPatientScreen extends StatelessWidget {
               LoadPatientProfile(patientId),
             ),
         ),
+        // document
+        BlocProvider<PatientDocumentBloc>(
+            create: (BuildContext context) => PatientDocumentBloc(
+                  documentRepo: getIt<IMedicalDocumentRepository>(),
+                )..add(LoadPatientDocuments(patientId))),
+        BlocProvider<PatientDoctorBloc>(
+            create: (BuildContext context) => PatientDoctorBloc(
+                  doctorRepo: getIt<IDoctorRepository>(),
+                )..add(LoadPatientDoctors(patientId))),
       ],
       child: const NavigationPatientView(),
     );
@@ -65,15 +76,42 @@ class NavigationPatientView extends StatefulWidget {
 }
 
 class _NavigationPatientViewState extends State<NavigationPatientView> {
+  // Pre-initialize all screens once
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize all screens once to maintain their state
+    _screens = [
+      const PatientDashboardScreen(),
+      const SearchDoctorsScreen(),
+      const ChatsListScreen(),
+      const DocumentManagementScreen(),
+      const PatientProfileScreen(),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 10,
       ),
-      body: const Padding(
+      body: Padding(
         padding: kPaddH20,
-        child: _Body(),
+        child: BlocBuilder<NavigationPatientCubit, NavigationPatientState>(
+          builder: (context, state) {
+            // Get the current index from the state
+            final int currentIndex = _getIndexFromNavItem(state.navbarItem);
+
+            // Use IndexedStack to maintain state of all screens
+            return IndexedStack(
+              index: currentIndex,
+              children: _screens,
+            );
+          },
+        ),
       ),
       bottomNavigationBar:
           CustomBottomNavBar<NavigationPatientCubit, NavigationPatientState>(
@@ -109,6 +147,23 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
     );
   }
 
+  int _getIndexFromNavItem(NavbarScreenItemsPatient navItem) {
+    switch (navItem) {
+      case NavbarScreenItemsPatient.dashboard:
+        return 0;
+      case NavbarScreenItemsPatient.search:
+        return 1;
+      case NavbarScreenItemsPatient.chats:
+        return 2;
+      case NavbarScreenItemsPatient.documents:
+        return 3;
+      case NavbarScreenItemsPatient.profile:
+        return 4;
+      default:
+        return 0;
+    }
+  }
+
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
@@ -137,27 +192,26 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
   }
 }
 
-class _Body extends StatelessWidget {
-  const _Body();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<NavigationPatientCubit, NavigationPatientState>(
-        builder: (context, state) {
-      switch (state.navbarItem) {
-        case NavbarScreenItemsPatient.dashboard:
-          return const PatientDashboardScreen();
-        case NavbarScreenItemsPatient.search:
-          return const SearchDoctorsScreen();
-        case NavbarScreenItemsPatient.chats:
-          return const ChatsListScreen();
-        case NavbarScreenItemsPatient.documents:
-          return const Text('Documents Screen');
-        case NavbarScreenItemsPatient.profile:
-          return const PatientProfileScreen();
-        default:
-          return const Text('Error. Please try again');
-      }
-    });
-  }
-}
+// No longer needed since we're using IndexedStack directly in the NavigationPatientView
+// class _Body extends StatelessWidget {
+//   const _Body();
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return BlocBuilder<NavigationPatientCubit, NavigationPatientState>(
+//         builder: (context, state) {
+//       switch (state.navbarItem) {
+//         case NavbarScreenItemsPatient.dashboard:
+//           return const PatientDashboardScreen();
+//         case NavbarScreenItemsPatient.search:
+//           return const SearchDoctorsScreen();
+//         case NavbarScreenItemsPatient.chats:
+//           return const ChatsListScreen();
+//         case NavbarScreenItemsPatient.documents:
+//           return const DocumentManagementScreen();
+//         case NavbarScreenItemsPatient.profile:
+//           return const PatientProfileScreen();
+//       }
+//     });
+//   }
+// }

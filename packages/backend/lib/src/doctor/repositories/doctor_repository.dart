@@ -100,4 +100,22 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<List<Doctor>> getPatientDoctors(String id) {
+    try {
+      return _doctorCollection
+          .where('patientIds', arrayContains: id)
+          .get()
+          .then((snapshot) => snapshot.docs
+              .map((doc) => Doctor.fromMap(doc.id, doc.data().toMap()))
+              .toList());
+    } on FirebaseException catch (e) {
+      logger.e(e.message);
+      throw DoctorException.fromCode(e.code);
+    } catch (e) {
+      logger.e(e);
+      rethrow;
+    }
+  }
 }

@@ -13,11 +13,26 @@ final class LoadPatientProfile extends PatientProfileEvent {
   List<Object> get props => [patientId];
 }
 
-final class UpdatePatientProfile extends PatientProfileEvent {
-  final Patient patient;
+class UpdatePatientProfile extends PatientProfileEvent {
+  final String? name;
+  final String? biography;
+  final String? bloodType;
+  final double? height;
+  final double? weight;
+  final String? sex;
+  final DateTime? dateOfBirth;
 
-  const UpdatePatientProfile(this.patient);
+  const UpdatePatientProfile({
+    this.name,
+    this.biography,
+    this.bloodType,
+    this.height,
+    this.weight,
+    this.sex,
+    this.dateOfBirth,
+  });
 
   @override
-  List<Object> get props => [patient];
+  List<Object?> get props =>
+      [name, biography, bloodType, height, weight, sex, dateOfBirth];
 }

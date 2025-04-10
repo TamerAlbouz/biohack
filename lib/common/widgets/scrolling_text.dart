@@ -174,7 +174,7 @@ class _ScrollingTextState extends State<ScrollingText> {
                 end: Alignment.centerRight,
                 colors: [
                   bgColor,
-                  bgColor.withOpacity(0.0),
+                  bgColor.withValues(alpha: 0.0),
                 ],
               ),
             ),
@@ -192,7 +192,7 @@ class _ScrollingTextState extends State<ScrollingText> {
                 end: Alignment.centerLeft,
                 colors: [
                   bgColor,
-                  bgColor.withOpacity(0.0),
+                  bgColor.withValues(alpha: 0.0),
                 ],
               ),
             ),

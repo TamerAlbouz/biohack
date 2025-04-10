@@ -5,10 +5,10 @@ sealed class PatientAppointmentEvent extends Equatable {
 }
 
 class LoadPatientAppointment extends PatientAppointmentEvent {
-  final String appointmentId;
+  final String patientId;
 
-  const LoadPatientAppointment(this.appointmentId);
+  const LoadPatientAppointment(this.patientId);
 
   @override
-  List<Object> get props => [appointmentId];
+  List<Object> get props => [patientId];
 }

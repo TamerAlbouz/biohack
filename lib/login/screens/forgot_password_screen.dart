@@ -125,8 +125,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                             ElevatedButton(
                               onPressed: () {
                                 // Capture the bloc reference before showing dialog
-                                final forgotBloc =
-                                    context.read<ForgotPasswordBloc>();
+                                context.read<ForgotPasswordBloc>();
                                 // show confirmation dialog
                                 showDialog(
                                   context: context,

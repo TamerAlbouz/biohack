@@ -113,7 +113,7 @@ class FirestoreMockDataService {
   Future<List<String>> batchInsertDoctors(
       List<Map<String, dynamic>> doctorDataList) async {
     final List<String> insertedIds = [];
-    final batch = FirebaseFirestore.instance.batch();
+    FirebaseFirestore.instance.batch();
     final doctorsCollection = FirebaseFirestore.instance.collection('doctors');
 
     try {
@@ -192,10 +192,10 @@ class FirestoreMockDataService {
 
     try {
       final insertedIds = await batchInsertDoctors(doctors);
-      print('Successfully inserted ${insertedIds.length} doctors');
-      print('First few doctor IDs: ${insertedIds.take(5).join(", ")}');
+      logger.i('Successfully inserted ${insertedIds.length} doctors');
+      logger.i('First few doctor IDs: ${insertedIds.take(5).join(", ")}');
     } catch (e) {
-      print('Error inserting doctors: $e');
+      logger.i('Error inserting doctors: $e');
     }
   }
 }

@@ -22,6 +22,7 @@ class CustomInputField extends StatefulWidget {
   final int? maxLength;
   final int maxLines; // Added maxLines property
   final bool showPasswordToggle;
+  final TextCapitalization textCapitalization;
 
   const CustomInputField({
     super.key,
@@ -40,6 +41,7 @@ class CustomInputField extends StatefulWidget {
     this.maxLength,
     this.maxLines = 1, // Default value set to 1
     this.showPasswordToggle = false,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -91,6 +93,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
             children: [
               Expanded(
                 child: TextFormField(
+                  textCapitalization: widget.textCapitalization,
                   controller: widget.controller,
                   onChanged: widget.onChanged,
                   keyboardType: widget.keyboardType,

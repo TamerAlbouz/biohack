@@ -130,56 +130,6 @@ class _VerificationRequirementsScreenState
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String description;
-
-  const _InfoCard({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomBase(
-      shadow: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 22),
-              kGap8,
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: Font.smallExtra,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          kGap8,
-          Text(
-            description,
-            style: const TextStyle(
-              fontSize: Font.extraSmall,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _RequirementSection extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -191,8 +141,9 @@ class _RequirementSection extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.title,
-    this.subtitle,
     required this.items,
+    // ignore: unused_element_parameter
+    this.subtitle,
   });
 
   @override

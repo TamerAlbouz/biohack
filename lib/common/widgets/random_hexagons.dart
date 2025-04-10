@@ -50,12 +50,12 @@ class DiagonalRectanglePainter extends CustomPainter {
     final double spacing = rectWidth * 2; // Space between rectangles
 
     final Paint primaryPaint = Paint()
-      ..color = primaryColor.withOpacity(0.4)
+      ..color = primaryColor.withValues(alpha: 0.4)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
     final Paint secondaryPaint = Paint()
-      ..color = Colors.white.withOpacity(0.3)
+      ..color = Colors.white.withValues(alpha: 0.3)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 

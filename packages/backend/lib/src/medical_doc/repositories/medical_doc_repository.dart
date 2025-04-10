@@ -86,4 +86,24 @@ class MedicalDocumentRepository implements IMedicalDocumentRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<List<MedicalDocument>> getPatientDocuments(String patientId) async {
+    try {
+      final snapshot = await _medicalDocumentCollection
+          .where('patientId', isEqualTo: patientId)
+          .get();
+
+      return snapshot.docs
+          .map((doc) =>
+              MedicalDocument.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    } on FirebaseException catch (e) {
+      logger.e(e.message);
+      rethrow;
+    } catch (e) {
+      logger.e(e);
+      rethrow;
+    }
+  }
 }

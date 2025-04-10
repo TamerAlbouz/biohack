@@ -8,8 +8,8 @@ class WaveGradientPainter extends CustomPainter {
     final paint = Paint()
       ..shader = LinearGradient(
         colors: [
-          MyColors.primary.withOpacity(0.3),
-          MyColors.primary.withOpacity(1),
+          MyColors.primary.withValues(alpha: 0.3),
+          MyColors.primary.withValues(alpha: 1),
         ],
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,

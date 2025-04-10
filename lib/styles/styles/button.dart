@@ -34,6 +34,15 @@ final kElevatedButtonCommonStyle = ElevatedButton.styleFrom(
   alignment: Alignment.center,
 );
 
+final kOutlinedButtonCancelStyle = OutlinedButton.styleFrom(
+  foregroundColor: MyColors.textGrey,
+  padding: kPaddV12,
+  side: const BorderSide(color: MyColors.grey),
+  shape: RoundedRectangleBorder(
+    borderRadius: kRadius10,
+  ),
+);
+
 final kElevatedButtonAddCardStyle = ElevatedButton.styleFrom(
   shape: RoundedRectangleBorder(borderRadius: kRadius10),
   backgroundColor: MyColors.selectionAddCard,

@@ -20,7 +20,8 @@ class PatientAppointmentBloc
   Future<void> _onLoadAppointment(LoadPatientAppointment event,
       Emitter<PatientAppointmentState> emit) async {
     try {
-      _appointment = await _appointmentRepo.getAppointment(event.appointmentId);
+      _appointment =
+          await _appointmentRepo.getPatientAppointmentLatest(event.patientId);
       emit(AppointmentLoaded(_appointment!));
     } catch (e) {
       emit(AppointmentError(e.toString()));

@@ -475,7 +475,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
           focusNode: _focusNode,
           child: Container(
             width: widget.width,
-            padding: widget.padding ?? kPaddH20V8,
+            padding: widget.padding ?? kPaddH20V4,
             decoration: BoxDecoration(
               color: widget.backgroundColor ?? MyColors.textField,
               borderRadius: widget.borderRadius ?? kRadius10,

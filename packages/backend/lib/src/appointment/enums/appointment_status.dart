@@ -1,9 +1,9 @@
 enum AppointmentStatus {
-  initiated,
+  scheduled,
   confirmed,
-  canceled,
+  cancelled,
   inProgress,
   completed,
-  noShow,
+  missed,
   rescheduled,
 }

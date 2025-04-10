@@ -25,4 +25,10 @@ abstract class IMedicalDocumentRepository {
   ///
   /// Throws a [FirebaseException] if an exception occurs.
   Future<void> deleteMedicalDocument(String documentId);
+
+  /// Gets all patient documents.
+  ///
+  /// Returns a list of [MedicalDocument] for the given [patientId].
+  /// Throws a [FirebaseException] if an exception occurs.
+  Future<List<MedicalDocument>> getPatientDocuments(String patientId);
 }
