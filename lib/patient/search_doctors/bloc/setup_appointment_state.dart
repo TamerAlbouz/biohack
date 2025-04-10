@@ -2,19 +2,24 @@ part of 'setup_appointment_bloc.dart';
 
 class SetupAppointmentState extends Equatable {
   final bool reBuild;
-  final String? errorMessage;
+  final String error;
+  final bool isLoading;
+  final bool isBooking;
+  final bool bookingComplete;
+  final int? serviceIndex;
+
   final SelectionItem? selectedService;
   final AppointmentType? selectedAppointment;
   final DateTime? appointmentDate;
   final TimeOfDay? appointmentTime;
-  final String selectedPayment;
+  final PaymentType? selectedPayment;
   final String appointmentLocation;
   final String? doctorId;
   final String? specialty;
   final bool termsAccepted;
   final int bookingAdvanceHours;
   final int bookingWindowDays;
-  final String doctorName;
+  final String? doctorName;
 
   // Doctor Profile Information
   final String? doctorBiography;
@@ -44,19 +49,23 @@ class SetupAppointmentState extends Equatable {
 
   const SetupAppointmentState({
     this.reBuild = false,
-    this.errorMessage,
+    this.error = '',
+    this.isLoading = true,
+    this.isBooking = false,
+    this.bookingComplete = false,
+    this.serviceIndex,
     this.selectedService,
     this.selectedAppointment,
     this.appointmentDate,
     this.appointmentTime,
-    this.selectedPayment = '',
+    this.selectedPayment,
     this.appointmentLocation = '',
     this.doctorId,
     this.specialty,
     this.termsAccepted = false,
     this.bookingAdvanceHours = 0,
     this.bookingWindowDays = 365,
-    this.doctorName = '',
+    this.doctorName,
 
     // Doctor profile defaults
     this.doctorBiography,
@@ -95,12 +104,16 @@ class SetupAppointmentState extends Equatable {
 
   SetupAppointmentState copyWith({
     bool? reBuild,
-    String? errorMessage,
+    String? error,
+    bool? isLoading,
+    bool? isBooking,
+    bool? bookingComplete,
+    int? serviceIndex,
     SelectionItem? selectedService,
     AppointmentType? selectedAppointment,
     DateTime? appointmentDate,
     TimeOfDay? appointmentTime,
-    String? selectedPayment,
+    PaymentType? selectedPayment,
     String? appointmentLocation,
     String? doctorId,
     String? specialty,
@@ -137,7 +150,12 @@ class SetupAppointmentState extends Equatable {
   }) {
     return SetupAppointmentState(
       reBuild: reBuild ?? this.reBuild,
-      errorMessage: errorMessage ?? this.errorMessage,
+      error: error ?? this.error,
+      isLoading: isLoading ?? this.isLoading,
+      isBooking: isBooking ?? this.isBooking,
+      bookingComplete: bookingComplete ?? this.bookingComplete,
+      serviceIndex: serviceIndex ?? this.serviceIndex,
+
       selectedService: selectedService ?? this.selectedService,
       selectedAppointment: selectedAppointment ?? this.selectedAppointment,
       appointmentDate: appointmentDate ?? this.appointmentDate,
@@ -184,7 +202,12 @@ class SetupAppointmentState extends Equatable {
   @override
   List<Object?> get props => [
         reBuild,
-        errorMessage,
+        error,
+        isLoading,
+        isBooking,
+        bookingComplete,
+        serviceIndex,
+
         selectedService,
         selectedAppointment,
         appointmentDate,

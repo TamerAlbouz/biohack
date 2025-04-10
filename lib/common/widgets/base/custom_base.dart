@@ -9,11 +9,13 @@ class CustomBase extends StatelessWidget {
   final bool roundCorners;
   final int? fixedHeight;
   final int? fixedWidth;
+  final EdgeInsets? padding;
 
   const CustomBase(
       {super.key,
       this.child,
-      this.shadow = true,
+      this.shadow = false,
+      this.padding,
       this.fixedWidth,
       this.fixedHeight,
       this.roundCorners = true});
@@ -21,12 +23,12 @@ class CustomBase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: kPaddH20V15,
+      padding: padding ?? kPadd20,
       width: fixedWidth?.toDouble() ?? double.infinity,
       height: fixedHeight?.toDouble(),
       decoration: BoxDecoration(
         color: MyColors.cardBackground,
-        borderRadius: roundCorners ? kRadius20 : BorderRadius.zero,
+        borderRadius: roundCorners ? kRadius16 : BorderRadius.zero,
         boxShadow: shadow
             ? [
                 BoxShadow(

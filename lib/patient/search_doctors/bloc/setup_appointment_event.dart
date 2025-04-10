@@ -69,7 +69,7 @@ class UpdateAppointmentType extends SetupAppointmentEvent {
 }
 
 class UpdatePaymentType extends SetupAppointmentEvent {
-  final String paymentType;
+  final PaymentType paymentType;
 
   const UpdatePaymentType(this.paymentType);
 
@@ -87,3 +87,5 @@ class ToggleTermsAccepted extends SetupAppointmentEvent {
 }
 
 class BookAppointment extends SetupAppointmentEvent {}
+
+class ResetError extends SetupAppointmentEvent {}

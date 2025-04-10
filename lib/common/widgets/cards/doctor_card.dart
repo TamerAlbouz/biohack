@@ -35,71 +35,75 @@ class DoctorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomBase(
-      shadow: false,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Profile Picture with shadow
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: imageUrl != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(14),
-                        child: Image.network(
-                          imageUrl!,
-                          width: 70,
-                          height: 70,
-                          fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: onCardTap,
+      child: CustomBase(
+        padding: kPadd16,
+        shadow: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Profile Picture with shadow
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: imageUrl != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(14),
+                          child: Image.network(
+                            imageUrl!,
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : const ProfilePicture(
+                          height: 60,
+                          width: 60,
                         ),
-                      )
-                    : const ProfilePicture(
-                        height: 70,
-                        width: 70,
-                      ),
-              ),
-              kGap16,
-              // Doctor Info
-              Expanded(
-                child: _DoctorInfo(
-                  name: name,
-                  specialty: specialty,
-                  availability: availability,
                 ),
-              ),
-              // Date Container
-              _DateContainer(date: date, month: month),
-            ],
-          ),
-          kGap4,
+                kGap16,
+                // Doctor Info
+                Expanded(
+                  child: _DoctorInfo(
+                    name: name,
+                    specialty: specialty,
+                    availability: availability,
+                  ),
+                ),
+                // Date Container
+                _DateContainer(date: date, month: month),
+              ],
+            ),
+            kGap4,
 
-          // Horizontal divider with gradient
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  MyColors.black.withValues(alpha: 0.5),
-                  Colors.transparent,
-                ],
+            // Horizontal divider with gradient
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.transparent,
+                    MyColors.black.withValues(alpha: 0.5),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
-          ),
-          kGap4,
-          // Time Slots
-          _TimeSlots(
-            timeSlots: timeSlots,
-            onTimeSlotSelected: onTimeSlotSelected,
-          ),
-        ],
+            kGap4,
+            // Time Slots
+            _TimeSlots(
+              timeSlots: timeSlots,
+              onTimeSlotSelected: onTimeSlotSelected,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -124,7 +128,7 @@ class _DoctorInfo extends StatelessWidget {
         Text(
           name,
           style: const TextStyle(
-            fontSize: Font.medium,
+            fontSize: Font.mediumSmall,
             color: Colors.black87,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.3,

@@ -23,7 +23,7 @@ class InfiniteScrollListView<T> extends StatefulWidget {
     required this.isLoading,
     required this.headerBuilder,
     this.hasReachedMax = false,
-    this.expandedHeaderHeight = 350,
+    this.expandedHeaderHeight = 330,
     this.collapsedHeaderHeight = 75,
     this.controller,
     this.onRefresh, // Add this line

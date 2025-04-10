@@ -36,6 +36,7 @@ class SetupAppointmentBloc
     on<BookAppointment>(_onBookAppointment);
     on<UpdateDoctorInfo>(_onUpdateDoctorInfo);
     on<ToggleTermsAccepted>(_onToggleTermsAccepted);
+    on<ResetError>(_onResetError);
   }
 
   final IMailRepository _mailRepository;
@@ -54,6 +55,10 @@ class SetupAppointmentBloc
     emit(state.copyWith(termsAccepted: event.value));
   }
 
+  void _onResetError(ResetError event, Emitter<SetupAppointmentState> emit) {
+    emit(state.copyWith(error: ''));
+  }
+
   void _onUpdateDoctorInfo(
       UpdateDoctorInfo event, Emitter<SetupAppointmentState> emit) {
     emit(state.copyWith(specialty: event.specialty, doctorId: event.doctorId));
@@ -65,13 +70,18 @@ class SetupAppointmentBloc
       emit(state.copyWith(
         doctorId: event.doctorId,
         specialty: event.specialty,
+        isLoading: true,
+        error: '',
       ));
 
       // Get doctor details
       final doctor = await _doctorRepository.getDoctor(event.doctorId);
 
       if (doctor == null) {
-        emit(state.copyWith(errorMessage: 'Doctor not found'));
+        emit(state.copyWith(
+          error: 'Doctor not found',
+          isLoading: false,
+        ));
         return;
       }
 
@@ -190,8 +200,12 @@ class SetupAppointmentBloc
         ),
       ];
 
+      // Get a more realistic date (next available day)
+      DateTime suggestedDate = _getNextAvailableDate(availableDays);
+
       // Update state with doctor information
       emit(state.copyWith(
+        doctorName: doctor.name,
         doctorBiography: doctor.biography,
         doctorPhone: '+1 123 456 7890',
         // Mock phone since it's not in the doctor model
@@ -204,8 +218,8 @@ class SetupAppointmentBloc
         doctorWorkingHours: workingHours,
         doctorAvailableDays: availableDays,
         defaultSlotDuration: 30,
-        appointmentDate: DateTime.now(),
         // Mock default slot duration
+        appointmentDate: suggestedDate,
         bufferTime: 10,
         // Mock buffer time
         doctorServices: services,
@@ -216,16 +230,52 @@ class SetupAppointmentBloc
         acceptsCreditCard: true,
         acceptsInsurance: false,
         doctorReviews: reviews,
+        isLoading: false,
       ));
     } catch (e) {
       logger.e('Error loading initial data: $e');
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(state.copyWith(
+        error: 'Could not load doctor information: ${e.toString()}',
+        isLoading: false,
+      ));
     }
+  }
+
+  DateTime _getNextAvailableDate(List<bool> availableDays) {
+    final now = DateTime.now();
+    int dayOfWeek = now.weekday - 1; // 0 = Monday, 6 = Sunday
+
+    // Find the next available day
+    int daysToAdd = 0;
+    for (int i = 0; i < 7; i++) {
+      int checkDay = (dayOfWeek + i) % 7;
+      if (availableDays[checkDay]) {
+        daysToAdd = i;
+        break;
+      }
+    }
+
+    return now.add(Duration(days: daysToAdd));
   }
 
   Future<void> _onBookAppointment(
       BookAppointment event, Emitter<SetupAppointmentState> emit) async {
+    // Validate required fields
+    if (state.appointmentDate == null ||
+        state.appointmentTime == null ||
+        state.selectedService == null ||
+        state.selectedAppointment == null ||
+        state.selectedPayment == null) {
+      emit(state.copyWith(
+        error: 'Please complete all fields before booking',
+      ));
+      return;
+    }
+
     try {
+      // Set booking state to show progress indicator
+      emit(state.copyWith(isBooking: true, error: ''));
+
       DateTime concatDateWithTime(DateTime date, TimeOfDay time) {
         return DateTime(
             date.year, date.month, date.day, time.hour, time.minute);
@@ -248,14 +298,17 @@ class SetupAppointmentBloc
                 : state.defaultSlotDuration,
             location: state.appointmentLocation)),
 
-        // Simulate booking
+        // Simulate network latency
+        Future.delayed(const Duration(seconds: 2)),
+
+        // Send email confirmation
         // _mailRepository.sendMail(
         //     to: _authenticationRepository.currentUser.email,
         //     templateName: "appointment_confirmation",
         //     templateData: {
         //       "userName": _authenticationRepository.currentUser.name,
-        //       "doctorName": "Dr. Smith",
-        //       "specialties": "Family Medicine, Cardiology",
+        //       "doctorName": state.doctorName,
+        //       "specialties": state.specialty,
         //       "appointmentDate": "${state.appointmentDate}",
         //       "appointmentTime": "${state.appointmentTime}",
         //       "sessionLength": state.selectedService!.value is int
@@ -263,13 +316,23 @@ class SetupAppointmentBloc
         //           : state.defaultSlotDuration,
         //       "fee": state.selectedService!.price,
         //       "currency": "\$",
-        //       "appName": "BioHack"
+        //       "appName": "MedTalk"
         //     })
       ]);
-      logger.i("Appointment booked");
+
+      // Set booking complete to trigger navigation
+      emit(state.copyWith(
+        isBooking: false,
+        bookingComplete: true,
+      ));
+
+      logger.i("Appointment booked successfully");
     } catch (e) {
-      logger.e(e);
-      emit(state.copyWith(errorMessage: e.toString()));
+      logger.e("Error booking appointment: $e");
+      emit(state.copyWith(
+        isBooking: false,
+        error: 'Failed to book appointment: ${e.toString()}',
+      ));
     }
   }
 
@@ -287,15 +350,34 @@ class SetupAppointmentBloc
 
   void _onUpdateAppointmentDate(
       UpdateAppointmentDate event, Emitter<SetupAppointmentState> emit) {
-    emit(state.copyWith(appointmentDate: event.date));
+    emit(state.copyWith(
+      appointmentDate: event.date,
+      // Reset time when date changes
+      appointmentTime: null,
+    ));
   }
 
   void _onUpdateServiceType(
       UpdateServiceType event, Emitter<SetupAppointmentState> emit) {
+    // Find the index of the selected service
+    final serviceIndex = state.doctorServices.indexWhere(
+      (service) => service.id == event.serviceType.value,
+    );
+
     // Check if service has custom availability
     ServiceAvailability? customAvailability;
 
     // This is where you would get the service's custom availability if it exists
+    // For example, if fetching from backend:
+    // final serviceAvailability = await _doctorRepository.getServiceAvailability(event.serviceType.value);
+    // if (serviceAvailability != null) {
+    //   customAvailability = ServiceAvailability(
+    //     days: serviceAvailability.availableDays,
+    //     startTime: serviceAvailability.startTime,
+    //     endTime: serviceAvailability.endTime,
+    //   );
+    // }
+
     // For now, we'll just mock it for one of the services as an example
     if (event.serviceType.value == '3') {
       customAvailability = const ServiceAvailability(
@@ -306,9 +388,20 @@ class SetupAppointmentBloc
       );
     }
 
+    // Find the next available date based on the service's availability
+    final nextDate = _getNextAvailableDate(
+      customAvailability?.days ?? state.doctorAvailableDays,
+    );
+
     emit(state.copyWith(
       selectedService: event.serviceType,
       selectedServiceAvailability: customAvailability,
+      serviceIndex: serviceIndex >= 0 ? serviceIndex : null,
+      // Reset appointment type, date and time when service changes
+      selectedAppointment: null,
+      appointmentDate: nextDate,
+      appointmentTime: null,
+      appointmentLocation: '',
     ));
   }
 

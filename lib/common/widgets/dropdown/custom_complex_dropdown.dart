@@ -341,6 +341,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
                                         prefixIcon: Icon(
                                           Icons.search,
                                           color: MyColors.textWhite,
+                                          size: 20,
                                         ),
                                         border: InputBorder.none,
                                         contentPadding: kPaddH16V12,
@@ -479,7 +480,7 @@ class _CustomComplexDropDownState extends State<CustomComplexDropDown>
             decoration: BoxDecoration(
               color: widget.backgroundColor ?? MyColors.textField,
               borderRadius: widget.borderRadius ?? kRadius10,
-              border: Border.all(color: MyColors.primary, width: 2.5),
+              border: Border.all(color: MyColors.primary, width: 2),
             ),
             child: Row(
               children: [

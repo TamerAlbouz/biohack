@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/common/widgets/common_error_widget.dart';
-import 'package:medtalk/common/widgets/dividers/section_divider.dart';
 import 'package:medtalk/common/widgets/dropdown/custom_complex_dropdown.dart';
 import 'package:medtalk/common/widgets/inifinite_list_view.dart';
 import 'package:medtalk/patient/search_doctors/bloc/search_doctors_bloc.dart';
-import 'package:medtalk/patient/search_doctors/screens/setup_appointment_screen.dart';
+import 'package:medtalk/patient/search_doctors/screens/setup_appointments/setup_appointment_screen.dart';
 import 'package:medtalk/styles/sizes.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -344,8 +343,7 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
             color: MyColors.subtitleDark,
           ),
         ),
-        const SectionDivider(),
-        kGap10,
+        kGap20,
 
         // Specialty filter
         CustomComplexDropDown(
@@ -447,8 +445,6 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
             ),
           ],
         ),
-        const SectionDivider(),
-        kGap10,
       ],
     );
   }
