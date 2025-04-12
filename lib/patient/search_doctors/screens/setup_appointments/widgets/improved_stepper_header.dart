@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import '../../../../../styles/colors.dart';
 import '../../../../../styles/font.dart';
@@ -21,101 +20,101 @@ class ImprovedStepperHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Progress indicator
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 24),
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: Column(
-            children: [
-              // Step indicator with circles and lines
-              Row(
-                children: List.generate(
-                  totalSteps * 2 - 1, // Generate alternating circles and lines
-                  (index) {
-                    final isCircle = index % 2 == 0;
-                    final stepIndex = index ~/ 2;
-
-                    if (isCircle) {
-                      // Step circle
-                      return Container(
-                        width: 60,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: stepIndex <= currentStep
-                              ? MyColors.primary
-                              : MyColors.primary.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: stepIndex < currentStep
-                              ? const FaIcon(
-                                  FontAwesomeIcons.check,
-                                  color: Colors.white,
-                                  size: 14,
-                                )
-                              : Text(
-                                  '${stepIndex + 1}',
-                                  style: TextStyle(
-                                    color: stepIndex <= currentStep
-                                        ? Colors.white
-                                        : MyColors.primary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      );
-                    } else {
-                      // Connecting line
-                      return Expanded(
-                        child: Container(
-                          height: 3,
-                          decoration: BoxDecoration(
-                            color: stepIndex < currentStep
-                                ? MyColors.primary
-                                : MyColors.primary.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
-
-              // Step titles
-              kGap8,
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: List.generate(
-                    totalSteps, // Generate only the labels
-                    (index) {
-                      return SizedBox(
-                        width: 60, // Fixed width matching the circles
-                        child: Text(
-                          _getShortTitle(stepTitles[index]),
-                          style: TextStyle(
-                            fontSize: Font.extraSmall,
-                            color: index <= currentStep
-                                ? MyColors.textBlack
-                                : MyColors.textGrey,
-                            fontWeight: index == currentStep
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center, // Center the text
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        // // Progress indicator
+        // Container(
+        //   margin: const EdgeInsets.symmetric(vertical: 24),
+        //   padding: const EdgeInsets.symmetric(horizontal: 10),
+        //   child: Column(
+        //     children: [
+        //       // Step indicator with circles and lines
+        //       Row(
+        //         children: List.generate(
+        //           totalSteps * 2 - 1, // Generate alternating circles and lines
+        //           (index) {
+        //             final isCircle = index % 2 == 0;
+        //             final stepIndex = index ~/ 2;
+        //
+        //             if (isCircle) {
+        //               // Step circle
+        //               return Container(
+        //                 width: 60,
+        //                 height: 32,
+        //                 decoration: BoxDecoration(
+        //                   color: stepIndex <= currentStep
+        //                       ? MyColors.primary
+        //                       : MyColors.primary.withValues(alpha: 0.15),
+        //                   shape: BoxShape.circle,
+        //                 ),
+        //                 child: Center(
+        //                   child: stepIndex < currentStep
+        //                       ? const FaIcon(
+        //                           FontAwesomeIcons.check,
+        //                           color: Colors.white,
+        //                           size: 14,
+        //                         )
+        //                       : Text(
+        //                           '${stepIndex + 1}',
+        //                           style: TextStyle(
+        //                             color: stepIndex <= currentStep
+        //                                 ? Colors.white
+        //                                 : MyColors.primary,
+        //                             fontWeight: FontWeight.bold,
+        //                           ),
+        //                         ),
+        //                 ),
+        //               );
+        //             } else {
+        //               // Connecting line
+        //               return Expanded(
+        //                 child: Container(
+        //                   height: 3,
+        //                   decoration: BoxDecoration(
+        //                     color: stepIndex < currentStep
+        //                         ? MyColors.primary
+        //                         : MyColors.primary.withValues(alpha: 0.15),
+        //                     borderRadius: BorderRadius.circular(2),
+        //                   ),
+        //                 ),
+        //               );
+        //             }
+        //           },
+        //         ),
+        //       ),
+        //
+        //       // Step titles
+        //       kGap8,
+        //       Padding(
+        //         padding: const EdgeInsets.symmetric(horizontal: 0),
+        //         child: Row(
+        //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        //           children: List.generate(
+        //             totalSteps, // Generate only the labels
+        //             (index) {
+        //               return SizedBox(
+        //                 width: 60, // Fixed width matching the circles
+        //                 child: Text(
+        //                   _getShortTitle(stepTitles[index]),
+        //                   style: TextStyle(
+        //                     fontSize: Font.extraSmall,
+        //                     color: index <= currentStep
+        //                         ? MyColors.textBlack
+        //                         : MyColors.textGrey,
+        //                     fontWeight: index == currentStep
+        //                         ? FontWeight.bold
+        //                         : FontWeight.normal,
+        //                   ),
+        //                   maxLines: 1,
+        //                   overflow: TextOverflow.ellipsis,
+        //                   textAlign: TextAlign.center, // Center the text
+        //                 ),
+        //               );
+        //             },
+        //           ),
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
 
         // Current step title
         Container(

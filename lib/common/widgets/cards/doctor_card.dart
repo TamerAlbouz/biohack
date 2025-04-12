@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/sizes.dart';
 
@@ -79,28 +78,6 @@ class DoctorCard extends StatelessWidget {
                 // Date Container
                 _DateContainer(date: date, month: month),
               ],
-            ),
-            kGap4,
-
-            // Horizontal divider with gradient
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              height: 1,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.transparent,
-                    MyColors.black.withValues(alpha: 0.5),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
-            ),
-            kGap4,
-            // Time Slots
-            _TimeSlots(
-              timeSlots: timeSlots,
-              onTimeSlotSelected: onTimeSlotSelected,
             ),
           ],
         ),
@@ -233,51 +210,6 @@ class _DateContainer extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _TimeSlots extends StatelessWidget {
-  final List<String> timeSlots;
-  final void Function(String, int)? onTimeSlotSelected;
-
-  const _TimeSlots({
-    required this.timeSlots,
-    this.onTimeSlotSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: List.generate(
-        timeSlots.length,
-        (index) => GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            if (onTimeSlotSelected != null) {
-              onTimeSlotSelected!(timeSlots[index], index);
-            }
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: kPaddH8V4,
-            decoration: BoxDecoration(
-              color: MyColors.primary,
-              borderRadius: kRadius10,
-            ),
-            child: Text(
-              timeSlots[index],
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: Font.extraSmall,
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

@@ -44,134 +44,138 @@ class DashboardView extends StatelessWidget {
           context.read<PatientBloc>().add(LoadPatient());
           // Refresh other data as needed
         },
-        child: BlocBuilder<PatientBloc, PatientState>(
-          builder: (context, patientState) {
-            switch (patientState) {
-              case PatientInitial() || PatientLoading():
-                return Skeletonizer(
-                  enabled: true,
-                  enableSwitchAnimation: true,
-                  switchAnimationConfig: const SwitchAnimationConfig(
-                    duration: Duration(milliseconds: 500),
-                  ),
-                  child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Skeleton welcome section
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                    height: 16,
-                                    width: 120,
-                                    color: Colors.grey[300]),
-                                Container(
-                                    height: 24,
-                                    width: 60,
-                                    decoration: BoxDecoration(
-                                      border:
-                                          Border.all(color: MyColors.primary),
-                                      borderRadius: kRadius10,
-                                    )),
-                              ],
-                            ),
-                            kGap4,
-                            Container(
-                                height: 24,
-                                width: 180,
-                                color: Colors.grey[300]),
-                            kGap4,
-                            Container(
-                                height: 14,
-                                width: 150,
-                                color: Colors.grey[300]),
-                            kGap20,
-
-                            // Skeleton upcoming appointment
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                        height: 20,
-                                        width: 180,
-                                        color: Colors.grey[300]),
-                                    Container(
-                                        height: 16,
-                                        width: 50,
-                                        color: Colors.grey[300]),
-                                  ],
-                                ),
-                                kGap10,
-                                AppointmentWidgetPatient(
-                                  specialty: 'sdfsdf',
-                                  name: "Dr. John Doe",
-                                  appointmentDate: DateTime.now(),
-                                  location: 'dsfdfsdfsdf',
-                                  serviceName: 'sdfsdfsdf',
-                                  fee: 0,
-                                  status: AppointmentStatus.scheduled,
-                                  isReady: true,
-                                  onJoinCall: null,
-                                ),
-                                kGap20,
-
-                                // Skeleton doctors section
-                                Container(
-                                    height: 20,
-                                    width: 120,
-                                    color: Colors.grey[300]),
-                                kGap10,
-                                const CustomBase(
-                                  shadow: false,
-                                  fixedHeight: 130,
-                                  child: Center(
-                                    child: Text(
-                                      'Loading doctors...',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                ),
-                                kGap20,
-
-                                // Skeleton documents section
-                                Container(
-                                    height: 20,
-                                    width: 160,
-                                    color: Colors.grey[300]),
-                                kGap10,
-                                const CustomBase(
-                                  shadow: false,
-                                  fixedHeight: 130,
-                                  child: Center(
-                                    child: Text(
-                                      'Loading docs...',
-                                      style: TextStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        )
-                      ],
+        child: Padding(
+          padding: kPaddH20,
+          child: BlocBuilder<PatientBloc, PatientState>(
+            builder: (context, patientState) {
+              switch (patientState) {
+                case PatientInitial() || PatientLoading():
+                  return Skeletonizer(
+                    enabled: true,
+                    enableSwitchAnimation: true,
+                    switchAnimationConfig: const SwitchAnimationConfig(
+                      duration: Duration(milliseconds: 500),
                     ),
-                  ),
-                );
-              case PatientLoaded():
-                return _buildDashboardContent(context, patientState.patient);
-              case PatientError():
-                return _DashboardError(message: patientState.message);
-            }
-          },
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Skeleton welcome section
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                      height: 16,
+                                      width: 120,
+                                      color: Colors.grey[300]),
+                                  Container(
+                                      height: 24,
+                                      width: 60,
+                                      decoration: BoxDecoration(
+                                        border:
+                                            Border.all(color: MyColors.primary),
+                                        borderRadius: kRadius10,
+                                      )),
+                                ],
+                              ),
+                              kGap4,
+                              Container(
+                                  height: 24,
+                                  width: 180,
+                                  color: Colors.grey[300]),
+                              kGap4,
+                              Container(
+                                  height: 14,
+                                  width: 150,
+                                  color: Colors.grey[300]),
+                              kGap20,
+
+                              // Skeleton upcoming appointment
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                          height: 20,
+                                          width: 180,
+                                          color: Colors.grey[300]),
+                                      Container(
+                                          height: 16,
+                                          width: 50,
+                                          color: Colors.grey[300]),
+                                    ],
+                                  ),
+                                  kGap10,
+                                  AppointmentWidgetPatient(
+                                    specialty: 'sdfsdf',
+                                    name: "Dr. John Doe",
+                                    appointmentDate: DateTime.now(),
+                                    location: 'dsfdfsdfsdf',
+                                    serviceName: 'sdfsdfsdf',
+                                    fee: 0,
+                                    status: AppointmentStatus.scheduled,
+                                    isReady: true,
+                                    onJoinCall: null,
+                                  ),
+                                  kGap20,
+
+                                  // Skeleton doctors section
+                                  Container(
+                                      height: 20,
+                                      width: 120,
+                                      color: Colors.grey[300]),
+                                  kGap10,
+                                  const CustomBase(
+                                    shadow: false,
+                                    fixedHeight: 130,
+                                    child: Center(
+                                      child: Text(
+                                        'Loading doctors...',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ),
+                                  ),
+                                  kGap20,
+
+                                  // Skeleton documents section
+                                  Container(
+                                      height: 20,
+                                      width: 160,
+                                      color: Colors.grey[300]),
+                                  kGap10,
+                                  const CustomBase(
+                                    shadow: false,
+                                    fixedHeight: 130,
+                                    child: Center(
+                                      child: Text(
+                                        'Loading docs...',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                case PatientLoaded():
+                  return _buildDashboardContent(context, patientState.patient);
+                case PatientError():
+                  return _DashboardError(message: patientState.message);
+              }
+            },
+          ),
         ),
       ),
     );
@@ -229,26 +233,31 @@ class _WelcomeSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              greeting,
-              style: const TextStyle(
-                fontSize: Font.medium,
-                color: MyColors.subtitleDark,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  greeting,
+                  style: const TextStyle(
+                    fontSize: Font.medium,
+                    color: MyColors.subtitleDark,
+                  ),
+                ),
+                Text(
+                  patientName,
+                  style: const TextStyle(
+                    fontSize: Font.large,
+                    fontWeight: FontWeight.bold,
+                    color: MyColors.primary,
+                  ),
+                ),
+              ],
             ),
             const _LogoutButton(),
           ],
-        ),
-        Text(
-          patientName,
-          style: const TextStyle(
-            fontSize: Font.large,
-            fontWeight: FontWeight.bold,
-            color: MyColors.primary,
-          ),
         ),
         Text(
           DateFormat('EEEE, MMM dd, yyyy').format(now),

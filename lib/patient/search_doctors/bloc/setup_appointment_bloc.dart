@@ -37,12 +37,35 @@ class SetupAppointmentBloc
     on<UpdateDoctorInfo>(_onUpdateDoctorInfo);
     on<ToggleTermsAccepted>(_onToggleTermsAccepted);
     on<ResetError>(_onResetError);
+    on<SelectCreditCard>(_onSelectCreditCard);
+    on<AddCreditCard>(_onAddCreditCard);
   }
 
   final IMailRepository _mailRepository;
   final IAppointmentRepository _appointmentRepository;
   final IAuthenticationRepository _authenticationRepository;
   final IDoctorRepository _doctorRepository;
+
+  void _onSelectCreditCard(
+      SelectCreditCard event, Emitter<SetupAppointmentState> emit) {
+    emit(state.copyWith(
+      selectedCardId: event.cardId,
+      selectedPayment: PaymentType.creditCard,
+    ));
+  }
+
+  void _onAddCreditCard(
+      AddCreditCard event, Emitter<SetupAppointmentState> emit) {
+    final updatedCards =
+        List<SavedCreditCard>.from(state.savedCreditCards ?? []);
+    updatedCards.add(event.card);
+
+    emit(state.copyWith(
+      savedCreditCards: updatedCards,
+      selectedCardId: event.card.id, // Auto-select the new card
+      selectedPayment: PaymentType.creditCard,
+    ));
+  }
 
   void _onToggleRebuild(
       ToggleRebuild event, Emitter<SetupAppointmentState> emit) {
@@ -73,6 +96,25 @@ class SetupAppointmentBloc
         isLoading: true,
         error: '',
       ));
+
+      // Add mock credit cards for testing
+      final mockCreditCards = [
+        SavedCreditCard(
+          id: '1',
+          cardNumber: '4321',
+          cardholderName: 'John Smith',
+          expiryDate: '10/25',
+          cardType: 'Visa',
+          isDefault: true,
+        ),
+        SavedCreditCard(
+          id: '2',
+          cardNumber: '8765',
+          cardholderName: 'John Smith',
+          expiryDate: '05/26',
+          cardType: 'Mastercard',
+        ),
+      ];
 
       // Get doctor details
       final doctor = await _doctorRepository.getDoctor(event.doctorId);
@@ -221,6 +263,7 @@ class SetupAppointmentBloc
         // Mock default slot duration
         appointmentDate: suggestedDate,
         bufferTime: 10,
+        savedCreditCards: mockCreditCards,
         // Mock buffer time
         doctorServices: services,
         cancellationPolicy: 24,
@@ -282,6 +325,109 @@ class SetupAppointmentBloc
       }
 
       logger.i("Booking appointment");
+
+      String _buildCalendarLink({
+        required String doctorName,
+        required DateTime appointmentDate,
+        required TimeOfDay appointmentTime,
+        required String serviceName,
+        required int durationMinutes,
+        required String specialty,
+      }) {
+        // Create start and end DateTime objects
+        final startDateTime = DateTime(
+          appointmentDate.year,
+          appointmentDate.month,
+          appointmentDate.day,
+          appointmentTime.hour,
+          appointmentTime.minute,
+        );
+
+        final endDateTime =
+            startDateTime.add(Duration(minutes: durationMinutes));
+
+        // Format dates for Google Calendar (YYYYMMDDTHHmmssZ format)
+        String formatDateTime(DateTime dt) {
+          return '${dt.year}${dt.month.toString().padLeft(2, '0')}${dt.day.toString().padLeft(2, '0')}T'
+              '${dt.hour.toString().padLeft(2, '0')}${dt.minute.toString().padLeft(2, '0')}00';
+        }
+
+        final formattedStart = formatDateTime(startDateTime);
+        final formattedEnd = formatDateTime(endDateTime);
+
+        // Create event text and details
+        final eventText =
+            Uri.encodeComponent('Appointment with Dr. $doctorName');
+        final eventDetails = Uri.encodeComponent('$serviceName - $specialty');
+
+        // Build the final URL
+        return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=$eventText'
+            '&dates=$formattedStart/$formattedEnd&details=$eventDetails';
+      }
+
+      var templateData = {
+        // Basic template information
+        "title":
+            "Your Appointment with Dr. ${state.doctorName} has been booked",
+
+        // User information mapped from your code
+        "userName": _authenticationRepository.currentUser.name,
+
+        // Appointment details
+        "appointmentDate": "${state.appointmentDate}",
+        // formatted from state.appointmentDate
+        "appointmentTime": "${state.appointmentTime}",
+        // formatted from state.appointmentTime
+
+        // Service details
+        "serviceName": state.selectedService!.title,
+        // from state.selectedService
+        "serviceDuration": "${state.selectedService!.value} minutes",
+        // from state.selectedService
+        "hasCustomHours": state.selectedServiceAvailability != null,
+        // from state.selectedServiceAvailability
+
+        // Doctor information
+        "doctorName": state.doctorName,
+        // from state.doctorName
+        "specialties": state.specialty,
+        // from state.specialty
+
+        // Location and type information
+        "appointmentType": state.selectedAppointment!.value,
+        // from state.selectedAppointment
+        "location": state.appointmentLocation,
+        // from state.appointmentLocation
+
+        // Payment information
+        "paymentMethod": state.selectedPayment!.value,
+        // from state.selectedPayment
+        "price": state.selectedService!.price,
+        // from state.selectedService
+        "currency": "\$",
+
+        // Interactive elements
+        "calendarLink": _buildCalendarLink(
+          doctorName: state.doctorName ?? '',
+          appointmentDate: state.appointmentDate!,
+          appointmentTime: state.appointmentTime!,
+          serviceName: state.selectedService!.title,
+          durationMinutes: state.selectedService!.value is int
+              ? state.selectedService!.value as int
+              : state.defaultSlotDuration,
+          specialty: state.specialty!,
+        ),
+
+        "supportEmail": "biohack@biohack.com",
+        // example support email
+
+        // Company information
+        "companyName": "BioHack",
+        // from appName
+        "year": "2025"
+        // current year
+      };
+
       await Future.wait([
         _appointmentRepository.createAppointment(Appointment(
             status: AppointmentStatus.scheduled,
@@ -302,22 +448,11 @@ class SetupAppointmentBloc
         Future.delayed(const Duration(seconds: 2)),
 
         // Send email confirmation
-        // _mailRepository.sendMail(
-        //     to: _authenticationRepository.currentUser.email,
-        //     templateName: "appointment_confirmation",
-        //     templateData: {
-        //       "userName": _authenticationRepository.currentUser.name,
-        //       "doctorName": state.doctorName,
-        //       "specialties": state.specialty,
-        //       "appointmentDate": "${state.appointmentDate}",
-        //       "appointmentTime": "${state.appointmentTime}",
-        //       "sessionLength": state.selectedService!.value is int
-        //           ? state.selectedService!.value as int
-        //           : state.defaultSlotDuration,
-        //       "fee": state.selectedService!.price,
-        //       "currency": "\$",
-        //       "appName": "MedTalk"
-        //     })
+        _mailRepository.sendMail(
+          to: _authenticationRepository.currentUser.email,
+          templateName: "appointment_confirmation",
+          templateData: templateData,
+        )
       ]);
 
       // Set booking complete to trigger navigation

@@ -28,6 +28,7 @@ class ImprovedDoctorProfile extends StatelessWidget {
     return GestureDetector(
       onTap: onViewProfileTap,
       child: CustomBase(
+        padding: kPaddH20V14,
         child: Row(
           children: [
             Stack(

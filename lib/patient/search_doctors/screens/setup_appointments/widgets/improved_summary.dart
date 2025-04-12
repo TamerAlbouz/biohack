@@ -73,13 +73,6 @@ class ImprovedSummaryScreen extends StatelessWidget {
 
         kGap24,
 
-        // Doctor information card
-        AppointmentsDetailsCard(
-          state: state,
-        ),
-
-        kGap16,
-
         // Payment notice
         Container(
           decoration: BoxDecoration(
@@ -200,6 +193,13 @@ class ImprovedSummaryScreen extends StatelessWidget {
             ),
           ),
         ],
+
+        kGap16,
+
+        // Doctor information card
+        AppointmentsDetailsCard(
+          state: state,
+        ),
       ],
     );
   }

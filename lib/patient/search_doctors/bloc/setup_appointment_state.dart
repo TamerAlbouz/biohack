@@ -28,6 +28,9 @@ class SetupAppointmentState extends Equatable {
   final String? doctorNotes;
   final LatLng? doctorLocation;
 
+  final List<SavedCreditCard>? savedCreditCards;
+  final String? selectedCardId;
+
   // Doctor Schedule Information
   final List<WorkingHours> doctorWorkingHours;
   final List<bool> doctorAvailableDays;
@@ -73,6 +76,8 @@ class SetupAppointmentState extends Equatable {
     this.doctorAddress,
     this.doctorNotes,
     this.doctorLocation,
+    this.savedCreditCards = const [],
+    this.selectedCardId,
 
     // Doctor schedule defaults
     this.doctorWorkingHours = const [],
@@ -128,6 +133,8 @@ class SetupAppointmentState extends Equatable {
     String? doctorAddress,
     String? doctorNotes,
     LatLng? doctorLocation,
+    List<SavedCreditCard>? savedCreditCards,
+    String? selectedCardId,
 
     // Doctor schedule
     List<WorkingHours>? doctorWorkingHours,
@@ -176,6 +183,9 @@ class SetupAppointmentState extends Equatable {
       doctorAddress: doctorAddress ?? this.doctorAddress,
       doctorNotes: doctorNotes ?? this.doctorNotes,
       doctorLocation: doctorLocation ?? this.doctorLocation,
+
+      savedCreditCards: savedCreditCards ?? this.savedCreditCards,
+      selectedCardId: selectedCardId ?? this.selectedCardId,
 
       // Doctor schedule
       doctorWorkingHours: doctorWorkingHours ?? this.doctorWorkingHours,
@@ -228,6 +238,9 @@ class SetupAppointmentState extends Equatable {
         doctorAddress,
         doctorNotes,
         doctorLocation,
+
+        savedCreditCards,
+        selectedCardId,
 
         // Doctor schedule
         doctorWorkingHours,

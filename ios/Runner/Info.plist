@@ -22,6 +22,11 @@
         <string>We need microphone access to enable video calling</string>
         <key>CFBundleName</key>
         <string>BioHack</string>
+        <key>LSApplicationQueriesSchemes</key>
+        <array>
+          <string>sms</string>
+          <string>tel</string>
+        </array>
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>

@@ -8,6 +8,7 @@ import '../../../styles/colors.dart';
 import '../../../styles/font.dart';
 import '../../../styles/sizes.dart';
 import '../bloc/setup_appointment_bloc.dart';
+import '../models/search_doctors_models.dart';
 
 class AppointmentsDetailsCard extends StatelessWidget {
   const AppointmentsDetailsCard({
@@ -20,6 +21,17 @@ class AppointmentsDetailsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DateFormat dateFormat = DateFormat('EEEE, MMMM d, yyyy');
+
+    final selectedCard = state.savedCreditCards!.firstWhere(
+      (card) => card.id == state.selectedCardId,
+      orElse: () => SavedCreditCard(
+        id: '',
+        cardNumber: '****',
+        cardholderName: 'Unknown',
+        expiryDate: '**/**',
+        cardType: 'Credit Card',
+      ),
+    );
 
     return CustomBase(
       padding: kPadd0,
@@ -133,8 +145,14 @@ class AppointmentsDetailsCard extends StatelessWidget {
                 kGap12,
                 _buildDetailItem(
                   title: 'Payment Method',
-                  value: state.selectedPayment?.value ?? 'Credit Card',
-                  icon: FontAwesomeIcons.creditCard,
+                  value: state.selectedPayment == PaymentType.creditCard &&
+                          state.selectedCardId != null &&
+                          state.savedCreditCards != null
+                      ? '${selectedCard.cardType} ending in ${selectedCard.cardNumber}'
+                      : state.selectedPayment?.value ?? 'Credit Card',
+                  icon: _getPaymentTypeIcon(
+                    state.selectedPayment?.value ?? 'Credit Card',
+                  ),
                   trailing: Text(
                     '\$${state.selectedService!.price}',
                     style: const TextStyle(
@@ -275,6 +293,19 @@ class AppointmentsDetailsCard extends StatelessWidget {
         ],
       ],
     );
+  }
+
+  IconData _getPaymentTypeIcon(String paymentType) {
+    switch (paymentType.toLowerCase()) {
+      case 'cash':
+        return FontAwesomeIcons.moneyBill;
+      case 'credit card':
+        return FontAwesomeIcons.creditCard;
+      case 'insurance':
+        return FontAwesomeIcons.fileInvoice;
+      default:
+        return FontAwesomeIcons.wallet;
+    }
   }
 
   IconData _getAppointmentTypeIcon(String appointmentType) {

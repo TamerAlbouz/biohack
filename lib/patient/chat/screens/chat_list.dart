@@ -6,6 +6,7 @@ import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/styles/colors.dart';
 
 import '../../../app/bloc/auth/route_bloc.dart';
+import '../../../styles/sizes.dart';
 import '../bloc/chat_list/chat_list_bloc.dart';
 import '../bloc/chat_list/chat_list_event.dart';
 import '../bloc/chat_list/chat_list_state.dart';
@@ -44,96 +45,101 @@ class _ChatsListScreenState extends State<ChatsListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: BlocConsumer<ChatsListBloc, ChatsListState>(
-        listener: (context, state) {
-          if (state is ChatsListError) {
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.error)));
-          }
-        },
-        builder: (context, state) {
-          if (state is ChatsListLoading || state is ChatsListInitial) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Padding(
+        padding: kPaddH20,
+        child: BlocConsumer<ChatsListBloc, ChatsListState>(
+          listener: (context, state) {
+            if (state is ChatsListError) {
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text(state.error)));
+            }
+          },
+          builder: (context, state) {
+            if (state is ChatsListLoading || state is ChatsListInitial) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (state is ChatsListEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.chat_bubble_outline,
-                      size: 100, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No chats yet',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  Text(
-                    'Start a conversation with someone',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            );
-          }
+            if (state is ChatsListEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.chat_bubble_outline,
+                        size: 100, color: Colors.grey),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No chats yet',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    Text(
+                      'Start a conversation with someone',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              );
+            }
 
-          if (state is ChatsListLoaded) {
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<ChatsListBloc>().add(RefreshChatsList(
-                    (context.read<RouteBloc>().state as AuthSuccess).user.uid));
-              },
-              child: ListView.builder(
-                itemCount: state.chatRooms.length,
-                itemBuilder: (context, index) {
-                  final chatRoom = state.chatRooms[index];
-                  final otherUserId = _getOtherUserId(
-                      chatRoom,
+            if (state is ChatsListLoaded) {
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<ChatsListBloc>().add(RefreshChatsList(
                       (context.read<RouteBloc>().state as AuthSuccess)
                           .user
-                          .uid);
-
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: MyColors.primary,
-                      // Placeholder for user avatar
-                      child: Text(
-                        otherUserId[0].toUpperCase(),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    title: Text(
-                      otherUserId,
-                      // Replace with actual user name
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                      style: const TextStyle(
-                          color: MyColors.textGrey, fontSize: 14),
-                      chatRoom.lastMessage ?? 'No messages yet',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Text(
-                      // Format timestamp
-                      _formatTimestamp(chatRoom.lastMessageTime),
-                      style: const TextStyle(
-                          color: MyColors.textGrey, fontSize: 14),
-                    ),
-                    onTap: () => _navigateToChatScreen(
+                          .uid));
+                },
+                child: ListView.builder(
+                  itemCount: state.chatRooms.length,
+                  itemBuilder: (context, index) {
+                    final chatRoom = state.chatRooms[index];
+                    final otherUserId = _getOtherUserId(
                         chatRoom,
                         (context.read<RouteBloc>().state as AuthSuccess)
                             .user
-                            .uid),
-                  );
-                },
-              ),
-            );
-          }
+                            .uid);
 
-          return const Center(child: Text('Something went wrong'));
-        },
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: MyColors.primary,
+                        // Placeholder for user avatar
+                        child: Text(
+                          otherUserId[0].toUpperCase(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      title: Text(
+                        otherUserId,
+                        // Replace with actual user name
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        style: const TextStyle(
+                            color: MyColors.textGrey, fontSize: 14),
+                        chatRoom.lastMessage ?? 'No messages yet',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      trailing: Text(
+                        // Format timestamp
+                        _formatTimestamp(chatRoom.lastMessageTime),
+                        style: const TextStyle(
+                            color: MyColors.textGrey, fontSize: 14),
+                      ),
+                      onTap: () => _navigateToChatScreen(
+                          chatRoom,
+                          (context.read<RouteBloc>().state as AuthSuccess)
+                              .user
+                              .uid),
+                    );
+                  },
+                ),
+              );
+            }
+
+            return const Center(child: Text('Something went wrong'));
+          },
+        ),
       ),
     );
   }

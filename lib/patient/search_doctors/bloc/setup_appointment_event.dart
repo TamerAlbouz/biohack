@@ -58,6 +58,24 @@ class UpdateAppointmentTime extends SetupAppointmentEvent {
   List<Object?> get props => [time];
 }
 
+class SelectCreditCard extends SetupAppointmentEvent {
+  final String cardId;
+
+  const SelectCreditCard(this.cardId);
+
+  @override
+  List<Object?> get props => [cardId];
+}
+
+class AddCreditCard extends SetupAppointmentEvent {
+  final SavedCreditCard card;
+
+  const AddCreditCard(this.card);
+
+  @override
+  List<Object?> get props => [card];
+}
+
 class UpdateAppointmentType extends SetupAppointmentEvent {
   final AppointmentType appointmentType;
   final String appointmentLocation;

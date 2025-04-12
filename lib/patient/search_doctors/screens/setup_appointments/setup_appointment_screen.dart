@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
+import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/patient/search_doctors/bloc/setup_appointment_bloc.dart';
 import 'package:medtalk/patient/search_doctors/screens/appointment_confirmed_screen.dart';
 import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widgets/improved_date_time.dart';
@@ -15,7 +16,8 @@ import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widget
 import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widgets/improved_stepper_header.dart';
 import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widgets/improved_summary.dart';
 import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widgets/utils.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:medtalk/styles/styles/button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../common/widgets/dummy/profile_picture.dart';
 import '../../../../doctor/design/models/design_models.dart';
@@ -230,23 +232,542 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return SingleChildScrollView(
+      padding: kPaddH20,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircularProgressIndicator(
-            color: MyColors.primary,
+          kGap20,
+
+          // Doctor profile skeleton
+          _buildDoctorProfileSkeleton(),
+
+          kGap30,
+
+          // Biography skeleton
+          _buildBiographySkeleton(),
+
+          kGap30,
+
+          // Services skeleton
+          _buildServicesSkeleton(),
+
+          kGap20,
+
+          // Location skeleton
+          _buildLocationSkeleton(),
+
+          kGap30,
+
+          // Clinic details skeleton
+          _buildClinicDetailsSkeleton(),
+
+          kGap30,
+
+          _buildPatientReviewsSkeleton(),
+
+          kGap80,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDoctorProfileSkeleton() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: MyColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          // Profile picture skeleton
+          Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(14),
+            ),
           ),
+
           kGap16,
-          Text(
-            'Loading doctor information...',
-            style: TextStyle(
-              color: Colors.grey,
-              fontSize: Font.small,
+
+          // Doctor info skeleton
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Name skeleton
+                Container(
+                  width: 150,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+
+                kGap8,
+
+                // Specialty skeleton
+                Container(
+                  width: 100,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+
+                kGap8,
+
+                // Reviews skeleton
+                Container(
+                  width: 80,
+                  height: 12,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Arrow icon skeleton
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              shape: BoxShape.circle,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBiographySkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section title skeleton
+        Container(
+          width: 100,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+
+        kGap16,
+
+        // Biography paragraph skeletons
+
+        CustomBase(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 0; i < 3; i++) ...[
+                Container(
+                  width: double.infinity,
+                  height: 14,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+              Container(
+                width: MediaQuery.of(AppGlobal.navigatorKey.currentContext!)
+                        .size
+                        .width *
+                    0.7,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildServicesSkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section title skeleton
+        Container(
+          width: 100,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+
+        kGap16,
+
+        // Service cards skeleton
+        for (int i = 0; i < 2; i++) ...[
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: MyColors.cardBackground,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Service title skeleton
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 150,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+
+                        kGap8,
+
+                        // Service duration skeleton
+                        Container(
+                          width: 80,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    // Price skeleton
+                    Container(
+                      width: 60,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ],
+                ),
+
+                kGap12,
+
+                // Service tags skeleton
+                Row(
+                  children: [
+                    for (int j = 0; j < 2; j++) ...[
+                      Container(
+                        width: 80,
+                        height: 24,
+                        margin: EdgeInsets.only(right: j < 1 ? 4 : 0),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+
+                kGap12,
+
+                // Description skeleton
+                Container(
+                  width: double.infinity,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildLocationSkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section title skeleton
+        Container(
+          width: 100,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+
+        kGap14,
+
+        // Map skeleton
+        Container(
+          height: 175,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey[400]!),
+          ),
+          child: Center(
+            child: FaIcon(
+              FontAwesomeIcons.mapLocationDot,
+              color: Colors.grey[400],
+              size: 40,
+            ),
+          ),
+        ),
+
+        kGap10,
+
+        // Address skeleton
+        Row(
+          children: [
+            // Icon skeleton
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+
+            kGap8,
+
+            // Address text skeleton
+            Expanded(
+              child: Container(
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+
+            // Directions button skeleton
+            Container(
+              width: 100,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClinicDetailsSkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Section title skeleton
+        Container(
+          width: 120,
+          height: 20,
+          decoration: BoxDecoration(
+            color: Colors.grey[200],
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+
+        kGap14,
+
+        // Phone number skeleton
+        Row(
+          children: [
+            // Icon skeleton
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+
+            kGap10,
+
+            // Phone number text skeleton
+            Container(
+              width: 120,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+
+            const Spacer(),
+
+            // Call button skeleton
+            Container(
+              width: 80,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPatientReviewsSkeleton() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header with "View All" skeleton
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Section title skeleton
+            Container(
+              width: 120,
+              height: 20,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+
+            // View all button skeleton
+            Container(
+              width: 60,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+          ],
+        ),
+
+        kGap14,
+
+        // Review card skeletons
+        for (int i = 0; i < 2; i++) ...[
+          Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: MyColors.cardBackground,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.1),
+                  spreadRadius: 0,
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    // Avatar skeleton
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+
+                    kGap10,
+
+                    // Name and date skeleton
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 14,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          kGap4,
+                          Container(
+                            width: 80,
+                            height: 12,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                kGap10,
+
+                // Review text skeleton
+                for (int j = 0; j < 2; j++) ...[
+                  Container(
+                    width: double.infinity,
+                    height: 14,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+
+                Container(
+                  width: MediaQuery.of(AppGlobal.navigatorKey.currentContext!)
+                          .size
+                          .width *
+                      0.5,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
     );
   }
 
@@ -267,7 +788,7 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
               specialty: widget.specialty,
               reviewCount: state.doctorReviews.length,
               onViewProfileTap: () {
-                // No need to toggle, we're already showing the full profile
+                // show bottom sheet with info such as qualificans and age and ...
               },
             ),
           ),
@@ -286,12 +807,14 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
                   style: kSectionTitle,
                 ),
                 kGap16,
-                Text(
-                  state.doctorBiography ?? 'No biography available.',
-                  style: const TextStyle(
-                    fontSize: Font.small,
-                    color: MyColors.textBlack,
-                    height: 1.5,
+                CustomBase(
+                  child: Text(
+                    state.doctorBiography ?? 'No biography available.',
+                    style: const TextStyle(
+                      fontSize: Font.small,
+                      color: MyColors.textBlack,
+                      height: 1.5,
+                    ),
                   ),
                 ),
               ],
@@ -659,92 +1182,97 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
           style: kSectionTitle,
         ),
         kGap14,
-        Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: MyColors.grey, width: 1.5),
-            borderRadius: kRadius10,
-            color: Colors.grey[300],
-          ),
-          height: 175,
-          width: double.infinity,
-          child: ClipRRect(
-            borderRadius: kRadius10,
-            child: GoogleMap(
-              // disable dragging
-              scrollGesturesEnabled: false,
-              // initial location
-              markers: {
-                Marker(
-                  markerId: const MarkerId('clinic'),
-                  position: state.doctorLocation ??
-                      const LatLng(45.521563, -122.677433),
-                  infoWindow: InfoWindow(
-                    title: 'Clinic',
-                    snippet: state.doctorAddress,
+        CustomBase(
+          padding: kPadd0,
+          child: Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: MyColors.grey, width: 1.5),
+                  borderRadius: kRadius10,
+                  color: Colors.grey[300],
+                ),
+                height: 175,
+                width: double.infinity,
+                child: ClipRRect(
+                  borderRadius: kRadius10,
+                  child: GoogleMap(
+                    // disable dragging
+                    scrollGesturesEnabled: false,
+                    // initial location
+                    markers: {
+                      Marker(
+                        markerId: const MarkerId('clinic'),
+                        position: state.doctorLocation ??
+                            const LatLng(45.521563, -122.677433),
+                        infoWindow: InfoWindow(
+                          title: 'Clinic',
+                          snippet: state.doctorAddress,
+                        ),
+                      ),
+                    },
+                    initialCameraPosition: CameraPosition(
+                      target: state.doctorLocation ??
+                          const LatLng(45.521563, -122.677433),
+                      zoom: 14.0,
+                    ),
                   ),
                 ),
-              },
-              initialCameraPosition: CameraPosition(
-                target: state.doctorLocation ??
-                    const LatLng(45.521563, -122.677433),
-                zoom: 14.0,
               ),
-            ),
+              kGap4,
+              Padding(
+                padding: kPaddH10V4,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 30,
+                      height: 30,
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: MyColors.primary.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const FaIcon(
+                        FontAwesomeIcons.mapLocation,
+                        color: MyColors.primary,
+                        size: 16,
+                      ),
+                    ),
+                    kGap8,
+                    Expanded(
+                      child: Text(
+                        state.doctorAddress ?? 'Address not available',
+                        style: const TextStyle(
+                          fontSize: Font.small,
+                          color: MyColors.textBlack,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        // Open in Maps app
+                        final url =
+                            'https://www.google.com/maps/search/?api=1&query=${state.doctorLocation?.latitude},${state.doctorLocation?.longitude}';
+                        launchUrl(Uri.parse(url));
+                      },
+                      visualDensity: VisualDensity.compact,
+                      icon: const FaIcon(
+                        FontAwesomeIcons.locationArrow,
+                        size: 14,
+                        color: MyColors.primary,
+                      ),
+                      style: IconButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          side: const BorderSide(color: MyColors.primary),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ),
-        kGap10,
-        Row(
-          children: [
-            Container(
-              width: 30,
-              height: 30,
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: MyColors.primary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const FaIcon(
-                FontAwesomeIcons.mapLocation,
-                color: MyColors.primary,
-                size: 16,
-              ),
-            ),
-            kGap8,
-            Expanded(
-              child: Text(
-                state.doctorAddress ?? 'Address not available',
-                style: const TextStyle(
-                  fontSize: Font.small,
-                  color: MyColors.textBlack,
-                ),
-              ),
-            ),
-            TextButton.icon(
-              onPressed: () {
-                // Open in Maps app - would add implementation
-              },
-              icon: const FaIcon(
-                FontAwesomeIcons.locationArrow,
-                size: 14,
-                color: MyColors.primary,
-              ),
-              label: const Text(
-                'Directions',
-                style: TextStyle(
-                  fontSize: Font.small,
-                  color: MyColors.primary,
-                ),
-              ),
-              style: TextButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: const BorderSide(color: MyColors.primary),
-                ),
-              ),
-            ),
-          ],
         ),
       ],
     );
@@ -758,95 +1286,704 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
           'Clinic Details',
           style: kSectionTitle,
         ),
-        kGap14,
-        Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: MyColors.primary.withValues(alpha: 0.25),
-                borderRadius: kRadiusAll,
+        kGap16,
+        CustomBase(
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: MyColors.primary.withValues(alpha: 0.25),
+                      borderRadius: kRadiusAll,
+                    ),
+                    width: 30,
+                    height: 30,
+                    padding: kPadd4,
+                    alignment: Alignment.center,
+                    child: const FaIcon(
+                      FontAwesomeIcons.phone,
+                      color: MyColors.primary,
+                      size: 16,
+                    ),
+                  ),
+                  kGap10,
+                  Text(
+                    state.doctorPhone ?? 'Phone not available',
+                    style: const TextStyle(
+                      fontSize: Font.small,
+                      color: MyColors.textBlack,
+                    ),
+                  ),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () {
+                      // Call the doctor - would add implementation
+                    },
+                    icon: const FaIcon(
+                      FontAwesomeIcons.phone,
+                      size: 14,
+                      color: MyColors.primary,
+                    ),
+                    label: const Text(
+                      'Call',
+                      style: TextStyle(
+                        fontSize: Font.small,
+                        color: MyColors.primary,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(color: MyColors.primary),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              width: 30,
-              height: 30,
-              padding: kPadd4,
-              alignment: Alignment.center,
-              child: const FaIcon(
-                FontAwesomeIcons.phone,
-                color: MyColors.primary,
-                size: 16,
+              if (state.doctorNotes?.isNotEmpty ?? false) ...[
+                kGap10,
+                // extra notes
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: kPadd4,
+                      decoration: BoxDecoration(
+                        color: MyColors.primary.withValues(alpha: 0.25),
+                        borderRadius: kRadiusAll,
+                      ),
+                      width: 30,
+                      height: 30,
+                      alignment: Alignment.center,
+                      child: const FaIcon(
+                        FontAwesomeIcons.circleInfo,
+                        color: MyColors.primary,
+                        size: 16,
+                      ),
+                    ),
+                    kGap10,
+                    Expanded(
+                      child: Text(
+                        state.doctorNotes!,
+                        style: const TextStyle(
+                          fontSize: Font.small,
+                          color: MyColors.textBlack,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showCardSelectionBottomSheet(
+      SetupAppointmentBloc setupAppointmentBloc) {
+    final state = setupAppointmentBloc.state;
+    final savedCards = state.savedCreditCards ?? [];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) => Container(
+        decoration: const BoxDecoration(
+          color: MyColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.7,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[500],
+                borderRadius: BorderRadius.circular(2),
               ),
             ),
-            kGap10,
-            Text(
-              state.doctorPhone ?? 'Phone not available',
-              style: const TextStyle(
-                fontSize: Font.small,
+
+            // Title
+            const Padding(
+              padding: kPaddH20V10,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Select Payment Method',
+                    style: TextStyle(
+                      fontSize: Font.mediumSmall,
+                      fontWeight: FontWeight.bold,
+                      color: MyColors.textBlack,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Divider
+            const Divider(height: 1),
+
+            // Cards list or empty state
+            // Card list
+            Expanded(
+              child: savedCards.isEmpty
+                  ? _buildEmptyCreditCardState()
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shrinkWrap: true,
+                      itemCount: savedCards.length,
+                      itemBuilder: (context, index) => _buildCreditCardItem(
+                          savedCards[index],
+                          bottomSheetContext,
+                          setupAppointmentBloc),
+                    ),
+            ),
+
+            // Add new card button - always shown at the bottom
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(bottomSheetContext);
+                  _showAddCardDialog(setupAppointmentBloc);
+                },
+                style: kElevatedButtonCommonStyle,
+                icon: const FaIcon(FontAwesomeIcons.creditCard, size: 16),
+                label: const Text(
+                  'Add New Card',
+                  style: TextStyle(
+                    fontSize: Font.mediumSmall,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            kGap20,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCreditCardItem(
+      SavedCreditCard card,
+      BuildContext bottomSheetContext,
+      SetupAppointmentBloc setupAppointmentBloc) {
+    // Get card icon and color based on card type
+    IconData cardIcon;
+    Color cardColor;
+
+    final bool isSelected =
+        setupAppointmentBloc.state.selectedCardId == card.id;
+
+    switch (card.cardType.toLowerCase()) {
+      case 'visa':
+        cardIcon = FontAwesomeIcons.ccVisa;
+        cardColor = Colors.blue[700]!;
+        break;
+      case 'mastercard':
+        cardIcon = FontAwesomeIcons.ccMastercard;
+        cardColor = Colors.orange[800]!;
+        break;
+      case 'amex':
+      case 'american express':
+        cardIcon = FontAwesomeIcons.ccAmex;
+        cardColor = Colors.indigo[600]!;
+        break;
+      case 'discover':
+        cardIcon = FontAwesomeIcons.ccDiscover;
+        cardColor = Colors.red[700]!;
+        break;
+      default:
+        cardIcon = FontAwesomeIcons.creditCard;
+        cardColor = Colors.grey[700]!;
+    }
+
+    return InkWell(
+      onTap: () {
+        // Use the passed bloc to update the selection
+        setupAppointmentBloc.add(SelectCreditCard(card.id));
+        Navigator.pop(bottomSheetContext);
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? MyColors.primary.withValues(alpha: 0.1)
+              : MyColors.cardBackground,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? MyColors.primary : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.1),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Card design - more visually appealing representation of the card
+            Container(
+              width: 80,
+              height: 50,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    cardColor,
+                    cardColor.withValues(alpha: 0.7),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: cardColor.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FaIcon(
+                    cardIcon,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                  Text(
+                    card.cardNumber,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            kGap16,
+
+            // Card details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        card.cardType,
+                        style: TextStyle(
+                          fontSize: Font.mediumSmall,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? MyColors.primary
+                              : MyColors.textBlack,
+                        ),
+                      ),
+                      if (card.isDefault) ...[
+                        kGap8,
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: MyColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            'Default',
+                            style: TextStyle(
+                              fontSize: Font.extraSmall,
+                              fontWeight: FontWeight.bold,
+                              color: MyColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  kGap4,
+                  Text(
+                    '•••• •••• •••• ${card.cardNumber}',
+                    style: TextStyle(
+                      fontSize: Font.small,
+                      color: isSelected
+                          ? MyColors.primary.withValues(alpha: 0.8)
+                          : MyColors.textGrey,
+                    ),
+                  ),
+                  kGap2,
+                  Row(
+                    children: [
+                      Text(
+                        'Expires ${card.expiryDate}',
+                        style: TextStyle(
+                          fontSize: Font.extraSmall,
+                          color: isSelected
+                              ? MyColors.primary.withValues(alpha: 0.8)
+                              : MyColors.textGrey,
+                        ),
+                      ),
+                      kGap8,
+                      Text(
+                        card.cardholderName,
+                        style: TextStyle(
+                          fontSize: Font.extraSmall,
+                          color: isSelected
+                              ? MyColors.primary.withValues(alpha: 0.8)
+                              : MyColors.textGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Selection indicator
+            Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? MyColors.primary : Colors.white,
+                border: Border.all(
+                  color: isSelected ? MyColors.primary : Colors.grey[300]!,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? const Center(
+                      child: FaIcon(
+                        FontAwesomeIcons.check,
+                        size: 12,
+                        color: Colors.white,
+                      ),
+                    )
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+// Enhanced empty state design
+  Widget _buildEmptyCreditCardState() {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: MyColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Transform.rotate(
+                      angle: -0.2,
+                      child: Container(
+                        width: 60,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: MyColors.primary.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                    FaIcon(
+                      FontAwesomeIcons.creditCard,
+                      size: 32,
+                      color: MyColors.primary.withValues(alpha: 0.8),
+                    ),
+                    Positioned(
+                      right: 20,
+                      bottom: 35,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.greenAccent[400],
+                          shape: BoxShape.circle,
+                        ),
+                        child: const FaIcon(
+                          FontAwesomeIcons.plus,
+                          size: 12,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            kGap20,
+            const Text(
+              'No saved cards',
+              style: TextStyle(
+                fontSize: Font.mediumSmall,
+                fontWeight: FontWeight.bold,
                 color: MyColors.textBlack,
               ),
             ),
-            const Spacer(),
-            TextButton.icon(
-              onPressed: () {
-                // Call the doctor - would add implementation
-              },
-              icon: const FaIcon(
-                FontAwesomeIcons.phone,
-                size: 14,
-                color: MyColors.primary,
-              ),
-              label: const Text(
-                'Call',
+            kGap12,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Text(
+                'Add a credit card to make secure payments for your medical appointments',
                 style: TextStyle(
                   fontSize: Font.small,
-                  color: MyColors.primary,
+                  color: Colors.grey[600],
+                  height: 1.5,
                 ),
+                textAlign: TextAlign.center,
               ),
-              style: TextButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  side: const BorderSide(color: MyColors.primary),
-                ),
+            ),
+            kGap20,
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.security,
+                size: 30,
+                color: Colors.blue[800],
+              ),
+            ),
+            kGap12,
+            Text(
+              'Your payment info is secure',
+              style: TextStyle(
+                fontSize: Font.small,
+                color: Colors.blue[800],
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
         ),
-        if (state.doctorNotes?.isNotEmpty ?? false) ...[
-          kGap10,
-          // extra notes
-          Row(
+      ),
+    );
+  }
+
+// Enhanced Add Card UI
+  void _showAddCardDialog(SetupAppointmentBloc setupAppointmentBloc) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (dialogContext) => Container(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom + 10,
+        ),
+        decoration: const BoxDecoration(
+          color: MyColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: kPadd4,
-                decoration: BoxDecoration(
-                  color: MyColors.primary.withValues(alpha: 0.25),
-                  borderRadius: kRadiusAll,
-                ),
-                width: 30,
-                height: 30,
-                alignment: Alignment.center,
-                child: const FaIcon(
-                  FontAwesomeIcons.circleInfo,
-                  color: MyColors.primary,
-                  size: 16,
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Add New Card',
+                    style: TextStyle(
+                      fontSize: Font.mediumSmall,
+                      fontWeight: FontWeight.bold,
+                      color: MyColors.textBlack,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    icon: const Icon(Icons.close),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+
+              kGap20,
+
+              // Card number field
+              const Text(
+                'Card Number',
+                style: TextStyle(
+                  fontSize: Font.small,
+                  fontWeight: FontWeight.bold,
+                  color: MyColors.textBlack,
                 ),
               ),
-              kGap10,
-              Expanded(
-                child: Text(
-                  state.doctorNotes!,
-                  style: const TextStyle(
-                    fontSize: Font.small,
-                    color: MyColors.textBlack,
+              kGap8,
+              CustomInputField(
+                keyboardType: TextInputType.number,
+                hintText: '1234 5678 9012 3456',
+                onChanged: (String) {},
+              ),
+
+              kGap16,
+
+              // Card holder name
+              const Text(
+                'Cardholder Name',
+                style: TextStyle(
+                  fontSize: Font.small,
+                  fontWeight: FontWeight.bold,
+                  color: MyColors.textBlack,
+                ),
+              ),
+              kGap8,
+              CustomInputField(
+                hintText: 'Name as appears on card',
+                keyboardType: TextInputType.name,
+                onChanged: (String) {},
+              ),
+
+              kGap16,
+
+              // Expiry and CVV
+              Row(
+                children: [
+                  // Expiry date
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Expiry Date',
+                          style: TextStyle(
+                            fontSize: Font.small,
+                            fontWeight: FontWeight.bold,
+                            color: MyColors.textBlack,
+                          ),
+                        ),
+                        kGap8,
+                        CustomInputField(
+                          keyboardType: TextInputType.number,
+                          hintText: 'MM/YY',
+                          onChanged: (String) {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  kGap12,
+
+                  // CVV
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'CVV',
+                          style: TextStyle(
+                            fontSize: Font.small,
+                            fontWeight: FontWeight.bold,
+                            color: MyColors.textBlack,
+                          ),
+                        ),
+                        kGap8,
+                        CustomInputField(
+                          keyboardType: TextInputType.number,
+                          obscureText: true,
+                          hintText: '123',
+                          onChanged: (String) {},
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              kGap24,
+
+              // Add card button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final newCard = SavedCreditCard(
+                      id: DateTime.now().millisecondsSinceEpoch.toString(),
+                      cardNumber: '1234',
+                      cardholderName: 'John Smith',
+                      expiryDate: '12/25',
+                      cardType: 'Visa',
+                    );
+
+                    // Use the passed bloc
+                    setupAppointmentBloc.add(AddCreditCard(newCard));
+                    Navigator.pop(dialogContext);
+                  },
+                  style: kElevatedButtonCommonStyle,
+                  child: const Text(
+                    'Add Card',
+                    style: TextStyle(
+                      fontSize: Font.mediumSmall,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
+
+              kGap20,
+
+              // Security note
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.shieldHalved,
+                    size: 14,
+                    color: Colors.grey[700],
+                  ),
+                  kGap8,
+                  Text(
+                    'Your payment information is secure and encrypted',
+                    style: TextStyle(
+                      fontSize: Font.extraSmall,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
-        ],
-      ],
+        ),
+      ),
     );
   }
 
@@ -1047,6 +2184,8 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
       ));
     }
 
+    final setupAppointmentBloc = context.read<SetupAppointmentBloc>();
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -1238,11 +2377,15 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
               padding: const EdgeInsets.only(bottom: 12),
               child: InkWell(
                 onTap: () {
-                  logger.f(
-                      'Selected payment type: ${option.title} (${option.value})');
-                  context
-                      .read<SetupAppointmentBloc>()
-                      .add(UpdatePaymentType(option.value as PaymentType));
+                  // Check if this is the credit card option
+                  if (option.value == PaymentType.creditCard) {
+                    // Pass the bloc to the bottom sheet
+                    _showCardSelectionBottomSheet(setupAppointmentBloc);
+                  } else {
+                    // For other payment methods, use the already captured bloc
+                    setupAppointmentBloc
+                        .add(UpdatePaymentType(option.value as PaymentType));
+                  }
                 },
                 borderRadius: BorderRadius.circular(16),
                 child: Container(

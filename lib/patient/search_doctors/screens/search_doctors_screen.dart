@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/common/widgets/common_error_widget.dart';
+import 'package:medtalk/common/widgets/dividers/section_divider.dart';
 import 'package:medtalk/common/widgets/dropdown/custom_complex_dropdown.dart';
 import 'package:medtalk/common/widgets/inifinite_list_view.dart';
 import 'package:medtalk/patient/search_doctors/bloc/search_doctors_bloc.dart';
@@ -50,84 +51,87 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: BlocProvider(
-          create: (context) => _searchDoctorsBloc,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              BlocConsumer<SearchDoctorsBloc, SearchDoctorsState>(
-                listener: (context, state) {
-                  // Update state for ANY SearchDoctorsLoaded state
-                  if (state is SearchDoctorsLoaded) {
-                    setState(() {
-                      _doctors = state.doctors;
-                      _isLoading = state.isLoadingMore;
-                      _hasMoreData = state.hasMoreData;
-                    });
-                    // Only refresh the controller if it's still mounted
-                    if (mounted) {
-                      _infiniteScrollController.refresh();
+        child: Padding(
+          padding: kPaddH20,
+          child: BlocProvider(
+            create: (context) => _searchDoctorsBloc,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                BlocConsumer<SearchDoctorsBloc, SearchDoctorsState>(
+                  listener: (context, state) {
+                    // Update state for ANY SearchDoctorsLoaded state
+                    if (state is SearchDoctorsLoaded) {
+                      setState(() {
+                        _doctors = state.doctors;
+                        _isLoading = state.isLoadingMore;
+                        _hasMoreData = state.hasMoreData;
+                      });
+                      // Only refresh the controller if it's still mounted
+                      if (mounted) {
+                        _infiniteScrollController.refresh();
+                      }
                     }
-                  }
-                },
-                builder: (context, state) {
-                  // Show loading indicator when in initial or loading state
-                  if (state is SearchDoctorsInitial ||
-                      (state is SearchDoctorsLoading && _doctors.isEmpty)) {
-                    return _buildLoadingState();
-                  }
+                  },
+                  builder: (context, state) {
+                    // Show loading indicator when in initial or loading state
+                    if (state is SearchDoctorsInitial ||
+                        (state is SearchDoctorsLoading && _doctors.isEmpty)) {
+                      return _buildLoadingState();
+                    }
 
-                  // Show error message when in error state
-                  if (state is SearchDoctorsError) {
-                    return CommonErrorWidget(onRetry: () {
-                      _searchDoctorsBloc.add(SearchDoctorsLoad());
-                    });
-                  }
+                    // Show error message when in error state
+                    if (state is SearchDoctorsError) {
+                      return CommonErrorWidget(onRetry: () {
+                        _searchDoctorsBloc.add(SearchDoctorsLoad());
+                      });
+                    }
 
-                  // Show the list when doctors are loaded
-                  return InfiniteScrollListView(
-                    controller: _infiniteScrollController,
-                    isLoading: _isLoading,
-                    hasReachedMax: !_hasMoreData,
-                    items: _doctors,
-                    onLoadMore: () {
-                      context
-                          .read<SearchDoctorsBloc>()
-                          .add(SearchDoctorsLoadMore());
-                    },
-                    headerBuilder: (isCollapsed) => isCollapsed
-                        ? _buildCollapsedHeader()
-                        : _buildExpandedHeader(),
-                    itemBuilder: (context, doctor) {
-                      return DoctorCard(
-                        name: doctor.name ?? 'Unknown Doctor',
-                        specialty: doctor.specialties?.join(', ') ??
-                            'General Practice',
-                        availability:
-                            calculateAvailability(doctor.availability),
-                        timeSlots: doctor.availability.isNotEmpty
-                            ? doctor.availability.values.firstWhere(
-                                    (v) => v != null,
-                                    orElse: () => []) ??
-                                []
-                            : [],
-                        onCardTap: () {
-                          AppGlobal.navigatorKey.currentState?.push<void>(
-                            SetupAppointmentScreen.route(
-                              doctorId: doctor.uid,
-                              doctorName: doctor.name ?? 'Unknown Doctor',
-                              specialty: doctor.specialties?.join(', ') ??
-                                  'General Practice',
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
+                    // Show the list when doctors are loaded
+                    return InfiniteScrollListView(
+                      controller: _infiniteScrollController,
+                      isLoading: _isLoading,
+                      hasReachedMax: !_hasMoreData,
+                      items: _doctors,
+                      onLoadMore: () {
+                        context
+                            .read<SearchDoctorsBloc>()
+                            .add(SearchDoctorsLoadMore());
+                      },
+                      headerBuilder: (isCollapsed) => isCollapsed
+                          ? _buildCollapsedHeader()
+                          : _buildExpandedHeader(),
+                      itemBuilder: (context, doctor) {
+                        return DoctorCard(
+                          name: doctor.name ?? 'Unknown Doctor',
+                          specialty: doctor.specialties?.join(', ') ??
+                              'General Practice',
+                          availability:
+                              calculateAvailability(doctor.availability),
+                          timeSlots: doctor.availability.isNotEmpty
+                              ? doctor.availability.values.firstWhere(
+                                      (v) => v != null,
+                                      orElse: () => []) ??
+                                  []
+                              : [],
+                          onCardTap: () {
+                            AppGlobal.navigatorKey.currentState?.push<void>(
+                              SetupAppointmentScreen.route(
+                                doctorId: doctor.uid,
+                                doctorName: doctor.name ?? 'Unknown Doctor',
+                                specialty: doctor.specialties?.join(', ') ??
+                                    'General Practice',
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -208,6 +212,8 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
                 ],
               ),
               kGap20,
+
+              const SectionDivider(),
 
               // Skeleton doctors
               for (int i = 0; i < 3; i++)
@@ -331,9 +337,9 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
         const Text(
           'Find a Doctor',
           style: TextStyle(
-            fontSize: Font.sectionTitleSize,
+            fontSize: Font.medium,
             fontWeight: FontWeight.bold,
-            color: MyColors.primary,
+            color: MyColors.textBlack,
           ),
         ),
         const Text(
@@ -445,6 +451,7 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
             ),
           ],
         ),
+        const SectionDivider(),
       ],
     );
   }

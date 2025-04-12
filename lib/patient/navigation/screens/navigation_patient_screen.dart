@@ -8,7 +8,6 @@ import 'package:medtalk/patient/search_doctors/screens/search_doctors_screen.dar
 
 import '../../../app/bloc/auth/route_bloc.dart';
 import '../../../common/widgets/custom_bottom_navbar.dart';
-import '../../../styles/sizes.dart';
 import '../../chat/bloc/chat_list/chat_list_bloc.dart';
 import '../../chat/bloc/chat_list/chat_list_event.dart';
 import '../../chat/screens/chat_list.dart';
@@ -98,20 +97,17 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
       appBar: AppBar(
         toolbarHeight: 10,
       ),
-      body: Padding(
-        padding: kPaddH20,
-        child: BlocBuilder<NavigationPatientCubit, NavigationPatientState>(
-          builder: (context, state) {
-            // Get the current index from the state
-            final int currentIndex = _getIndexFromNavItem(state.navbarItem);
+      body: BlocBuilder<NavigationPatientCubit, NavigationPatientState>(
+        builder: (context, state) {
+          // Get the current index from the state
+          final int currentIndex = _getIndexFromNavItem(state.navbarItem);
 
-            // Use IndexedStack to maintain state of all screens
-            return IndexedStack(
-              index: currentIndex,
-              children: _screens,
-            );
-          },
-        ),
+          // Use IndexedStack to maintain state of all screens
+          return IndexedStack(
+            index: currentIndex,
+            children: _screens,
+          );
+        },
       ),
       bottomNavigationBar:
           CustomBottomNavBar<NavigationPatientCubit, NavigationPatientState>(
@@ -159,8 +155,6 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
         return 3;
       case NavbarScreenItemsPatient.profile:
         return 4;
-      default:
-        return 0;
     }
   }
 
@@ -191,27 +185,3 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
     }
   }
 }
-
-// No longer needed since we're using IndexedStack directly in the NavigationPatientView
-// class _Body extends StatelessWidget {
-//   const _Body();
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return BlocBuilder<NavigationPatientCubit, NavigationPatientState>(
-//         builder: (context, state) {
-//       switch (state.navbarItem) {
-//         case NavbarScreenItemsPatient.dashboard:
-//           return const PatientDashboardScreen();
-//         case NavbarScreenItemsPatient.search:
-//           return const SearchDoctorsScreen();
-//         case NavbarScreenItemsPatient.chats:
-//           return const ChatsListScreen();
-//         case NavbarScreenItemsPatient.documents:
-//           return const DocumentManagementScreen();
-//         case NavbarScreenItemsPatient.profile:
-//           return const PatientProfileScreen();
-//       }
-//     });
-//   }
-// }
