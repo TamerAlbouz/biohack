@@ -118,7 +118,8 @@ class AuthenticationRepository implements IAuthenticationRepository {
   ///
   /// Throws a [SignUpWithEmailAndPasswordFailure] if an exception occurs.
   @override
-  Future<void> signUp({required String email, required String password}) async {
+  Future<void> createUserWithEmailAndPassword(
+      {required String email, required String password}) async {
     try {
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,

@@ -10,6 +10,7 @@ import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
 
+import '../../../common/widgets/badged_tab.dart';
 import '../bloc/doctor_appointments_bloc.dart';
 import '../models/appointments_models.dart';
 
@@ -85,21 +86,21 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                     unselectedLabelColor: Colors.grey,
                     isScrollable: true,
                     tabs: [
-                      const _BadgedTab(
+                      const BadgedTab(
                         text: 'Today',
                         icon: FontAwesomeIcons.calendarDay,
                       ),
-                      _BadgedTab(
+                      BadgedTab(
                         text: 'Upcoming',
                         icon: FontAwesomeIcons.calendarPlus,
                         badgeCount: unviewedUpcomingCount,
                         badgeColor: MyColors.primary,
                       ),
-                      const _BadgedTab(
+                      const BadgedTab(
                         text: 'Past',
                         icon: FontAwesomeIcons.clockRotateLeft,
                       ),
-                      _BadgedTab(
+                      BadgedTab(
                         text: 'Missed',
                         icon: FontAwesomeIcons.calendarXmark,
                         badgeCount: unviewedMissedCount,
@@ -787,64 +788,6 @@ class _AppointmentsError extends StatelessWidget {
               foregroundColor: Colors.white,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-// Create a new widget for tabs with badges and icons
-class _BadgedTab extends StatelessWidget {
-  final String text;
-  final IconData? icon;
-  final int badgeCount;
-  final Color badgeColor;
-
-  const _BadgedTab({
-    required this.text,
-    this.icon,
-    this.badgeCount = 0,
-    this.badgeColor = Colors.red,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Tab(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (icon != null) ...[
-            FaIcon(icon, size: 16),
-            const SizedBox(width: 6),
-          ],
-          Text(text,
-              style: const TextStyle(
-                fontSize: Font.mediumSmall,
-              )),
-          if (badgeCount > 0) ...[
-            const SizedBox(width: 4),
-            Container(
-              decoration: BoxDecoration(
-                color: badgeColor,
-                shape: BoxShape.circle,
-              ),
-              constraints: const BoxConstraints(
-                minWidth: 20,
-                minHeight: 20,
-              ),
-              child: Center(
-                child: Text(
-                  badgeCount > 99 ? '99+' : badgeCount.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

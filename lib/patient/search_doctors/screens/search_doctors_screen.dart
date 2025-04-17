@@ -109,12 +109,6 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
                               'General Practice',
                           availability:
                               calculateAvailability(doctor.availability),
-                          timeSlots: doctor.availability.isNotEmpty
-                              ? doctor.availability.values.firstWhere(
-                                      (v) => v != null,
-                                      orElse: () => []) ??
-                                  []
-                              : [],
                           onCardTap: () {
                             AppGlobal.navigatorKey.currentState?.push<void>(
                               SetupAppointmentScreen.route(
@@ -287,7 +281,7 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
   }
 
   // Fixed availability calculation method
-  String calculateAvailability(Map<String, List<String>?> map) {
+  String calculateAvailability(Map<String, WorkingHours?> map) {
     if (map.isEmpty) return 'No availability';
 
     final weekdayNames = [
@@ -303,9 +297,7 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
     final currentDayName = weekdayNames[currentDay - 1];
 
     // Check if available today
-    if (map.containsKey(currentDayName) &&
-        map[currentDayName] != null &&
-        map[currentDayName]!.isNotEmpty) {
+    if (map.containsKey(currentDayName) && map[currentDayName] != null) {
       return 'Available Today';
     }
 
@@ -313,15 +305,13 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
     final tomorrowIndex = currentDay % 7;
     final tomorrowDayName = weekdayNames[tomorrowIndex];
 
-    if (map.containsKey(tomorrowDayName) &&
-        map[tomorrowDayName] != null &&
-        map[tomorrowDayName]!.isNotEmpty) {
+    if (map.containsKey(tomorrowDayName) && map[tomorrowDayName] != null) {
       return 'Available Tomorrow';
     }
 
     // Find next available day
     for (final day in map.keys) {
-      if (map[day] != null && map[day]!.isNotEmpty) {
+      if (map[day] != null) {
         // Capitalize the day name
         return 'Available on ${day[0].toUpperCase()}${day.substring(1)}';
       }
@@ -500,16 +490,6 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
         ],
       ),
     );
-  }
-
-  String _getGreeting(int hour) {
-    if (hour < 12) {
-      return 'Good morning,';
-    } else if (hour < 17) {
-      return 'Good afternoon,';
-    } else {
-      return 'Good evening,';
-    }
   }
 }
 

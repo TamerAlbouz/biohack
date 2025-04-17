@@ -1,15 +1,19 @@
 import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:medtalk/app/screens/auth_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/doctor/navigation/screens/navigation_doctor_screen.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
+import 'package:medtalk/styles/sizes.dart';
 import 'package:medtalk/styles/themes.dart';
 
 import '../../login/screens/login_screen.dart';
 import '../../patient/dashboard/bloc/patient/patient_bloc.dart';
+import '../../styles/colors.dart';
+import '../../styles/font.dart';
 import '../bloc/auth/route_bloc.dart';
+import 'auth_screen.dart';
 
 class App extends StatelessWidget {
   const App({
@@ -115,9 +119,75 @@ class _AppViewState extends State<_AppView> {
       onGenerateRoute: (settings) {
         return MaterialPageRoute<void>(
           builder: (context) {
-            return const Scaffold(
+            return Scaffold(
               body: Center(
-                child: CircularProgressIndicator(),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // App logo
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: const BoxDecoration(
+                        color: MyColors.primary,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: SvgPicture.asset(
+                          'assets/svgs/Logo.svg',
+                          width: 80,
+                          height: 80,
+                          color: MyColors.white,
+                          fit: BoxFit.fill,
+                          // Fallback to icon if image isn't available during testing
+                          placeholderBuilder: (context) => const Icon(
+                            Icons.medical_services_rounded,
+                            size: 60,
+                            color: MyColors.primary,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    kGap40,
+
+                    // Loading indicator
+                    const SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor:
+                            AlwaysStoppedAnimation<Color>(MyColors.primary),
+                      ),
+                    ),
+
+                    kGap24,
+
+                    // App name
+                    const Text(
+                      'MedTalk',
+                      style: TextStyle(
+                        fontSize: Font.large,
+                        fontWeight: FontWeight.bold,
+                        color: MyColors.primary,
+                      ),
+                    ),
+
+                    kGap8,
+
+                    // Tagline
+                    const Text(
+                      'Connecting doctors and patients',
+                      style: TextStyle(
+                        fontSize: Font.small,
+                        color: MyColors.subtitleDark,
+                      ),
+                    ),
+
+                    kGap80,
+                  ],
+                ),
               ),
             );
           },

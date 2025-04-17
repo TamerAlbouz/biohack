@@ -10,7 +10,6 @@ class DoctorCard extends StatelessWidget {
   final String name;
   final String specialty;
   final String availability;
-  final List<String> timeSlots;
   final String date;
   final String month;
   final String? imageUrl;
@@ -23,7 +22,6 @@ class DoctorCard extends StatelessWidget {
     required this.name,
     required this.specialty,
     required this.availability,
-    required this.timeSlots,
     this.date = '12',
     this.month = 'Oct',
     this.imageUrl,

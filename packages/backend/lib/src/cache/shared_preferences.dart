@@ -36,6 +36,24 @@ class UserPreferences {
     }
   }
 
+  Future<void> setBool(String key, bool value) async {
+    try {
+      await _sharedPreferences.setBool(key, value);
+    } on Exception catch (e) {
+      logger.e('Error saving user data: $e');
+      rethrow;
+    }
+  }
+
+  bool? getBool(String key) {
+    try {
+      return _sharedPreferences.getBool(key);
+    } on Exception catch (e) {
+      logger.e('Error getting user data: $e');
+      rethrow;
+    }
+  }
+
   // clear all
   Future<void> clearAll() async {
     try {

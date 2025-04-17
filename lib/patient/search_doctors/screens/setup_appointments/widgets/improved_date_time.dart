@@ -1,8 +1,8 @@
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../../doctor/design/models/design_models.dart';
 import '../../../../../styles/colors.dart';
 import '../../../../../styles/font.dart';
 import '../../../../../styles/sizes.dart';

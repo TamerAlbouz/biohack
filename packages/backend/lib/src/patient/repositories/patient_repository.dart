@@ -60,4 +60,45 @@ class PatientRepository extends UserRepository implements IPatientRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<List<SavedCreditCard>?> getCreditCards(String id) {
+    try {
+      return _userCollection.doc(id).get().then((snapshot) {
+        if (snapshot.exists) {
+          final data = snapshot.data()!.toMap();
+          final creditCards = data['savedCreditCards'] as List<dynamic>?;
+
+          if (creditCards != null) {
+            return creditCards.map((e) => SavedCreditCard.fromJson(e)).toList();
+          }
+        }
+
+        return [];
+      });
+    } on FirebaseException catch (e) {
+      logger.e(e.message);
+      throw PatientException.fromCode(e.code);
+    } catch (e) {
+      logger.e(e);
+      rethrow;
+    }
+  }
+
+  // check email exists
+  @override
+  Future<bool> checkEmailExists(String email) async {
+    try {
+      final snapshot =
+          await _userCollection.where('email', isEqualTo: email).limit(1).get();
+
+      return snapshot.docs.isNotEmpty;
+    } on FirebaseException catch (e) {
+      logger.e(e.message);
+      throw PatientException.fromCode(e.code);
+    } catch (e) {
+      logger.e(e);
+      rethrow;
+    }
+  }
 }

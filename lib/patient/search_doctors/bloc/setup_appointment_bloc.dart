@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:p_logger/p_logger.dart';
 
-import '../../../doctor/design/models/design_models.dart';
 import '../models/search_doctors_models.dart';
 import '../models/selection_item.dart';
 
@@ -21,10 +20,12 @@ class SetupAppointmentBloc
     required IAppointmentRepository appointmentRepository,
     required IAuthenticationRepository authenticationRepository,
     required IDoctorRepository doctorRepository,
+    required IPatientRepository patientRepository,
   })  : _mailRepository = mailRepository,
         _appointmentRepository = appointmentRepository,
         _authenticationRepository = authenticationRepository,
         _doctorRepository = doctorRepository,
+        _patientRepository = patientRepository,
         super(const SetupAppointmentState()) {
     on<ToggleRebuild>(_onToggleRebuild);
     on<LoadInitialData>(_onLoadInitialData);
@@ -45,6 +46,7 @@ class SetupAppointmentBloc
   final IAppointmentRepository _appointmentRepository;
   final IAuthenticationRepository _authenticationRepository;
   final IDoctorRepository _doctorRepository;
+  final IPatientRepository _patientRepository;
 
   void _onSelectCreditCard(
       SelectCreditCard event, Emitter<SetupAppointmentState> emit) {
@@ -97,27 +99,16 @@ class SetupAppointmentBloc
         error: '',
       ));
 
-      // Add mock credit cards for testing
-      final mockCreditCards = [
-        SavedCreditCard(
-          id: '1',
-          cardNumber: '4321',
-          cardholderName: 'John Smith',
-          expiryDate: '10/25',
-          cardType: 'Visa',
-          isDefault: true,
-        ),
-        SavedCreditCard(
-          id: '2',
-          cardNumber: '8765',
-          cardholderName: 'John Smith',
-          expiryDate: '05/26',
-          cardType: 'Mastercard',
-        ),
-      ];
+      // Get credit cards and doctor details in parallel
+      final results = await Future.wait([
+        _patientRepository
+            .getCreditCards(_authenticationRepository.currentUser.uid),
+        _doctorRepository.getDoctor(event.doctorId),
+      ]);
 
-      // Get doctor details
-      final doctor = await _doctorRepository.getDoctor(event.doctorId);
+      final List<SavedCreditCard>? patientCreditCards =
+          results[0] as List<SavedCreditCard>?;
+      final Doctor? doctor = results[1] as Doctor?;
 
       if (doctor == null) {
         emit(state.copyWith(
@@ -141,7 +132,7 @@ class SetupAppointmentBloc
 
       // Parse doctor's availability into working days/hours
       doctor.availability.forEach((day, timeSlots) {
-        if (timeSlots != null && timeSlots.isNotEmpty) {
+        if (timeSlots != null) {
           // Get day index (0 = Monday, 6 = Sunday)
           int dayIndex;
           switch (day.toLowerCase()) {
@@ -175,56 +166,20 @@ class SetupAppointmentBloc
             availableDays[dayIndex] = true;
 
             // Parse start and end times
-            if (timeSlots.length >= 2) {
-              workingHours[dayIndex] = WorkingHours(
-                isWorking: true,
-                startTime: timeSlots[0],
-                endTime: timeSlots.last,
-                breaks: const [], // We don't have break information from doctor model
-              );
-            }
+            workingHours[dayIndex] = WorkingHours(
+              isWorking: true,
+              startTime: timeSlots.startTime,
+              endTime: timeSlots.endTime,
+              breaks: timeSlots.breaks
+                  .map((breakTime) => BreakTime(
+                        startTime: breakTime.startTime.split('-')[0],
+                        endTime: breakTime.endTime.split('-')[1],
+                      ))
+                  .toList(),
+            );
           }
         }
       });
-
-      // Mock doctor services for now - in a real app, you'd fetch these from backend
-      List<DoctorService> services = [
-        const DoctorService(
-          id: '1',
-          title: 'General Consultation',
-          description: 'Comprehensive health check with personalized advice',
-          duration: 45,
-          price: 100,
-          isOnline: true,
-          isInPerson: true,
-          isHomeVisit: false,
-          preAppointmentInstructions:
-              'Please bring your medical records and a list of current medications.',
-        ),
-        const DoctorService(
-          id: '2',
-          title: 'Follow-up Visit',
-          description: 'Review of treatment progress and adjustments',
-          duration: 30,
-          price: 75,
-          isOnline: true,
-          isInPerson: true,
-          isHomeVisit: false,
-          preAppointmentInstructions: null,
-        ),
-        const DoctorService(
-          id: '3',
-          title: 'Specialized Treatment',
-          description: 'Advanced procedures specific to your condition',
-          duration: 60,
-          price: 150,
-          isOnline: false,
-          isInPerson: true,
-          isHomeVisit: false,
-          preAppointmentInstructions:
-              'Please fast for 8 hours before the appointment.',
-        ),
-      ];
 
       // Mock reviews
       List<PatientReview> reviews = [
@@ -263,9 +218,9 @@ class SetupAppointmentBloc
         // Mock default slot duration
         appointmentDate: suggestedDate,
         bufferTime: 10,
-        savedCreditCards: mockCreditCards,
+        savedCreditCards: patientCreditCards,
         // Mock buffer time
-        doctorServices: services,
+        doctorServices: doctor.services,
         cancellationPolicy: 24,
         // Mock cancellation policy
         acceptsCash: true,
@@ -326,7 +281,7 @@ class SetupAppointmentBloc
 
       logger.i("Booking appointment");
 
-      String _buildCalendarLink({
+      String buildCalendarLink({
         required String doctorName,
         required DateTime appointmentDate,
         required TimeOfDay appointmentTime,
@@ -407,7 +362,7 @@ class SetupAppointmentBloc
         "currency": "\$",
 
         // Interactive elements
-        "calendarLink": _buildCalendarLink(
+        "calendarLink": buildCalendarLink(
           doctorName: state.doctorName ?? '',
           appointmentDate: state.appointmentDate!,
           appointmentTime: state.appointmentTime!,
@@ -496,7 +451,7 @@ class SetupAppointmentBloc
       UpdateServiceType event, Emitter<SetupAppointmentState> emit) {
     // Find the index of the selected service
     final serviceIndex = state.doctorServices.indexWhere(
-      (service) => service.id == event.serviceType.value,
+      (Service service) => service.uid == event.serviceType.value,
     );
 
     // Check if service has custom availability

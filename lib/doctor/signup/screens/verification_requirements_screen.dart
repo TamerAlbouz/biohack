@@ -57,7 +57,7 @@ class _VerificationRequirementsScreenState
 
               kGap14,
 
-              // Rest of the existing content...
+              // Required Documentation
               const _RequirementSection(
                 icon: Icons.shield_outlined,
                 color: Colors.red,
@@ -72,6 +72,64 @@ class _VerificationRequirementsScreenState
 
               kGap14,
 
+              // Personal Information
+              const _RequirementSection(
+                icon: Icons.person_outline,
+                color: Colors.blue,
+                title: 'Personal Information',
+                items: [
+                  'Full Name (include previous names if applicable)',
+                  'Date of Birth',
+                  'Sex',
+                  'Email Address (for verification communications)',
+                ],
+              ),
+
+              kGap14,
+
+              // Practice Details
+              const _RequirementSection(
+                icon: Icons.location_on_outlined,
+                color: Colors.green,
+                title: 'Practice Details',
+                items: [
+                  'Practice Location',
+                  'Health Zone (Central, Eastern, Western, Northern, or IWK)',
+                  'Atlantic Registry Status',
+                  'Home Jurisdiction (if part of Atlantic Registry)',
+                ],
+              ),
+
+              kGap14,
+
+              // Specialties & Credentials
+              const _RequirementSection(
+                icon: Icons.medical_services_outlined,
+                color: Colors.orange,
+                title: 'Specialties & Credentials',
+                items: [
+                  'License Type',
+                  'Registrant Type',
+                  'Specialty or Area of Practice',
+                ],
+              ),
+
+              kGap14,
+
+              // Compliance Requirements
+              const _RequirementSection(
+                icon: Icons.gavel_outlined,
+                color: Colors.purple,
+                title: 'Compliance Requirements',
+                items: [
+                  'Agreement to CPSNS Virtual Care Standards',
+                  'Confirmation of identity via government-issued ID',
+                  'Proof of medical credentials',
+                ],
+              ),
+
+              kGap14,
+
               const CustomBase(
                 shadow: false,
                 child: Row(
@@ -81,6 +139,24 @@ class _VerificationRequirementsScreenState
                     Expanded(
                       child: Text(
                         'Most verifications are completed within 2-3 business days when all documentation is provided.',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              kGap14,
+
+              const CustomBase(
+                shadow: false,
+                child: Row(
+                  children: [
+                    Icon(Icons.security, color: Colors.green, size: 24),
+                    SizedBox(width: 16),
+                    Expanded(
+                      child: Text(
+                        'Your information is securely encrypted. You\'ll receive a recovery code during setup that should be stored safely.',
                         style: TextStyle(fontSize: 14),
                       ),
                     ),

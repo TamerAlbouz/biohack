@@ -37,7 +37,8 @@ abstract class IAuthenticationRepository {
   /// Creates a new user with the provided [email] and [password].
   ///
   /// Throws a [SignUpWithEmailAndPasswordFailure] if an exception occurs.
-  Future<void> signUp({required String email, required String password});
+  Future<void> createUserWithEmailAndPassword(
+      {required String email, required String password});
 
   /// Signs in with the provided [email] and [password].
   ///

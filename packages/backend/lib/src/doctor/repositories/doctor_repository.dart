@@ -20,9 +20,21 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
   @override
   Future<Doctor?> getDoctor(String id) {
     try {
-      return _doctorCollection.doc(id).get().then((snapshot) {
+      return _doctorCollection.doc(id).get().then((snapshot) async {
         if (snapshot.exists) {
-          return Doctor.fromMap(id, snapshot.data()!.toMap());
+          // Get doctor data
+          final doctorData = snapshot.data()!.toMap();
+
+          // Get services subcollection
+          final servicesSnapshot =
+              await _doctorCollection.doc(id).collection('services').get();
+          final services =
+              servicesSnapshot.docs.map((doc) => doc.data().toMap()).toList();
+
+          // Add services to doctor data
+          doctorData['services'] = services;
+
+          return Doctor.fromMap(id, doctorData);
         }
 
         return null;
@@ -110,6 +122,25 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
           .then((snapshot) => snapshot.docs
               .map((doc) => Doctor.fromMap(doc.id, doc.data().toMap()))
               .toList());
+    } on FirebaseException catch (e) {
+      logger.e(e.message);
+      throw DoctorException.fromCode(e.code);
+    } catch (e) {
+      logger.e(e);
+      rethrow;
+    }
+  }
+
+  // check email exist
+  @override
+  Future<bool> checkEmailExists(String email) async {
+    try {
+      final snapshot = await _doctorCollection
+          .where('email', isEqualTo: email)
+          .limit(1)
+          .get();
+
+      return snapshot.docs.isNotEmpty;
     } on FirebaseException catch (e) {
       logger.e(e.message);
       throw DoctorException.fromCode(e.code);

@@ -1,7 +1,9 @@
+import 'package:backend/backend.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/common/widgets/dividers/card_divider.dart';
 import 'package:medtalk/common/widgets/rows/cancel_confirm.dart';
 import 'package:medtalk/styles/colors.dart';
@@ -11,18 +13,17 @@ import 'package:uuid/uuid.dart';
 
 import '../../../common/widgets/themes/time_picker.dart';
 import '../../../common/widgets/toggle.dart';
-import '../models/design_models.dart';
 
 class ServiceEditorScreen extends StatefulWidget {
-  final DoctorService? service; // Null for new service, populated for editing
+  final Service? service; // Null for new service, populated for editing
 
   const ServiceEditorScreen({
     super.key,
     this.service,
   });
 
-  static Route<DoctorService?> route({DoctorService? service}) {
-    return MaterialPageRoute<DoctorService?>(
+  static Route<Service?> route({Service? service}) {
+    return MaterialPageRoute<Service?>(
       builder: (_) => ServiceEditorScreen(service: service),
     );
   }
@@ -79,11 +80,11 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
       _preAppointmentInstructions = service.preAppointmentInstructions ?? '';
 
       // Initialize availability settings
-      if (service.availability != null) {
+      if (service.customAvailability != null) {
         _hasCustomAvailability = true;
-        _availableDays = List.from(service.availability!.days);
-        _startTime = service.availability!.startTime;
-        _endTime = service.availability!.endTime;
+        _availableDays = List.from(service.customAvailability!.days);
+        _startTime = service.customAvailability!.startTime;
+        _endTime = service.customAvailability!.endTime;
       }
 
       // Format the duration text for display
@@ -122,9 +123,9 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: MyColors.cardBackground,
+      backgroundColor: MyColors.background,
       appBar: AppBar(
-        backgroundColor: MyColors.cardBackground,
+        backgroundColor: MyColors.background,
         foregroundColor: Colors.black,
         toolbarHeight: 40,
         title: Text(
@@ -146,7 +147,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
               children: [
                 // Service Info Card
                 _buildInfoCard(),
-                kGap20,
+                kGap10,
 
                 const CardDivider(),
                 // Appointment Types Section
@@ -160,6 +161,8 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
 
                 // Save/Cancel Buttons
                 _buildActionButtons(context),
+
+                kGap20
               ],
             ),
           ),
@@ -182,31 +185,16 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
         ),
         kGap20,
 
-        TextFormField(
+        CustomInputField(
           controller: _titleController,
-          style: const TextStyle(
-            fontSize: Font.small,
-            color: MyColors.textBlack,
+          hintText: 'Service Name',
+          onChanged: (value) {},
+          leadingWidget: const FaIcon(
+            FontAwesomeIcons.stethoscope,
+            color: MyColors.primary,
+            size: 16,
           ),
-          decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius: kRadius6),
-            hintText: 'Enter service name',
-            contentPadding: kPaddH10V8,
-            hintStyle: const TextStyle(
-              color: MyColors.textGrey,
-              fontSize: Font.small,
-              fontWeight: FontWeight.w400,
-            ),
-            prefixIcon: const Padding(
-              padding: EdgeInsets.only(left: 15),
-              child: FaIcon(
-                FontAwesomeIcons.kitMedical,
-                color: MyColors.primary,
-                size: 16,
-              ),
-            ),
-            prefixIconConstraints: const BoxConstraints(minWidth: 40),
-          ),
+          keyboardType: TextInputType.text,
           validator: (value) {
             if (value == null || value.isEmpty) {
               return 'Please enter a service name';
@@ -216,33 +204,16 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
         ),
         kGap10,
 
-        TextFormField(
+        CustomInputField(
           controller: _descriptionController,
-          style: const TextStyle(
-            fontSize: Font.small,
-            color: MyColors.textBlack,
+          hintText: 'Description',
+          onChanged: (value) {},
+          leadingWidget: const FaIcon(
+            FontAwesomeIcons.notesMedical,
+            color: MyColors.primary,
+            size: 16,
           ),
-          decoration: InputDecoration(
-            hintText:
-                'Brief description of what this service includes (Optional)',
-            alignLabelWithHint: true,
-            contentPadding: kPaddH10V8,
-            hintStyle: const TextStyle(
-              color: MyColors.textGrey,
-              fontSize: Font.small,
-              fontWeight: FontWeight.w400,
-            ),
-            border: OutlineInputBorder(borderRadius: kRadius6),
-            prefixIcon: const Padding(
-              padding: EdgeInsets.only(left: 15),
-              child: FaIcon(
-                FontAwesomeIcons.fileLines,
-                color: MyColors.primary,
-                size: 16,
-              ),
-            ),
-            prefixIconConstraints: const BoxConstraints(minWidth: 40),
-          ),
+          keyboardType: TextInputType.text,
           maxLines: 3,
         ),
         kGap10,
@@ -253,77 +224,54 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
           children: [
             // Duration Field - Dropdown with common options
             Expanded(
-              child: TextFormField(
-                controller: _durationController,
-                readOnly: true,
-                style: const TextStyle(
-                  fontSize: Font.small,
-                  color: MyColors.textBlack,
-                ),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: kRadius6,
-                  ),
-                  contentPadding: kPaddH10V8,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 15),
-                    child: FaIcon(
-                      FontAwesomeIcons.clock,
-                      color: MyColors.primary,
-                      size: 16,
-                    ),
-                  ),
-                  prefixIconConstraints: const BoxConstraints(minWidth: 40),
-                  suffixIcon: const Icon(Icons.arrow_drop_down),
-                  hintText: "Duration",
-                  hintStyle: const TextStyle(
-                    color: MyColors.textGrey,
-                    fontSize: Font.small,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+              child: GestureDetector(
                 onTap: () {
                   _showDurationPicker(context);
                 },
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Required';
-                  }
-                  return null;
-                },
+                child: CustomInputField(
+                  controller: _durationController,
+                  readOnly: true,
+                  hintText: 'Duration',
+                  leadingWidget: const FaIcon(
+                    FontAwesomeIcons.clock,
+                    color: MyColors.primary,
+                    size: 16,
+                  ),
+                  trailingWidget: const Icon(
+                    Icons.arrow_drop_down,
+                    color: MyColors.grey,
+                  ),
+                  keyboardType: TextInputType.text,
+                  onChanged: (value) {},
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Required';
+                    }
+                    return null;
+                  },
+                ),
               ),
             ),
             kGap16,
 
             Expanded(
-              child: TextFormField(
-                style: const TextStyle(
-                  fontSize: Font.small,
-                  color: MyColors.textBlack,
-                ),
+              child: CustomInputField(
                 controller: _priceController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: kRadius6,
-                  ),
-                  contentPadding: kPaddH10V8,
-                  prefixIcon: const Padding(
-                    padding: EdgeInsets.only(left: 15),
-                    child: FaIcon(
-                      FontAwesomeIcons.dollarSign,
-                      color: MyColors.primary,
-                      size: 16,
-                    ),
-                  ),
-                  hintText: 'Price',
-                  hintStyle: const TextStyle(
-                    color: MyColors.textGrey,
-                    fontSize: Font.small,
-                    fontWeight: FontWeight.w400,
-                  ),
-                  prefixIconConstraints: const BoxConstraints(minWidth: 40),
-                ),
+                hintText: 'Price',
+                onChanged: (value) {},
                 keyboardType: TextInputType.number,
+                leadingWidget: const FaIcon(
+                  FontAwesomeIcons.moneyBill,
+                  color: MyColors.primary,
+                  size: 16,
+                ),
+                trailingWidget: const Text(
+                  'USD',
+                  style: TextStyle(
+                    fontSize: Font.small,
+                    color: MyColors.textBlack,
+                  ),
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                 ],
@@ -346,6 +294,39 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
 
   // Add this method to your class
   void _showDurationPicker(BuildContext context) {
+    const List<Map<String, dynamic>> options = [
+      {'label': '15 minutes', 'value': 15},
+      {'label': '30 minutes', 'value': 30},
+      {'label': '45 minutes', 'value': 45},
+      {'label': '1 hour', 'value': 60},
+      {'label': '1.5 hours', 'value': 90},
+      {'label': '2 hours', 'value': 120},
+    ];
+
+    int currentValue = _durationController.text.isNotEmpty
+        ? int.parse(_durationController.text.split(' ')[0])
+        : 0;
+
+    _showOptionsPicker(
+      context,
+      'Select Duration',
+      options,
+      currentValue,
+      (int value) {
+        setState(() {
+          _durationController.text = '$value minutes';
+        });
+      },
+    );
+  }
+
+  void _showOptionsPicker(
+    BuildContext context,
+    String title,
+    List<Map<String, dynamic>> options,
+    int currentValue,
+    Function(int) onSelect,
+  ) {
     const line = DottedLine(
       direction: Axis.horizontal,
       lineLength: double.infinity,
@@ -357,83 +338,81 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: MyColors.cardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
       builder: (BuildContext context) {
         return Container(
-          height: 400,
-          padding: kPadd16,
+          padding: const EdgeInsets.all(20),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Select Duration',
-                style: TextStyle(
-                  fontSize: Font.medium,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
               ),
-              kGap10,
               Expanded(
-                child: ListView(
-                  children: [
-                    _buildDurationOption(context, '15', '15 minutes'),
-                    line,
-                    _buildDurationOption(context, '30', '30 minutes'),
-                    line,
-                    _buildDurationOption(context, '45', '45 minutes'),
-                    line,
-                    _buildDurationOption(context, '60', '1 hour'),
-                    line,
-                    _buildDurationOption(context, '90', '1.5 hours'),
-                    line,
-                    _buildDurationOption(context, '120', '2 hours'),
-                  ],
+                child: ListView.separated(
+                  itemCount: options.length,
+                  separatorBuilder: (context, index) => line,
+                  itemBuilder: (context, index) {
+                    final option = options[index];
+                    final bool isSelected = currentValue == option['value'];
+
+                    return InkWell(
+                      onTap: () {
+                        onSelect(option['value']);
+                        Navigator.pop(context);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Row(
+                          children: [
+                            Text(
+                              option['label'],
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: isSelected
+                                    ? MyColors.primary
+                                    : MyColors.textBlack,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                            const Spacer(),
+                            if (isSelected)
+                              const Icon(
+                                Icons.check_circle,
+                                color: MyColors.primary,
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDurationOption(
-      BuildContext context, String value, String label) {
-    bool isSelected = _durationController.text == label;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _durationController.text = label;
-        });
-        Navigator.pop(context);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? MyColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: Font.medium,
-                color: isSelected ? MyColors.primary : MyColors.textBlack,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: MyColors.primary,
-              ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -466,7 +445,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
           isEnabled: _isInPerson,
           onChanged: (value) {
             setState(() {
-              _isInPerson = value!;
+              _isInPerson = value;
               // Ensure at least one type is selected
               if (!_isInPerson && !_isOnline && !_isHomeVisit) {
                 _isInPerson = true;
@@ -492,7 +471,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
           isEnabled: _isOnline,
           onChanged: (value) {
             setState(() {
-              _isOnline = value!;
+              _isOnline = value;
               // Ensure at least one type is selected
               if (!_isInPerson && !_isOnline && !_isHomeVisit) {
                 _isOnline = true;
@@ -518,7 +497,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
           isEnabled: _isHomeVisit,
           onChanged: (value) {
             setState(() {
-              _isHomeVisit = value!;
+              _isHomeVisit = value;
               // Ensure at least one type is selected
               if (!_isInPerson && !_isOnline && !_isHomeVisit) {
                 _isHomeVisit = true;
@@ -960,8 +939,8 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
         );
       }
 
-      final service = DoctorService(
-        id: widget.service?.id ?? const Uuid().v4(),
+      final service = Service(
+        uid: widget.service?.uid ?? const Uuid().v4(),
         title: _titleController.text,
         description: _descriptionController.text,
         duration: duration,
@@ -970,7 +949,7 @@ class _ServiceEditorScreenState extends State<ServiceEditorScreen> {
         isInPerson: _isInPerson,
         isHomeVisit: _isHomeVisit,
         preAppointmentInstructions: _preAppointmentInstructions,
-        availability: availability,
+        customAvailability: availability,
       );
 
       Navigator.pop(context, service);

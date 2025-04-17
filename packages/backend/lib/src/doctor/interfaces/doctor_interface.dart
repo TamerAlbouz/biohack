@@ -14,4 +14,6 @@ abstract class IDoctorRepository extends IUserRepository {
       int limit, DocumentSnapshot? lastDocument);
 
   Future<List<Doctor>> getPatientDoctors(String patientId);
+
+  Future<bool> checkEmailExists(String email);
 }

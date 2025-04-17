@@ -7,4 +7,8 @@ abstract class IPatientRepository extends IUserRepository {
   Future<void> addPatient(Patient patient);
 
   Future<void> updatePatient(Patient patient);
+
+  Future<List<SavedCreditCard>?> getCreditCards(String id);
+
+  Future<bool> checkEmailExists(String email);
 }

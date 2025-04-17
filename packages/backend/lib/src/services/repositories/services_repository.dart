@@ -34,18 +34,22 @@ class ServicesRepository implements IServiceRepository {
   }
 
   @override
-  Future<Service> createService(Service service) async {
+  Future<Service> createService(String docId, Service service) async {
     try {
-      final docRef =
-          _doctorsCollection.doc(service.doctorId).collection('services').doc();
+      final docRef = _doctorsCollection.doc(docId).collection('services').doc();
 
-      final newService = service.copyWith(id: docRef.id);
+      final newService = service.copyWith(uid: docRef.id);
       await docRef.set({
-        'doctorId': newService.doctorId,
-        'name': newService.name,
+        'title': newService.title,
         'description': newService.description,
         'duration': newService.duration,
         'price': newService.price,
+        'isOnline': newService.isOnline,
+        'isInPerson': newService.isInPerson,
+        'isHomeVisit': newService.isHomeVisit,
+        'preAppointmentInstructions':
+            newService.preAppointmentInstructions ?? '',
+        'customAvailability': newService.customAvailability?.toJson(),
       });
 
       return newService;
@@ -59,12 +63,12 @@ class ServicesRepository implements IServiceRepository {
   }
 
   @override
-  Future<void> updateService(Service service) async {
+  Future<void> updateService(String docId, Service service) async {
     try {
       await _doctorsCollection
-          .doc(service.doctorId)
+          .doc(docId)
           .collection('services')
-          .doc(service.id)
+          .doc(service.uid)
           .update(service.toJson());
     } on FirebaseException catch (e) {
       logger.e(e.message);
@@ -76,10 +80,10 @@ class ServicesRepository implements IServiceRepository {
   }
 
   @override
-  Future<void> deleteService(String doctorId, String serviceId) async {
+  Future<void> deleteService(String docId, String serviceId) async {
     try {
       await _doctorsCollection
-          .doc(doctorId)
+          .doc(docId)
           .collection('services')
           .doc(serviceId)
           .delete();

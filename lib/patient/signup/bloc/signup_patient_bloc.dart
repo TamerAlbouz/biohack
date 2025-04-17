@@ -295,7 +295,7 @@ class SignUpPatientBloc extends Bloc<SignUpPatientEvent, SignUpPatientState> {
     logger.i('Submitting signup...');
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
-      await _authenticationRepository.signUp(
+      await _authenticationRepository.createUserWithEmailAndPassword(
         email: state.signUpEmail.value,
         password: state.signUpPassword.value,
       );

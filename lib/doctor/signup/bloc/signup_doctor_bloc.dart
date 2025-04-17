@@ -5,6 +5,7 @@ import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:crypton/crypton.dart';
 import 'package:equatable/equatable.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
 import 'package:formz_inputs/formz_inputs.dart';
 import 'package:p_logger/p_logger.dart';
@@ -14,17 +15,21 @@ part 'signup_doctor_state.dart';
 
 class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
   final IDoctorRepository _doctorRepository;
+  final IPatientRepository _doctorPatientRepository;
   final ICryptoRepository _crypto;
   final IAuthenticationRepository _authenticationRepository;
   final IEncryptionRepository _encryptionRepository;
   final ISecureStorageRepository _secureStorageRepository;
+  final IStorageRepository _storageRepository;
 
   SignUpDoctorBloc(
     this._crypto,
     this._authenticationRepository,
     this._encryptionRepository,
     this._doctorRepository,
+    this._doctorPatientRepository,
     this._secureStorageRepository,
+    this._storageRepository,
   ) : super(const SignUpDoctorState()) {
     on<SignUpEmailChanged>(_onEmailChanged);
     on<SignUpPasswordChanged>(_onPasswordChanged);
@@ -32,12 +37,62 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
     on<FullNameChanged>(_onFullNameChanged);
     on<DateOfBirthChanged>(_onDateOfBirthChanged);
     on<SexChanged>(_onSexChanged);
+    on<PreviousNameChanged>(_onPreviousNameChanged);
+    on<LicenseTypeChanged>(_onLicenseTypeChanged);
+    on<LicenseNumberChanged>(_onLicenseNumberChanged);
+    on<LocationChanged>(_onLocationChanged);
+    on<ZoneChanged>(_onZoneChanged);
+    on<AtlanticRegistryChanged>(_onAtlanticRegistryChanged);
+    on<RegistryHomeChanged>(_onRegistryHomeChanged);
+    on<RegistrantTypeChanged>(_onRegistrantTypeChanged);
+    on<SpecialtyChanged>(_onSpecialtyChanged);
+    on<GovernmentIdUploaded>(_onGovernmentIdUploaded);
+    on<MedicalLicenseUploaded>(_onMedicalLicenseUploaded);
+    on<TermsAcceptedChanged>(_onTermsAcceptedChanged);
+    on<NextStep>(_onNextStep);
+    on<PreviousStep>(_onPreviousStep);
     on<SubmitSignUp>(_onSubmitSignUp);
     on<CheckEmailVerification>(_onCheckEmailVerification);
     on<GenerateKeys>(_onGenerateKeys);
     on<ResendVerificationEmail>(_onResendVerificationEmail);
     on<RequestSubscription>(_onRequestSubscription);
     on<ResetStatus>(_onResetStatus);
+    on<CheckEmailExists>(_onCheckEmailExists);
+  }
+
+  // 2. Add this method to handle the event in the SignUpDoctorBloc:
+  Future<void> _onCheckEmailExists(
+      CheckEmailExists event, Emitter<SignUpDoctorState> emit) async {
+    try {
+      logger.i('Checking if email exists: ${event.email}');
+      emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
+
+      // Check if email exists using authentication repository
+      final emailExists = await _doctorRepository.checkEmailExists(event.email);
+
+      if (emailExists) {
+        // Email already exists, show error
+        logger.w('Email already exists: ${event.email}');
+        emit(state.copyWith(
+          status: FormzSubmissionStatus.failure,
+          errorMessage:
+              'Email is already registered. Please use a different email or login.',
+        ));
+      } else {
+        // Email doesn't exist, proceed to next step
+        logger.i('Email is available, proceeding to next step');
+        emit(state.copyWith(
+          status: FormzSubmissionStatus.initial,
+          currentStep: state.currentStep + 1,
+        ));
+      }
+    } catch (e) {
+      logger.e('Error checking if email exists: $e');
+      emit(state.copyWith(
+        status: FormzSubmissionStatus.failure,
+        errorMessage: 'Error checking email: $e',
+      ));
+    }
   }
 
   void _onRequestSubscription(
@@ -66,13 +121,8 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
     final dateOfBirth = DateOfBirth.dirty(event.dateOfBirth);
     emit(state.copyWith(
       dateOfBirth: dateOfBirth,
-      isValid: Formz.validate([
-        state.signUpEmail,
-        state.signUpPassword,
-        state.fullName,
-        dateOfBirth,
-        state.sex,
-      ]),
+      isPersonalDetailsValid: _validatePersonalDetails(
+          state.sex, state.licenseType, state.licenseNumber, dateOfBirth),
     ));
   }
 
@@ -81,13 +131,8 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
     final sex = Sex.dirty(event.sex);
     emit(state.copyWith(
       sex: sex,
-      isValid: Formz.validate([
-        state.signUpEmail,
-        state.signUpPassword,
-        state.fullName,
-        state.dateOfBirth,
-        sex,
-      ]),
+      isPersonalDetailsValid: _validatePersonalDetails(
+          sex, state.licenseType, state.licenseNumber, state.dateOfBirth),
     ));
   }
 
@@ -97,13 +142,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
     final fullName = FullName.dirty(event.fullName);
     emit(state.copyWith(
       fullName: fullName,
-      isValid: Formz.validate([
-        state.signUpEmail,
-        state.signUpPassword,
-        fullName,
-        state.dateOfBirth,
-        state.sex,
-      ]),
+      isBasicInfoValid: _validateBasicInfo(state.signUpEmail, fullName),
     ));
   }
 
@@ -113,13 +152,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
     final email = Email.dirty(event.email);
     emit(state.copyWith(
       signUpEmail: email,
-      isValid: Formz.validate([
-        email,
-        state.signUpPassword,
-        state.fullName,
-        state.dateOfBirth,
-        state.sex,
-      ]),
+      isBasicInfoValid: _validateBasicInfo(email, state.fullName),
     ));
   }
 
@@ -135,14 +168,11 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
 
     emit(state.copyWith(
       signUpPassword: password,
-      isValid: passwordsMatch &&
-          Formz.validate([
+      isBasicInfoValid: passwordsMatch &&
+          _validateBasicInfo(
             state.signUpEmail,
-            password,
             state.fullName,
-            state.dateOfBirth,
-            state.sex,
-          ]),
+          ),
     ));
   }
 
@@ -158,15 +188,192 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
 
     emit(state.copyWith(
       signUpConfirmPassword: confirmPassword,
-      isValid: passwordsMatch &&
-          Formz.validate([
+      isBasicInfoValid: passwordsMatch &&
+          _validateBasicInfo(
             state.signUpEmail,
-            state.signUpPassword,
             state.fullName,
-            state.dateOfBirth,
-            state.sex,
-          ]),
+          ),
     ));
+  }
+
+  void _onPreviousNameChanged(
+      PreviousNameChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('Previous name changed to: ${event.previousName}');
+    emit(state.copyWith(
+      previousName: event.previousName,
+    ));
+  }
+
+  void _onLicenseTypeChanged(
+      LicenseTypeChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('License type changed to: ${event.licenseType}');
+    emit(state.copyWith(
+      licenseType: event.licenseType,
+      isPersonalDetailsValid: _validatePersonalDetails(
+          state.sex, event.licenseType, state.licenseNumber, state.dateOfBirth),
+    ));
+  }
+
+  void _onLicenseNumberChanged(
+      LicenseNumberChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('License number changed to: ${event.licenseNumber}');
+    emit(state.copyWith(
+      licenseNumber: event.licenseNumber,
+      isPersonalDetailsValid: _validatePersonalDetails(
+          state.sex, state.licenseType, event.licenseNumber, state.dateOfBirth),
+    ));
+  }
+
+  void _onLocationChanged(
+      LocationChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('Location changed to: ${event.location}');
+    emit(state.copyWith(
+      location: event.location,
+      isLocationValid: _validateLocation(
+        event.location,
+        state.zone,
+        state.isAtlanticRegistry,
+        state.registryHomeJurisdiction,
+      ),
+    ));
+  }
+
+  void _onZoneChanged(ZoneChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('Zone changed to: ${event.zone}');
+    emit(state.copyWith(
+      zone: event.zone,
+      isLocationValid: _validateLocation(
+        state.location,
+        event.zone,
+        state.isAtlanticRegistry,
+        state.registryHomeJurisdiction,
+      ),
+    ));
+  }
+
+  void _onAtlanticRegistryChanged(
+      AtlanticRegistryChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('Atlantic registry changed to: ${event.isAtlanticRegistry}');
+    // If Atlantic Registry is set to "No", clear registry home jurisdiction
+    final registryHome =
+        event.isAtlanticRegistry == 'No' ? '' : state.registryHomeJurisdiction;
+    emit(state.copyWith(
+      isAtlanticRegistry: event.isAtlanticRegistry,
+      registryHomeJurisdiction: registryHome,
+      isLocationValid: _validateLocation(
+        state.location,
+        state.zone,
+        event.isAtlanticRegistry,
+        registryHome,
+      ),
+    ));
+  }
+
+  void _onRegistryHomeChanged(
+      RegistryHomeChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('Registry home changed to: ${event.registryHome}');
+    emit(state.copyWith(
+      registryHomeJurisdiction: event.registryHome,
+      isLocationValid: _validateLocation(
+        state.location,
+        state.zone,
+        state.isAtlanticRegistry,
+        event.registryHome,
+      ),
+    ));
+  }
+
+  void _onRegistrantTypeChanged(
+      RegistrantTypeChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('Registrant type changed to: ${event.registrantType}');
+    emit(state.copyWith(
+      registrantType: event.registrantType,
+      isSpecialtiesValid: _validateSpecialties(
+        event.registrantType,
+        state.specialty,
+      ),
+    ));
+  }
+
+  void _onSpecialtyChanged(
+      SpecialtyChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('Specialty changed to: ${event.specialty}');
+    emit(state.copyWith(
+      specialty: event.specialty,
+      isSpecialtiesValid: _validateSpecialties(
+        state.registrantType,
+        event.specialty,
+      ),
+    ));
+  }
+
+  Future<void> _onGovernmentIdUploaded(
+      GovernmentIdUploaded event, Emitter<SignUpDoctorState> emit) async {
+    try {
+      logger.i('Government ID file uploaded');
+      emit(state.copyWith(
+        governmentIdFile: event.file,
+        isDocumentsValid: _validateDocuments(
+          event.file,
+          state.medicalLicenseFile,
+          state.termsAccepted,
+        ),
+      ));
+    } catch (e) {
+      logger.e('Error uploading government ID: $e');
+      emit(state.copyWith(
+        errorMessage: 'Error uploading government ID: $e',
+      ));
+    }
+  }
+
+  Future<void> _onMedicalLicenseUploaded(
+      MedicalLicenseUploaded event, Emitter<SignUpDoctorState> emit) async {
+    try {
+      logger.i('Medical license file uploaded');
+      emit(state.copyWith(
+        medicalLicenseFile: event.file,
+        isDocumentsValid: _validateDocuments(
+          state.governmentIdFile,
+          event.file,
+          state.termsAccepted,
+        ),
+      ));
+    } catch (e) {
+      logger.e('Error uploading medical license: $e');
+      emit(state.copyWith(
+        errorMessage: 'Error uploading medical license: $e',
+      ));
+    }
+  }
+
+  void _onTermsAcceptedChanged(
+      TermsAcceptedChanged event, Emitter<SignUpDoctorState> emit) {
+    logger.i('Terms accepted changed to: ${event.accepted}');
+    emit(state.copyWith(
+      termsAccepted: event.accepted,
+      isDocumentsValid: _validateDocuments(
+        state.governmentIdFile,
+        state.medicalLicenseFile,
+        event.accepted,
+      ),
+    ));
+  }
+
+  void _onNextStep(NextStep event, Emitter<SignUpDoctorState> emit) {
+    if (state.currentStep < 4) {
+      emit(state.copyWith(
+        currentStep: state.currentStep + 1,
+      ));
+    }
+  }
+
+  void _onPreviousStep(PreviousStep event, Emitter<SignUpDoctorState> emit) {
+    if (state.currentStep > 0) {
+      emit(state.copyWith(
+        currentStep: state.currentStep - 1,
+      ));
+    }
   }
 
   Future<void> _onCheckEmailVerification(
@@ -294,34 +501,72 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
     logger.i('Submitting signup...');
     emit(state.copyWith(status: FormzSubmissionStatus.inProgress));
     try {
-      await _authenticationRepository.signUp(
-        email: state.signUpEmail.value,
-        password: state.signUpPassword.value,
-      );
+      // check if user is already signed up but as a patient, if so, keep the patient, but now create a doctor
+      final exists = await _doctorPatientRepository
+          .checkEmailExists(state.signUpEmail.value);
 
-      logger.i('User signup successful. Creating patient profile...');
-      final patient = Doctor(
+      final existsPatient = await _doctorPatientRepository
+          .checkEmailExists(state.signUpEmail.value);
+
+      if (!exists && !existsPatient) {
+        await _authenticationRepository.createUserWithEmailAndPassword(
+          email: state.signUpEmail.value,
+          password: state.signUpPassword.value,
+        );
+      } else {
+        await _authenticationRepository.logInWithEmailAndPassword(
+          email: state.signUpEmail.value,
+          password: state.signUpPassword.value,
+        );
+      }
+
+      logger.i('User signup successful. Uploading documents...');
+
+      String govIdUrl = '';
+      String medLicenseUrl = '';
+
+      if (state.governmentIdFile != null) {
+        govIdUrl = await _uploadFile(state.governmentIdFile!,
+            'government_id_${_authenticationRepository.currentUser.uid}');
+      }
+
+      if (state.medicalLicenseFile != null) {
+        medLicenseUrl = await _uploadFile(state.medicalLicenseFile!,
+            'medical_license_${_authenticationRepository.currentUser.uid}');
+      }
+
+      logger.i('Documents uploaded successfully. Creating doctor profile...');
+
+      // Create a new doctor object
+      final doctor = Doctor(
         email: state.signUpEmail.value,
         name: state.fullName.value,
         sex: state.sex.value,
         uid: _authenticationRepository.currentUser.uid,
         createdAt: DateTime.now(),
         role: Role.doctor,
-        licNum: state.licNum,
-        state: state.state,
-        govIdUrl: '',
-        medicalLicenseUrl: '',
+        licNum: state.licenseNumber,
+        govIdUrl: govIdUrl,
+        medicalLicenseUrl: medLicenseUrl,
         availability: const {},
-        active: true,
+        active: false,
+        previousName: state.previousName,
+        licenseType: state.licenseType,
+        zone: state.zone,
+        location: state.location,
+        isAtlanticRegistry: state.isAtlanticRegistry == 'Yes',
+        registryHomeJurisdiction: state.registryHomeJurisdiction,
+        registrantType: state.registrantType,
+        termsAccepted: state.termsAccepted,
+        specialties: state.specialty.isNotEmpty ? [state.specialty] : null,
       );
 
       await Future.wait([
-        _doctorRepository.addDoctor(patient),
-        _authenticationRepository.sendEmailVerification(),
-        _authenticationRepository.updateProfile(patient),
+        _doctorRepository.addDoctor(doctor),
+        _authenticationRepository.updateProfile(doctor),
       ]);
 
-      logger.i('Patient profile created successfully');
+      logger.i('Doctor profile created successfully');
       emit(state.copyWith(
           status: FormzSubmissionStatus.inProgress,
           requiresEmailVerification: true));
@@ -338,5 +583,65 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
   void _onResetStatus(ResetStatus event, Emitter<SignUpDoctorState> emit) {
     logger.i('Resetting form status');
     emit(state.copyWith(status: FormzSubmissionStatus.initial));
+  }
+
+  // Helper methods for validation
+  bool _validateBasicInfo(Email email, FullName fullName) {
+    return Formz.validate([email, fullName]);
+  }
+
+  bool _validatePersonalDetails(Sex sex, String licenseType,
+      String licenseNumber, DateOfBirth dateOfBirth) {
+    return sex.isValid &&
+        licenseType.isNotEmpty &&
+        licenseNumber.isNotEmpty &&
+        dateOfBirth.isValid;
+  }
+
+  bool _validateLocation(String location, String zone,
+      String isAtlanticRegistry, String registryHome) {
+    if (location.isEmpty || zone.isEmpty || isAtlanticRegistry.isEmpty) {
+      return false;
+    }
+
+    // If Atlantic Registry is "Yes", registry home must be selected
+    if (isAtlanticRegistry == 'Yes' && registryHome.isEmpty) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool _validateSpecialties(String registrantType, String specialty) {
+    return registrantType.isNotEmpty && specialty.isNotEmpty;
+  }
+
+  bool _validateDocuments(
+      PlatformFile? govId, PlatformFile? medLicense, bool termsAccepted) {
+    return govId != null && medLicense != null && termsAccepted;
+  }
+
+  // Helper method for file upload
+  Future<String> _uploadFile(PlatformFile file, String path) async {
+    try {
+      final fileBytes = file.bytes;
+      if (fileBytes == null) {
+        throw Exception('File bytes are null');
+      }
+
+      final fileExt = file.extension ?? 'file';
+      final fileName = '$path.$fileExt';
+
+      final url = await _storageRepository.uploadBytes(
+        fileBytes,
+        fileName,
+        contentType: 'application/$fileExt',
+      );
+
+      return url;
+    } catch (e) {
+      logger.e('Error uploading file: $e');
+      throw Exception('Failed to upload file: $e');
+    }
   }
 }

@@ -13,6 +13,7 @@ class ImprovedDoctorProfile extends StatelessWidget {
   final String imageUrl;
   final int reviewCount;
   final VoidCallback onViewProfileTap;
+  final bool? showArrow;
 
   const ImprovedDoctorProfile({
     super.key,
@@ -21,6 +22,7 @@ class ImprovedDoctorProfile extends StatelessWidget {
     this.imageUrl = '',
     this.reviewCount = 0,
     required this.onViewProfileTap,
+    this.showArrow = true,
   });
 
   @override
@@ -111,22 +113,23 @@ class ImprovedDoctorProfile extends StatelessWidget {
               ),
             ),
             // View profile button
-            InkWell(
-              onTap: onViewProfileTap,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const FaIcon(
-                  FontAwesomeIcons.arrowRight,
-                  color: MyColors.primary,
-                  size: 18,
+            if (showArrow == true)
+              InkWell(
+                onTap: onViewProfileTap,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const FaIcon(
+                    FontAwesomeIcons.arrowRight,
+                    color: MyColors.primary,
+                    size: 18,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

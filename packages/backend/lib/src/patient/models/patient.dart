@@ -5,7 +5,7 @@ import '../../user/models/user.dart';
 
 part 'patient.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Patient extends User {
   const Patient({
     required super.email,
@@ -25,6 +25,7 @@ class Patient extends User {
     this.bloodType,
     this.weight,
     this.height,
+    this.savedCreditCards,
   });
 
   /// IDs or references to medical records.
@@ -45,6 +46,9 @@ class Patient extends User {
   /// The current user's height.
   final double? height;
 
+  /// Selected saved credit cards
+  final List<SavedCreditCard>? savedCreditCards;
+
   /// Returns a new [Patient] with updated fields.
   @override
   Patient copyWith({
@@ -63,6 +67,7 @@ class Patient extends User {
     String? bloodType,
     double? weight,
     double? height,
+    List<SavedCreditCard>? savedCreditCards,
   }) {
     return Patient(
       email: email ?? this.email,
@@ -82,6 +87,7 @@ class Patient extends User {
       weight: weight ?? this.weight,
       height: height ?? this.height,
       biography: biography ?? this.biography,
+      savedCreditCards: savedCreditCards ?? this.savedCreditCards,
     );
   }
 
@@ -105,6 +111,16 @@ class Patient extends User {
       bloodType: data['bloodType'],
       weight: data['weight'],
       height: data['height'],
+      savedCreditCards: (data['savedCreditCards'] as List<dynamic>?)
+          ?.map((e) => SavedCreditCard(
+                id: e['id'],
+                cardNumber: e['cardNumber'],
+                cardholderName: e['cardholderName'],
+                expiryDate: e['expiryDate'],
+                cardType: e['cardType'],
+                isDefault: e['isDefault'] ?? false,
+              ))
+          .toList(),
     );
   }
 
@@ -127,6 +143,16 @@ class Patient extends User {
       'bloodType': bloodType,
       'weight': weight,
       'height': height,
+      'savedCreditCards': savedCreditCards
+          ?.map((e) => {
+                'id': e.id,
+                'cardNumber': e.cardNumber,
+                'cardholderName': e.cardholderName,
+                'expiryDate': e.expiryDate,
+                'cardType': e.cardType,
+                'isDefault': e.isDefault,
+              })
+          .toList(),
     };
   }
 
@@ -149,6 +175,7 @@ class Patient extends User {
         weight,
         height,
         biography,
+        savedCreditCards,
       ];
 
   factory Patient.fromJson(Map<String, dynamic> json) =>
@@ -156,4 +183,28 @@ class Patient extends User {
 
   @override
   Map<String, dynamic> toJson() => _$PatientToJson(this);
+}
+
+@JsonSerializable()
+class SavedCreditCard {
+  final String id;
+  final String cardNumber; // Last 4 digits only
+  final String cardholderName;
+  final String expiryDate;
+  final String cardType; // Visa, Mastercard, etc.
+  final bool isDefault;
+
+  SavedCreditCard({
+    required this.id,
+    required this.cardNumber,
+    required this.cardholderName,
+    required this.expiryDate,
+    required this.cardType,
+    this.isDefault = false,
+  });
+
+  factory SavedCreditCard.fromJson(Map<String, dynamic> json) =>
+      _$SavedCreditCardFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SavedCreditCardToJson(this);
 }

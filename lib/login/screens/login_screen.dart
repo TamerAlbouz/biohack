@@ -248,7 +248,7 @@ class _LoginFormState extends State<LoginForm> {
                             );
                           }
                         },
-                        style: kElevatedButtonCommonStyleOutline,
+                        style: kElevatedButtonCommonStyleOutlined,
                         child: const Text(
                           'Create an account',
                         ),

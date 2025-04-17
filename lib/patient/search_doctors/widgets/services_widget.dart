@@ -153,9 +153,9 @@ class Services extends StatelessWidget {
                       kGap10,
 
                       // Description
-                      if (service.description.isNotEmpty) ...[
+                      if (service.description!.isNotEmpty) ...[
                         Text(
-                          service.description,
+                          service.description!,
                           style: kServiceCardSummary.copyWith(
                             color: MyColors.textGrey,
                           ),

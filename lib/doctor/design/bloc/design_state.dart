@@ -1,14 +1,13 @@
 // State
+import 'package:backend/backend.dart';
 import 'package:equatable/equatable.dart';
-
-import '../models/design_models.dart';
 
 class DesignState extends Equatable {
   final String bio;
   final String phone;
   final String address;
   final String notes;
-  final List<DoctorService> services;
+  final List<Service> services;
   final bool offersInPerson;
   final bool offersOnline;
   final bool offersHomeVisit;
@@ -49,7 +48,7 @@ class DesignState extends Equatable {
     String? phone,
     String? address,
     String? notes,
-    List<DoctorService>? services,
+    List<Service>? services,
     bool? offersInPerson,
     bool? offersOnline,
     bool? offersHomeVisit,

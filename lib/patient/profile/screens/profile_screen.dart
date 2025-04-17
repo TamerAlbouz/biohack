@@ -5,7 +5,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/common/widgets/common_error_widget.dart';
+import 'package:medtalk/common/widgets/custom_input_field.dart';
+import 'package:medtalk/patient/profile/screens/settings_screens.dart';
 import 'package:medtalk/styles/colors.dart';
+import 'package:medtalk/styles/styles/button.dart';
 
 import '../../../styles/font.dart';
 import '../../../styles/sizes.dart';
@@ -21,14 +24,17 @@ class PatientProfileScreen extends StatefulWidget {
 class _PatientProfileScreenState extends State<PatientProfileScreen>
     with SingleTickerProviderStateMixin {
   bool _isEditing = false;
+  bool _isImageUploading = false;
   final TextEditingController _biographyController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _heightController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   String? _selectedBloodType;
   String? _selectedSex;
   DateTime? _selectedDob;
   late TabController _tabController;
+  String? _profileImageUrl;
 
   final List<String> _bloodTypes = [
     'A+',
@@ -40,7 +46,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
     'O+',
     'O-'
   ];
-  final List<String> _sexOptions = ['Male', 'Female', 'Other'];
+  final List<String> _sexOptions = ['Male', 'Female'];
 
   @override
   void initState() {
@@ -54,6 +60,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
     _nameController.dispose();
     _heightController.dispose();
     _weightController.dispose();
+    _addressController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -91,9 +98,11 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
       _biographyController.text = state.patient.biography ?? '';
       _heightController.text = state.patient.height?.toString() ?? '';
       _weightController.text = state.patient.weight?.toString() ?? '';
+      // _addressController.text = state.patient.address ?? '';
       _selectedBloodType = state.patient.bloodType;
       _selectedSex = state.patient.sex;
       _selectedDob = state.patient.dateOfBirth;
+      // _profileImageUrl = state.patient.profileImageUrl;
 
       setState(() {
         _isEditing = true;
@@ -101,7 +110,74 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
     }
   }
 
+  bool _validateForm() {
+    bool isValid = true;
+    String? errorMessage;
+
+    // Validate name
+    if (_nameController.text.trim().isEmpty) {
+      isValid = false;
+      errorMessage = "Name cannot be empty";
+    }
+
+    // Validate height (if provided)
+    if (_heightController.text.isNotEmpty) {
+      try {
+        final height = double.parse(_heightController.text);
+        if (height <= 0 || height > 300) {
+          // Reasonable height range in cm
+          isValid = false;
+          errorMessage = "Please enter a valid height (1-300 cm)";
+        }
+      } catch (e) {
+        isValid = false;
+        errorMessage = "Height must be a valid number";
+      }
+    }
+
+    // Validate weight (if provided)
+    if (_weightController.text.isNotEmpty) {
+      try {
+        final weight = double.parse(_weightController.text);
+        if (weight <= 0 || weight > 500) {
+          // Reasonable weight range in kg
+          isValid = false;
+          errorMessage = "Please enter a valid weight (1-500 kg)";
+        }
+      } catch (e) {
+        isValid = false;
+        errorMessage = "Weight must be a valid number";
+      }
+    }
+
+    // Validate date of birth
+    if (_selectedDob != null) {
+      if (_selectedDob!.isAfter(DateTime.now())) {
+        isValid = false;
+        errorMessage = "Date of birth cannot be in the future";
+      }
+    }
+
+    // Show error message if validation fails
+    if (!isValid && errorMessage != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+
+    return isValid;
+  }
+
   void _saveChanges() {
+    // Validate form before saving
+    if (!_validateForm()) {
+      return;
+    }
+
     // Save changes
     context.read<PatientProfileBloc>().add(UpdatePatientProfile(
           name: _nameController.text,
@@ -115,6 +191,8 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
               : null,
           sex: _selectedSex,
           dateOfBirth: _selectedDob,
+          // address: _addressController.text,
+          // profileImageUrl: _profileImageUrl,
         ));
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -147,6 +225,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
                 Navigator.pop(context);
                 setState(() {
                   _isEditing = false;
+                  _profileImageUrl = null; // Reset any unsaved image changes
                 });
               },
               style: ElevatedButton.styleFrom(
@@ -160,56 +239,137 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("My Profile",
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        actions: [
-          BlocBuilder<PatientProfileBloc, PatientProfileState>(
-            builder: (context, state) {
-              if (state is PatientProfileLoaded) {
-                return Row(
-                  children: [
-                    if (_isEditing)
+  Future<void> _pickProfileImage() async {
+    try {
+      setState(() {
+        _isImageUploading = true; // Show uploading state
+      });
+
+      // This would typically use image_picker package
+      // final ImagePicker _picker = ImagePicker();
+      // final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+      // For now, show a dialog to simulate the process
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Profile Picture"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Select source:"),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  Column(
+                    children: [
                       IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: _cancelEdit,
-                        tooltip: "Cancel editing",
+                        onPressed: () {
+                          Navigator.pop(context);
+                          // Simulate camera selection
+                          _simulateImageUpload("camera");
+                        },
+                        icon: const Icon(Icons.camera_alt, size: 40),
+                        color: MyColors.primary,
                       ),
-                    IconButton(
-                      icon: Icon(_isEditing ? Icons.save : Icons.edit),
-                      onPressed: () => _toggleEditMode(state),
-                      tooltip: _isEditing ? "Save changes" : "Edit profile",
-                    ),
-                  ],
-                );
-              }
-              return const SizedBox.shrink();
-            },
+                      const Text("Camera"),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          // Simulate gallery selection
+                          _simulateImageUpload("gallery");
+                        },
+                        icon: const Icon(Icons.photo_library, size: 40),
+                        color: MyColors.primary,
+                      ),
+                      const Text("Gallery"),
+                    ],
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        foregroundColor: MyColors.textBlack,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: MyColors.primary,
-          unselectedLabelColor: Colors.grey,
-          indicatorColor: MyColors.primary,
-          tabs: const [
-            Tab(
-              text: "Profile",
-              icon: Icon(Icons.person),
-            ),
-            Tab(
-              text: "Settings",
-              icon: Icon(Icons.settings),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  _isImageUploading = false;
+                });
+              },
+              child: const Text("CANCEL"),
             ),
           ],
         ),
+      );
+    } catch (e) {
+      setState(() {
+        _isImageUploading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error selecting image: $e"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  // Method to simulate image upload process
+  void _simulateImageUpload(String source) {
+    // In a real app, this would upload the image to storage and get back a URL
+
+    // Show progress
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text("Uploading image from $source..."),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
       ),
+    );
+
+    // Simulate network delay
+    Future.delayed(const Duration(seconds: 2), () {
+      // Set a dummy URL (in a real app, this would be the actual uploaded image URL)
+      setState(() {
+        _profileImageUrl =
+            "https://example.com/profile_image_${DateTime.now().millisecondsSinceEpoch}.jpg";
+        _isImageUploading = false;
+      });
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Profile picture updated successfully"),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
       body: BlocBuilder<PatientProfileBloc, PatientProfileState>(
         builder: (context, state) {
           if (state is PatientProfileLoading ||
@@ -225,12 +385,54 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
           }
 
           state as PatientProfileLoaded;
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _buildProfileTab(state),
-              _buildSettingsTab(state),
-            ],
+          return SafeArea(
+            child: Column(
+              children: [
+                // Tab Bar
+                TabBar(
+                  controller: _tabController,
+                  labelColor: MyColors.primary,
+                  unselectedLabelColor: Colors.grey,
+                  indicatorColor: MyColors.primary,
+                  tabs: const [
+                    Tab(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(Icons.person),
+                          SizedBox(width: 6),
+                          Text("Profile"),
+                        ],
+                      ),
+                    ),
+                    Tab(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.settings),
+                          SizedBox(width: 6),
+                          Text("Settings"),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Tab Content
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildProfileTab(state),
+                      _buildSettingsTab(state),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -263,25 +465,29 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
                   shape: BoxShape.circle,
                   border: Border.all(color: MyColors.primary, width: 2),
                 ),
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey[200],
-                  backgroundImage: null,
-                  // state.patient.profileImageUrl != null
-                  //     ? NetworkImage(state.patient.profileImageUrl!)
-                  //     : null,
-                  child: null,
-                  // state.patient.profileImageUrl == null
-                  //     ? Text(
-                  //         _getInitials(state.patient.name),
-                  //         style: const TextStyle(
-                  //           fontSize: 30,
-                  //           fontWeight: FontWeight.bold,
-                  //           color: MyColors.primary,
-                  //         ),
-                  //       )
-                  //     : null,
-                ),
+                child: _isImageUploading
+                    ? CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey[200],
+                        child: const CircularProgressIndicator(),
+                      )
+                    : CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: _profileImageUrl != null
+                            ? NetworkImage(_profileImageUrl!)
+                            : null,
+                        child: _profileImageUrl == null
+                            ? Text(
+                                _getInitials(state.patient.name),
+                                style: const TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: MyColors.primary,
+                                ),
+                              )
+                            : null,
+                      ),
               ),
               if (_isEditing)
                 Container(
@@ -291,15 +497,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
                   ),
                   padding: const EdgeInsets.all(8),
                   child: GestureDetector(
-                    onTap: () {
-                      // TODO: Implement image picker
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Profile picture upload coming soon"),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
+                    onTap: _pickProfileImage,
                     child: const Icon(
                       Icons.camera_alt,
                       color: Colors.white,
@@ -309,31 +507,15 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
                 ),
             ],
           ),
-          const SizedBox(height: 16),
-          if (_isEditing)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: TextFormField(
-                controller: _nameController,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-                decoration: const InputDecoration(
-                  hintText: "Your Name",
-                  border: UnderlineInputBorder(),
-                ),
-              ),
-            )
-          else
-            Text(
-              state.patient.name ?? "Add your name",
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+          kGap16,
+
+          Text(
+            state.patient.name ?? "Add your name",
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
+          ),
           const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -369,6 +551,20 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
               ),
             ],
           ),
+          kGap16,
+          // Edit button under profile picture
+          ElevatedButton.icon(
+            onPressed: () => _toggleEditMode(state),
+            icon: Icon(_isEditing ? Icons.save : Icons.edit),
+            label: Text(_isEditing ? "Save Profile" : "Edit Profile"),
+            style: kElevatedButtonCommonStyle,
+          ),
+          // Cancel button if in edit mode
+          if (_isEditing)
+            TextButton(
+              onPressed: _cancelEdit,
+              child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+            ),
         ],
       ),
     );
@@ -393,36 +589,14 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Health Summary",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (!_isEditing)
-                TextButton.icon(
-                  onPressed: () {
-                    // Future implementation for health summary detail
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Health summary details coming soon"),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.assessment, size: 16),
-                  label: const Text("View Details"),
-                  style: TextButton.styleFrom(
-                    foregroundColor: MyColors.primary,
-                  ),
-                ),
-            ],
+          const Text(
+            "Health Summary",
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 16),
+          kGap16,
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -501,9 +675,8 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildProfileHeader(state),
-          const SizedBox(height: 16),
           _buildHealthSummary(state),
-          const SizedBox(height: 24),
+          kGap24,
 
           // Basic info card
           _buildInfoCard(
@@ -529,7 +702,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
                 suffixIcon: _isEditing ? Icons.calendar_today : null,
               ),
               _buildEditableField(
-                "Gender",
+                "Sex",
                 _isEditing ? null : state.patient.sex ?? "Not provided",
                 Icons.wc,
                 isEditing: _isEditing,
@@ -545,27 +718,45 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
             ],
           ),
 
-          const SizedBox(height: 24),
+          kGap24,
+
+          // Contact info card
+          _buildInfoCard(
+            "Contact Information",
+            [
+              _buildEditableField(
+                "Email Address",
+                state.patient.email,
+                Icons.email,
+                isEditable: false,
+                isEditing: _isEditing,
+              ),
+              _buildEditableField(
+                "Address",
+                _isEditing ? null : "Not provided",
+                Icons.home,
+                controller: _addressController,
+                isEditing: _isEditing,
+                keyboardType: TextInputType.streetAddress,
+              ),
+            ],
+          ),
+
+          kGap24,
 
           // Biography card
           _buildInfoCard(
             "About Me",
             [
               if (_isEditing)
-                TextFormField(
+                CustomInputField(
                   controller: _biographyController,
                   maxLines: 4,
-                  decoration: InputDecoration(
-                    hintText: "Tell us about yourself...",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: MyColors.primary),
-                    ),
-                  ),
+                  height: 60,
+                  color: Colors.grey.shade50,
+                  hintText: "Tell us about yourself...",
+                  keyboardType: TextInputType.multiline,
+                  onChanged: (String value) {},
                 )
               else
                 Padding(
@@ -593,7 +784,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
+          kGap16,
 
           // Medical History Section
           _buildSettingsSection(
@@ -624,7 +815,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
             ],
           ),
 
-          const SizedBox(height: 24),
+          kGap24,
 
           // Payments Section
           _buildSettingsSection(
@@ -655,7 +846,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
             ],
           ),
 
-          const SizedBox(height: 24),
+          kGap24,
 
           // Help & Support
           _buildSettingsSection(
@@ -693,7 +884,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
             ],
           ),
 
-          const SizedBox(height: 24),
+          kGap24,
 
           // Account Settings
           _buildSettingsSection(
@@ -702,23 +893,17 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
               _buildActionButton(
                 "Notifications",
                 FontAwesomeIcons.bell,
-                onTap: () {
-                  // Navigate to notifications settings
-                },
+                onTap: () => _editSettings('notifications'),
               ),
               _buildActionButton(
                 "App Preferences",
                 FontAwesomeIcons.sliders,
-                onTap: () {
-                  // Navigate to app preferences
-                },
+                onTap: () => _editSettings('preferences'),
               ),
               _buildActionButton(
                 "Security",
                 FontAwesomeIcons.lock,
-                onTap: () {
-                  // Navigate to security settings
-                },
+                onTap: () => _editSettings('security'),
               ),
               _buildActionButton(
                 "Sign Out",
@@ -798,9 +983,9 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 8),
+        kGap8,
         CustomBase(
-          shadow: false,
+          padding: kPaddH20V10,
           child: Column(
             children: [...children],
           ),
@@ -821,7 +1006,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
             color: MyColors.textBlack,
           ),
         ),
-        const SizedBox(height: 8),
+        kGap8,
         CustomBase(
           shadow: false,
           child: Column(
@@ -846,6 +1031,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
     List<String>? dropdownItems,
     String? selectedValue,
     void Function(String?)? onDropdownChanged,
+    TextInputType? keyboardType,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -859,7 +1045,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 8),
+          kGap8,
           if (isEditing && isEditable)
             if (isDropdown && dropdownItems != null)
               Container(
@@ -867,16 +1053,22 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey.shade300),
                   borderRadius: BorderRadius.circular(12),
+                  color: Colors.grey.shade50,
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
                     value: selectedValue,
+                    dropdownColor: Colors.white,
                     hint: const Text("Select"),
                     items: dropdownItems.map((String item) {
                       return DropdownMenuItem<String>(
                         value: item,
-                        child: Text(item),
+                        child: Text(item,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: MyColors.textBlack,
+                            )),
                       );
                     }).toList(),
                     onChanged: onDropdownChanged,
@@ -888,24 +1080,16 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
                 onTap: onTap,
                 child: AbsorbPointer(
                   absorbing: onTap != null,
-                  child: TextFormField(
+                  child: CustomInputField(
                     controller: controller,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(icon, color: Colors.grey),
-                      suffixIcon: suffixIcon != null
-                          ? Icon(suffixIcon, color: MyColors.primary)
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: MyColors.primary),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
+                    keyboardType: keyboardType ?? TextInputType.text,
+                    hintText: label,
+                    color: Colors.grey.shade50,
+                    onChanged: (String value) {},
+                    leadingWidget: Icon(
+                      icon,
+                      size: 20,
+                      color: Colors.grey,
                     ),
                   ),
                 ),
@@ -1054,7 +1238,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: SizedBox(
         width: 75,
         child: Column(
           children: [
@@ -1073,7 +1257,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            kGap8,
             Text(
               label,
               style: TextStyle(
@@ -1086,23 +1270,13 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
             if (editController != null)
               SizedBox(
                 height: 40,
-                child: TextFormField(
+                child: CustomInputField(
                   controller: editController,
-                  keyboardType: keyboardType,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 8,
-                    ),
-                    border: const OutlineInputBorder(),
-                    suffixText: suffix,
-                    isDense: true,
-                  ),
+                  keyboardType: keyboardType ?? TextInputType.text,
+                  hintText: label,
+                  height: 35,
+                  color: Colors.grey.shade50,
+                  onChanged: (String value) {},
                 ),
               )
             else
@@ -1216,5 +1390,170 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
       return age - 1;
     }
     return age;
+  }
+
+  void _editSettings(String settingType) {
+    switch (settingType) {
+      case 'notifications':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const NotificationSettingsScreen(),
+          ),
+        );
+        break;
+      case 'preferences':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const AppPreferencesScreen(),
+          ),
+        );
+        break;
+      case 'security':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const SecuritySettingsScreen(),
+          ),
+        );
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _showSettingsEditor(String title, List<Widget> settings) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+                const Divider(),
+                ...settings,
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("CANCEL"),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Settings updated successfully"),
+                            backgroundColor: Colors.green,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: MyColors.primary,
+                      ),
+                      child: const Text("SAVE"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildToggleSetting(String label, bool initialValue) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        bool value = initialValue;
+        return SwitchListTile(
+          title: Text(label),
+          value: value,
+          onChanged: (newValue) {
+            setState(() {
+              value = newValue;
+            });
+          },
+          activeColor: MyColors.primary,
+        );
+      },
+    );
+  }
+
+  Widget _buildDropdownSetting(
+      String label, String initialValue, List<String> options) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        String value = initialValue;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: value,
+                    items: options.map((String item) {
+                      return DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(item),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

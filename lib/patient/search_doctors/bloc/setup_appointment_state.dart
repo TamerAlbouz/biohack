@@ -38,7 +38,7 @@ class SetupAppointmentState extends Equatable {
   final int bufferTime;
 
   // Doctor Service Information
-  final List<DoctorService> doctorServices;
+  final List<Service> doctorServices;
   final ServiceAvailability? selectedServiceAvailability;
 
   // Doctor Settings
@@ -143,7 +143,7 @@ class SetupAppointmentState extends Equatable {
     int? bufferTime,
 
     // Doctor service
-    List<DoctorService>? doctorServices,
+    List<Service>? doctorServices,
     ServiceAvailability? selectedServiceAvailability,
 
     // Doctor settings

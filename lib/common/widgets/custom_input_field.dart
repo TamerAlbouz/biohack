@@ -22,7 +22,12 @@ class CustomInputField extends StatefulWidget {
   final int? maxLength;
   final int maxLines; // Added maxLines property
   final bool showPasswordToggle;
+  final Color? color;
+  final bool readOnly;
   final TextCapitalization textCapitalization;
+
+  // validator
+  final String? Function(String?)? validator;
 
   const CustomInputField({
     super.key,
@@ -39,8 +44,11 @@ class CustomInputField extends StatefulWidget {
     this.inputFormatters,
     this.obscureText = false,
     this.maxLength,
+    this.color,
+    this.validator,
     this.maxLines = 1, // Default value set to 1
     this.showPasswordToggle = false,
+    this.readOnly = false,
     this.textCapitalization = TextCapitalization.none,
   });
 
@@ -81,7 +89,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
         Container(
           decoration: BoxDecoration(
             borderRadius: widget.borderRadius ?? kRadius10,
-            color: MyColors.textField,
+            color: widget.color ?? MyColors.textField,
           ),
           // make padding dependent on the max lines. make a formula for this
           padding: widget.maxLines == 1
@@ -93,6 +101,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
             children: [
               Expanded(
                 child: TextFormField(
+                  readOnly: widget.readOnly,
                   textCapitalization: widget.textCapitalization,
                   controller: widget.controller,
                   onChanged: widget.onChanged,
@@ -100,18 +109,17 @@ class _CustomInputFieldState extends State<CustomInputField> {
                   obscureText: _isObscured,
                   maxLength: widget.maxLength,
                   maxLines: widget.maxLines,
-                  // Pass maxLines to TextFormField
                   inputFormatters: widget.inputFormatters,
                   cursorColor: MyColors.primaryLight,
+                  validator: widget.validator,
+                  // Added validator function
                   style: const TextStyle(
                     color: MyColors.textBlack,
                     fontSize: Font.small,
                   ),
                   decoration: InputDecoration(
-                    // remove underline
                     border: InputBorder.none,
                     counterText: '',
-                    // Hide max length counter
                     hintText: widget.hintText,
                     icon: widget.leadingWidget,
                     hintStyle: kButtonHint,

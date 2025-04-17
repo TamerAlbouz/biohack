@@ -10,6 +10,7 @@ import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/patient/search_doctors/bloc/setup_appointment_bloc.dart';
 import 'package:medtalk/patient/search_doctors/screens/appointment_confirmed_screen.dart';
+import 'package:medtalk/patient/search_doctors/screens/setup_appointments/view_doctor_profile.dart';
 import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widgets/improved_date_time.dart';
 import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widgets/improved_doctor_profile.dart';
 import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widgets/improved_service_selection.dart';
@@ -20,7 +21,6 @@ import 'package:medtalk/styles/styles/button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../common/widgets/dummy/profile_picture.dart';
-import '../../../../doctor/design/models/design_models.dart';
 import '../../../../styles/colors.dart';
 import '../../../../styles/font.dart';
 import '../../../../styles/sizes.dart';
@@ -124,6 +124,7 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
         appointmentRepository: getIt<IAppointmentRepository>(),
         authenticationRepository: getIt<IAuthenticationRepository>(),
         doctorRepository: getIt<IDoctorRepository>(),
+        patientRepository: getIt<IPatientRepository>(),
       )..add(LoadInitialData(
           widget.doctorId,
           widget.specialty,
@@ -242,10 +243,10 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
           // Doctor profile skeleton
           _buildDoctorProfileSkeleton(),
 
-          kGap30,
-
-          // Biography skeleton
-          _buildBiographySkeleton(),
+          // kGap30,
+          //
+          // // Biography skeleton
+          // _buildBiographySkeleton(),
 
           kGap30,
 
@@ -346,57 +347,6 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildBiographySkeleton() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Section title skeleton
-        Container(
-          width: 100,
-          height: 20,
-          decoration: BoxDecoration(
-            color: Colors.grey[200],
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ),
-
-        kGap16,
-
-        // Biography paragraph skeletons
-
-        CustomBase(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (int i = 0; i < 3; i++) ...[
-                Container(
-                  width: double.infinity,
-                  height: 14,
-                  margin: const EdgeInsets.only(bottom: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ],
-              Container(
-                width: MediaQuery.of(AppGlobal.navigatorKey.currentContext!)
-                        .size
-                        .width *
-                    0.7,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -788,7 +738,13 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
               specialty: widget.specialty,
               reviewCount: state.doctorReviews.length,
               onViewProfileTap: () {
-                // show bottom sheet with info such as qualificans and age and ...
+                AppGlobal.navigatorKey.currentState!.push(
+                  ViewDoctorProfileScreen.route(
+                    doctorId: widget.doctorId,
+                    doctorName: widget.doctorName,
+                    specialty: widget.specialty,
+                  ),
+                );
               },
             ),
           ),
@@ -797,33 +753,33 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
             child: kGap30,
           ),
 
-          // Biography section
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Biography',
-                  style: kSectionTitle,
-                ),
-                kGap16,
-                CustomBase(
-                  child: Text(
-                    state.doctorBiography ?? 'No biography available.',
-                    style: const TextStyle(
-                      fontSize: Font.small,
-                      color: MyColors.textBlack,
-                      height: 1.5,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SliverToBoxAdapter(
-            child: kGap30,
-          ),
+          // // Biography section
+          // SliverToBoxAdapter(
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       const Text(
+          //         'Biography',
+          //         style: kSectionTitle,
+          //       ),
+          //       kGap16,
+          //       CustomBase(
+          //         child: Text(
+          //           state.doctorBiography ?? 'No biography available.',
+          //           style: const TextStyle(
+          //             fontSize: Font.small,
+          //             color: MyColors.textBlack,
+          //             height: 1.5,
+          //           ),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+          //
+          // const SliverToBoxAdapter(
+          //   child: kGap30,
+          // ),
 
           // Services section
           SliverToBoxAdapter(
@@ -881,7 +837,7 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
     );
   }
 
-  Widget _buildServiceCard(DoctorService service) {
+  Widget _buildServiceCard(Service service) {
     String durationText = '';
     if (service.duration < 60) {
       durationText = '${service.duration} mins';
@@ -899,7 +855,7 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
 
     // Check if this service has custom availability
     bool hasCustomAvailability =
-        service.id == '3'; // This is mocked in the bloc for service id '3'
+        service.uid == '3'; // This is mocked in the bloc for service id '3'
 
     return CustomBase(
       child: Column(
@@ -1045,10 +1001,10 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
           ),
 
           // Service description
-          if (service.description.isNotEmpty) ...[
+          if (service.description!.isNotEmpty) ...[
             kGap12,
             Text(
-              service.description,
+              service.description!,
               style: TextStyle(
                 fontSize: Font.small,
                 color: Colors.grey[600],
@@ -2532,7 +2488,7 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
         title: service.title,
         subtitle: durationText,
         price: service.price,
-        value: service.id,
+        value: service.uid,
         description: service.description,
         hasInPerson: service.isInPerson,
         hasOnline: service.isOnline,

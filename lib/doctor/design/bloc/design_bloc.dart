@@ -1,92 +1,20 @@
 // BLoC
+import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:medtalk/doctor/design/bloc/design_event.dart';
 import 'package:medtalk/doctor/design/bloc/design_state.dart';
 
-import '../models/design_models.dart';
-
 class DesignBloc extends Bloc<DesignEvent, DesignState> {
-  DesignBloc()
-      : super(const DesignState(
+  DesignBloc({
+    required IAuthenticationRepository authenticationRepository,
+    required IDoctorRepository doctorRepository,
+  })  : _authenticationRepository = authenticationRepository,
+        _doctorRepository = doctorRepository,
+        super(const DesignState(
           // Initialize with default services
-          services: [
-            DoctorService(
-              id: '1',
-              title: 'Consultation',
-              duration: 30,
-              price: 50,
-              isOnline: true,
-              isInPerson: true,
-            ),
-            DoctorService(
-              id: '2',
-              title: 'Treatment',
-              duration: 60,
-              price: 100,
-              isInPerson: true,
-              isHomeVisit: true,
-              isOnline: true,
-            ),
-            DoctorService(
-              id: '3',
-              title: 'Checkup',
-              duration: 15,
-              price: 30,
-              isOnline: true,
-              isInPerson: true,
-            ),
-          ],
+          services: [],
           // Initialize with default schedule
-          schedule: {
-            'Monday': WorkingHours(
-              isWorking: true,
-              startTime: '09:00 AM',
-              endTime: '05:00 PM',
-              breaks: [
-                BreakTime(
-                  title: 'Lunch Break',
-                  startTime: '12:00 PM',
-                  endTime: '01:00 PM',
-                ),
-              ],
-            ),
-            'Tuesday': WorkingHours(
-              isWorking: true,
-              startTime: '09:00 AM',
-              endTime: '05:00 PM',
-              breaks: [],
-            ),
-            'Wednesday': WorkingHours(
-              isWorking: true,
-              startTime: '09:00 AM',
-              endTime: '05:00 PM',
-              breaks: [],
-            ),
-            'Thursday': WorkingHours(
-              isWorking: true,
-              startTime: '09:00 AM',
-              endTime: '05:00 PM',
-              breaks: [],
-            ),
-            'Friday': WorkingHours(
-              isWorking: true,
-              startTime: '09:00 AM',
-              endTime: '05:00 PM',
-              breaks: [],
-            ),
-            'Saturday': WorkingHours(
-              isWorking: false,
-              startTime: '09:00 AM',
-              endTime: '01:00 PM',
-              breaks: [],
-            ),
-            'Sunday': WorkingHours(
-              isWorking: false,
-              startTime: '09:00 AM',
-              endTime: '01:00 PM',
-              breaks: [],
-            ),
-          },
+          schedule: {},
         )) {
     on<LoadDoctorProfile>(_onLoadDoctorProfile);
     on<SaveDoctorProfile>(_onSaveDoctorProfile);
@@ -98,6 +26,9 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
     on<UpdateSettings>(_onUpdateSettings);
   }
 
+  final IAuthenticationRepository _authenticationRepository;
+  final IDoctorRepository _doctorRepository;
+
   Future<void> _onLoadDoctorProfile(
     LoadDoctorProfile event,
     Emitter<DesignState> emit,
@@ -105,9 +36,18 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
     emit(state.copyWith(isLoading: true));
 
     try {
-      // Here we would fetch doctor profile from API or repository
-      // For now, we'll just simulate a delay
-      await Future.delayed(const Duration(milliseconds: 500));
+      var docId = _authenticationRepository.currentUser.uid;
+
+      // Fetch doctor profile from repository
+      final Doctor? doctorProfile = await _doctorRepository.getDoctor(docId);
+
+      if (doctorProfile == null) {
+        emit(state.copyWith(
+          errorMessage: 'Doctor profile not found',
+          isLoading: false,
+        ));
+        return;
+      }
 
       // Initialize schedule with default values if empty
       Map<String, WorkingHours> initialSchedule = {};
@@ -121,22 +61,37 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
         'Sun'
       ];
 
-      for (final day in days) {
-        // Default weekdays (Mon-Fri) as working days
-        final isWeekday = days.indexOf(day) < 5;
-        initialSchedule[day] = WorkingHours(
-          isWorking: isWeekday,
-          startTime: '09:00',
-          endTime: '17:00',
-          breaks: isWeekday
-              ? [
-                  const BreakTime(
-                      title: 'Lunch Break',
-                      startTime: '12:00',
-                      endTime: '13:00')
-                ]
-              : [],
-        );
+      if (doctorProfile.availability.isNotEmpty) {
+        // Use existing availability if available
+        initialSchedule =
+            doctorProfile.availability.map((day, workAndBreakTimes) {
+          // map the workTimes and breakTimes to WorkingHours
+          return MapEntry(
+              day,
+              WorkingHours(
+                isWorking: true,
+                startTime: workAndBreakTimes?.startTime ?? '09:00',
+                endTime: workAndBreakTimes?.endTime ?? '17:00',
+                breaks: workAndBreakTimes?.breaks
+                        .map((breakTime) => BreakTime(
+                              startTime: workAndBreakTimes.startTime,
+                              endTime: workAndBreakTimes.endTime,
+                              title: breakTime.title,
+                            ))
+                        .toList() ??
+                    [],
+              ));
+        });
+      } else {
+        // Initialize with default values
+        for (final day in days) {
+          initialSchedule[day] = const WorkingHours(
+            isWorking: false,
+            startTime: '09:00',
+            endTime: '17:00',
+            breaks: [],
+          );
+        }
       }
 
       // Update state with fetched profile (using default values for now)
@@ -147,6 +102,7 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
         address: '1234 Clinic St, Portland, OR 97205',
         notes: 'Free parking available in the back',
         isLoading: false,
+        services: doctorProfile.services ?? [],
         schedule: initialSchedule,
       ));
     } catch (e) {
@@ -190,8 +146,8 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
     Emitter<DesignState> emit,
   ) async {
     // Create new service
-    final newService = DoctorService(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+    final newService = Service(
+      uid: DateTime.now().millisecondsSinceEpoch.toString(),
       title: event.title,
       duration: event.duration,
       price: event.price,
@@ -201,8 +157,7 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
     );
 
     // Add to existing services
-    final updatedServices = List<DoctorService>.from(state.services)
-      ..add(newService);
+    final updatedServices = List<Service>.from(state.services)..add(newService);
 
     emit(state.copyWith(services: updatedServices));
   }
@@ -212,9 +167,9 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
     Emitter<DesignState> emit,
   ) async {
     // Update existing service
-    final List<DoctorService> updatedServices =
-        state.services.map<DoctorService>((service) {
-      if (service.id == event.id) {
+    final List<Service> updatedServices =
+        state.services.map<Service>((Service service) {
+      if (service.uid == event.id) {
         return service.copyWith(
           title: event.title,
           duration: event.duration,
@@ -235,8 +190,9 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
     Emitter<DesignState> emit,
   ) async {
     // Remove service by ID
-    final updatedServices =
-        state.services.where((service) => service.id != event.id).toList();
+    final updatedServices = state.services
+        .where((Service service) => service.uid != event.id)
+        .toList();
 
     emit(state.copyWith(services: updatedServices));
   }

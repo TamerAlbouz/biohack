@@ -1,23 +1,23 @@
-import 'package:dotted_line/dotted_line.dart';
+import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
-import 'package:medtalk/common/widgets/dividers/card_divider.dart';
+import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/common/widgets/dummy/profile_picture.dart';
+import 'package:medtalk/common/widgets/show_model_sheet.dart';
 import 'package:medtalk/doctor/design/bloc/design_bloc.dart';
 import 'package:medtalk/doctor/design/bloc/design_state.dart';
 import 'package:medtalk/doctor/design/screens/service_editor.dart';
 import 'package:medtalk/styles/colors.dart';
-import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
 import 'package:medtalk/styles/styles/button.dart';
 import 'package:medtalk/styles/styles/text.dart';
 
 import '../../../common/widgets/themes/time_picker.dart';
+import '../../../styles/font.dart';
 import '../bloc/design_event.dart';
-import '../models/design_models.dart';
 
 class DesignScreen extends StatefulWidget {
   const DesignScreen({super.key});
@@ -32,7 +32,8 @@ class DesignScreen extends StatefulWidget {
   State<DesignScreen> createState() => _DesignScreenState();
 }
 
-class _DesignScreenState extends State<DesignScreen> {
+class _DesignScreenState extends State<DesignScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
@@ -63,11 +64,20 @@ class _DesignScreenState extends State<DesignScreen> {
 
   late final PageController _pageController;
   int _currentPage = 0;
+  bool _isPageChanging = false;
+  late final AnimationController _animationController;
+
+  // For scrolling behavior
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
 
     // Initialize default schedule for all days
     for (final day in _workingDaysTitles) {
@@ -94,7 +104,7 @@ class _DesignScreenState extends State<DesignScreen> {
     _notesController.text = 'Free parking available in the back';
   }
 
-// Helper methods to get current day's schedule settings
+  // Helper methods to get current day's schedule settings
   bool get _isWorkingDay =>
       _scheduleMap[_workingDaysTitles[_selectedDayIndex]]?.isWorking ?? false;
 
@@ -107,7 +117,7 @@ class _DesignScreenState extends State<DesignScreen> {
   List<BreakTime> get _breaks =>
       _scheduleMap[_workingDaysTitles[_selectedDayIndex]]?.breaks ?? [];
 
-// Update the setters for these properties
+  // Update the setters for these properties
   void _setWorkingDay(bool value) {
     final day = _workingDaysTitles[_selectedDayIndex];
     final current = _scheduleMap[day]!;
@@ -178,6 +188,34 @@ class _DesignScreenState extends State<DesignScreen> {
     });
   }
 
+  void _animateToPage(int page) {
+    setState(() {
+      _isPageChanging = true;
+      _currentPage = page;
+    });
+
+    _pageController
+        .animateToPage(
+      page,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOutCubic,
+    )
+        .then((_) {
+      setState(() {
+        _isPageChanging = false;
+      });
+    });
+
+    // Scroll to top when changing pages
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+  }
+
   @override
   void dispose() {
     _bioController.dispose();
@@ -185,39 +223,52 @@ class _DesignScreenState extends State<DesignScreen> {
     _addressController.dispose();
     _notesController.dispose();
     _pageController.dispose();
+    _animationController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DesignBloc()..add(LoadDoctorProfile()),
-      child: Scaffold(
-        body: CustomBase(
-          roundCorners: false,
-          child: BlocBuilder<DesignBloc, DesignState>(
+      create: (context) => DesignBloc(
+          authenticationRepository: getIt<IAuthenticationRepository>(),
+          doctorRepository: getIt<IDoctorRepository>())
+        ..add(LoadDoctorProfile()),
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        // Dismiss keyboard on tap outside
+        child: Scaffold(
+          backgroundColor: MyColors.background,
+          body: BlocBuilder<DesignBloc, DesignState>(
             builder: (context, state) {
-              return Padding(
-                padding: kPaddT40,
+              return SafeArea(
                 child: Column(
                   children: [
-                    // Navigation tabs
-                    Container(
-                      margin: kPaddB15,
-                      decoration: BoxDecoration(
-                        color: MyColors.blueGrey,
-                        borderRadius: kRadius12,
-                      ),
-                      child: Row(
-                        children: [
-                          _buildNavTab(
-                              0, 'Profile', FontAwesomeIcons.userDoctor),
-                          _buildNavTab(
-                              1, 'Services', FontAwesomeIcons.kitMedical),
-                          _buildNavTab(
-                              2, 'Schedule', FontAwesomeIcons.calendar),
-                          _buildNavTab(3, 'Settings', FontAwesomeIcons.gear),
-                        ],
+                    // Header with page title
+                    _buildHeader(state),
+
+                    kGap10,
+                    // Navigation tabs with improved design
+                    Padding(
+                      padding: kPaddH20,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: MyColors.blueGrey.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        padding: const EdgeInsets.all(6),
+                        child: Row(
+                          children: [
+                            _buildNavTab(
+                                0, 'Profile', FontAwesomeIcons.userDoctor),
+                            _buildNavTab(
+                                1, 'Services', FontAwesomeIcons.kitMedical),
+                            _buildNavTab(
+                                2, 'Schedule', FontAwesomeIcons.calendar),
+                            _buildNavTab(3, 'Settings', FontAwesomeIcons.gear),
+                          ],
+                        ),
                       ),
                     ),
 
@@ -225,6 +276,8 @@ class _DesignScreenState extends State<DesignScreen> {
                     Expanded(
                       child: PageView(
                         controller: _pageController,
+                        physics: const NeverScrollableScrollPhysics(),
+                        // Disable swiping between pages
                         onPageChanged: (index) {
                           setState(() {
                             _currentPage = index;
@@ -239,49 +292,8 @@ class _DesignScreenState extends State<DesignScreen> {
                       ),
                     ),
 
-                    // Save button
-                    Padding(
-                      padding: kPaddT15,
-                      child: ElevatedButton(
-                        // Update the SaveDoctorProfile event call in the Save button's onPressed callback
-                        onPressed: () {
-                          // Save profile changes
-                          context.read<DesignBloc>().add(SaveDoctorProfile(
-                                // Profile data
-                                bio: _bioController.text,
-                                phone: _phoneController.text,
-                                address: _addressController.text,
-                                notes: _notesController.text,
-
-                                // Schedule data
-                                schedule: _scheduleMap,
-                                // slotDuration: _slotDuration,
-                                // bufferTime: _bufferTime,
-                                //
-                                // // Settings data
-                                // advanceNotice: _advanceNotice,
-                                // bookingWindow: _bookingWindow,
-                                // autoConfirmation: _autoConfirmation,
-                                // sendReminders: _sendReminders,
-                                // reminder24h: _reminder24h,
-                                // reminder1h: _reminder1h,
-                                // customReminders: _customReminders,
-                                // acceptCreditCard: _acceptCreditCard,
-                                // acceptCash: _acceptCash,
-                                // acceptInsurance: _acceptInsurance,
-                                // cancellationPolicy: _cancellationPolicy,
-                              ));
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text(
-                                    'Profile and settings saved successfully')),
-                          );
-                        },
-                        style: kElevatedButtonCommonStyle,
-                        child: const Text('Save Changes'),
-                      ),
-                    ),
+                    // Save button - fixed at bottom
+                    _buildSaveButton(context),
                   ],
                 ),
               );
@@ -292,42 +304,124 @@ class _DesignScreenState extends State<DesignScreen> {
     );
   }
 
+  Widget _buildHeader(DesignState state) {
+    return Padding(
+      padding: kPaddH20,
+      child: Row(
+        children: [
+          Text(
+            _getPageTitle(),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: MyColors.textBlack,
+            ),
+          ),
+          const Spacer(),
+          // Progress indicator
+          Container(
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: MyColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _getSaveIcon(),
+                  size: 14,
+                  color: MyColors.primary,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _getSaveText(),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: MyColors.primary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getPageTitle() {
+    switch (_currentPage) {
+      case 0:
+        return 'Doctor Profile';
+      case 1:
+        return 'Your Services';
+      case 2:
+        return 'Schedule';
+      case 3:
+        return 'Settings';
+      default:
+        return 'Profile Setup';
+    }
+  }
+
+  IconData _getSaveIcon() {
+    return _currentPage < 3 ? Icons.edit : Icons.check_circle;
+  }
+
+  String _getSaveText() {
+    return _currentPage < 3 ? 'Editing' : 'Final Step';
+  }
+
   Widget _buildNavTab(int index, String title, IconData icon) {
     bool isSelected = _currentPage == index;
+
+    // Calculate animation values
+    final isAnimating = _isPageChanging && _currentPage == index;
+    final bgColor = isSelected ? MyColors.primary : Colors.transparent;
+    final textColor = isSelected ? Colors.white : MyColors.textGrey;
+    final iconColor =
+        isSelected ? Colors.white : MyColors.primary.withValues(alpha: 0.7);
 
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
+          if (!isSelected) {
+            _animateToPage(index);
+          }
         },
-        child: Container(
-          padding: kPaddT12B8,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? MyColors.primary : Colors.transparent,
-            borderRadius: kRadius12,
+            color: bgColor,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: MyColors.primary.withValues(alpha: 0.3),
+                      blurRadius: isAnimating ? 8 : 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               FaIcon(
                 icon,
-                color: isSelected
-                    ? Colors.white
-                    : MyColors.primary.withValues(alpha: 0.7),
+                color: iconColor,
                 size: 16,
               ),
-              const SizedBox(height: 4),
+              kGap6,
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: Font.extraSmall,
-                  color: isSelected
-                      ? Colors.white
-                      : MyColors.primary.withValues(alpha: 0.7),
+                  fontSize: 12,
+                  color: textColor,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
@@ -339,286 +433,155 @@ class _DesignScreenState extends State<DesignScreen> {
   }
 
   Widget _buildProfilePage(BuildContext context, DesignState state) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          kGap4,
-          Row(
-            children: [
-              const ProfilePicture(
-                height: 70,
-                width: 70,
+    return CustomScrollView(
+      controller: _scrollController,
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: kPadd20,
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              // Profile card with shadow
+              _buildProfileCard(),
+
+              kGap20,
+
+              // Biography section
+              _buildSectionHeading('Biography'),
+              kGap10,
+              _buildTextArea(
+                controller: _bioController,
+                hintText: 'Tell patients about your experience and expertise',
+                maxLines: 5,
               ),
+              kGap24,
+
+              // Qualifications section
+              _buildSectionHeading('Qualifications & Experience'),
+              kGap12,
+              ...List.generate(3, (index) {
+                final qualifications = [
+                  {
+                    'title': 'MD, Stanford University School of Medicine',
+                    'subtitle': '2010 - 2014'
+                  },
+                  {
+                    'title': 'Residency, UCSF Medical Center',
+                    'subtitle': '2014 - 2017'
+                  },
+                  {
+                    'title':
+                        'Board Certification, American Board of Medical Specialties',
+                    'subtitle': '2018'
+                  },
+                ];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: _buildQualificationItem(
+                    qualifications[index]['title']!,
+                    qualifications[index]['subtitle']!,
+                    isEditable: true,
+                  ),
+                );
+              }),
+
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // Add new qualification
+                  },
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Qualification',
+                      style: TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: Font.small)),
+                  style: kElevatedButtonCommonStyleOutlined,
+                ),
+              ),
+
+              kGap24,
+
+              // Clinic details section
+              _buildSectionHeading('Clinic Details'),
+              kGap12,
+              _buildMapContainer(),
               kGap16,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      // state.patient.name ?? 'Unknown Doctor',
-                      'Dr. John Doe',
-                      style: TextStyle(
-                        fontSize: Font.mediumSmall,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Text(
-                      // '${state.patient.speciality} • ${_calculateAge(state.patient.dateOfBirth)} yrs • ${state.patient.sex}',
-                      'Dentist • 29 yrs • Male',
-                      style: TextStyle(
-                        color: MyColors.textGrey,
-                        fontSize: Font.extraSmall,
-                      ),
-                    ),
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        // Upload new photo
-                      },
-                      icon: const FaIcon(FontAwesomeIcons.camera,
-                          size: 14, color: MyColors.primary),
-                      label: const Text('Update Photo',
-                          style: TextStyle(
-                              fontSize: Font.extraSmall,
-                              color: MyColors.primary)),
-                      style: OutlinedButton.styleFrom(
-                        padding: kPaddH10V4,
-                        minimumSize: Size.zero,
-                        side: const BorderSide(
-                          color: MyColors.primary,
-                        ),
-                        textStyle: const TextStyle(
-                            fontSize: Font.extraSmall, color: MyColors.primary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+
+              // Contact information
+              _buildContactFields(),
+
+              kGap20,
+            ]),
           ),
+        ),
+      ],
+    );
+  }
 
-          const CardDivider(),
-
-          // Biography
-          const Text('Biography', style: kSectionTitle),
-          kGap10,
-          TextField(
-            controller: _bioController,
-            style: const TextStyle(
-              fontSize: Font.small,
-              color: MyColors.textBlack,
-            ),
-            decoration: InputDecoration(
-              enabledBorder: OutlineInputBorder(
-                borderSide: const BorderSide(
-                  color: MyColors.softStroke,
-                ),
-                borderRadius: kRadius6,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(
-                  color: MyColors.primary,
-                ),
-                borderRadius: kRadius6,
-              ),
-              border: OutlineInputBorder(
-                borderSide: const BorderSide(
-                  color: MyColors.softStroke,
-                ),
-                borderRadius: kRadius6,
-              ),
-              hintText: 'Tell patients about your experience and expertise',
-              contentPadding: kPadd10,
-              hintStyle: const TextStyle(
-                color: MyColors.textGrey,
-                fontSize: Font.small,
-              ),
-            ),
-            maxLines: 5,
-          ),
-          kGap8,
-
-          const CardDivider(),
-
-          // Qualifications
-          const Text('Qualifications & Experience', style: kSectionTitle),
-          kGap10,
-          _buildQualificationItem(
-            'MD, Stanford University School of Medicine',
-            '2010 - 2014',
-            isEditable: true,
-          ),
-          kGap10,
-          _buildQualificationItem(
-            'Residency, UCSF Medical Center',
-            '2014 - 2017',
-            isEditable: true,
-          ),
-          kGap10,
-          _buildQualificationItem(
-            'Board Certification, American Board of Medical Specialties',
-            '2018',
-            isEditable: true,
-          ),
-          kGap14,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () {
-                  // Add new qualification
-                },
-                icon: const Icon(Icons.add, size: 20),
-                label: const Text('Add Qualification',
-                    style: TextStyle(
-                      fontSize: Font.small,
-                      color: MyColors.primary,
-                    )),
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: MyColors.primary,
-                  elevation: 0,
-                  side: const BorderSide(
-                    color: MyColors.primary,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: kRadius10,
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          const CardDivider(),
-
-          // Clinic details
-          const Text('Clinic Details', style: kSectionTitle),
-          kGap14,
-
-          // Map location
+  Widget _buildProfileCard() {
+    return CustomBase(
+      child: Row(
+        children: [
+          // Profile image with border
           Container(
-            height: 175,
-            width: double.infinity,
             decoration: BoxDecoration(
-              border: Border.all(color: MyColors.grey, width: 1.5),
-              borderRadius: kRadius10,
+              shape: BoxShape.circle,
+              border: Border.all(color: MyColors.primary, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: MyColors.primary.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                  spreadRadius: 2,
+                ),
+              ],
             ),
-            child: ClipRRect(
-              borderRadius: kRadius10,
-              child: Stack(
-                children: [
-                  const GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(45.521563, -122.677433),
-                      zoom: 14.0,
+            child: const ProfilePicture(
+              height: 80,
+              width: 80,
+            ),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Dr. John Doe',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                kGap4,
+                const Text(
+                  'Dentist • 29 yrs • Male',
+                  style: TextStyle(
+                    color: MyColors.textGrey,
+                    fontSize: 14,
+                  ),
+                ),
+                kGap10,
+                OutlinedButton.icon(
+                  onPressed: () {
+                    // Upload new photo
+                  },
+                  icon: const FaIcon(FontAwesomeIcons.camera,
+                      size: 14, color: MyColors.primary),
+                  label: const Text('Update Photo',
+                      style: TextStyle(
+                        fontSize: Font.small,
+                        color: MyColors.primary,
+                      )),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: MyColors.primary,
+                    side: const BorderSide(color: MyColors.primary),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  Positioned(
-                    right: 10,
-                    bottom: 10,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Update map location
-                      },
-                      icon: const Icon(Icons.edit_location_alt, size: 16),
-                      label: const Text('Update'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: MyColors.primary,
-                        padding: kPaddH8V4,
-                        textStyle: const TextStyle(fontSize: Font.extraSmall),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          kGap10,
-
-          // Phone
-          TextField(
-            style: const TextStyle(
-              fontSize: Font.small,
-              color: MyColors.textBlack,
-            ),
-            controller: _phoneController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: kPaddH10V8,
-              hintText: 'Phone number',
-              hintStyle: TextStyle(
-                color: MyColors.textGrey,
-                fontSize: Font.small,
-                fontWeight: FontWeight.w400,
-              ),
-              prefixIcon: Padding(
-                padding: EdgeInsets.only(left: 15),
-                child: FaIcon(
-                  FontAwesomeIcons.phone,
-                  color: MyColors.primary,
-                  size: 16,
                 ),
-              ),
-              prefixIconConstraints: BoxConstraints(minWidth: 40),
-            ),
-          ),
-          kGap10,
-
-          // Address
-          TextField(
-            style: const TextStyle(
-              fontSize: Font.small,
-              color: MyColors.textBlack,
-            ),
-            controller: _addressController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: kPaddH10V8,
-              hintText: 'Clinic address',
-              hintStyle: TextStyle(
-                color: MyColors.textGrey,
-                fontSize: Font.small,
-                fontWeight: FontWeight.w400,
-              ),
-              prefixIcon: Padding(
-                padding: EdgeInsets.only(left: 15),
-                child: FaIcon(
-                  FontAwesomeIcons.mapLocation,
-                  color: MyColors.primary,
-                  size: 16,
-                ),
-              ),
-              prefixIconConstraints: BoxConstraints(minWidth: 40),
-            ),
-          ),
-          kGap10,
-
-          // Additional notes
-          TextField(
-            style: const TextStyle(
-              fontSize: Font.small,
-              color: MyColors.textBlack,
-            ),
-            controller: _notesController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              contentPadding: kPaddH10V8,
-              hintText: 'Additional notes (parking, access, etc.)',
-              hintStyle: TextStyle(
-                color: MyColors.textGrey,
-                fontSize: Font.small,
-                fontWeight: FontWeight.w400,
-              ),
-              prefixIcon: Padding(
-                padding: EdgeInsets.only(left: 15),
-                child: FaIcon(
-                  FontAwesomeIcons.circleInfo,
-                  color: MyColors.primary,
-                  size: 16,
-                ),
-              ),
-              prefixIconConstraints: BoxConstraints(minWidth: 40),
+              ],
             ),
           ),
         ],
@@ -626,111 +589,277 @@ class _DesignScreenState extends State<DesignScreen> {
     );
   }
 
-  Widget _buildServicesPage(BuildContext context, DesignState state) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text('Your Services', style: kSectionTitle),
-          ],
-        ),
-        kGap10,
+  Widget _buildSectionHeading(String title) {
+    return Text(
+      title,
+      style: kSectionTitle,
+    );
+  }
 
-        // Services list
-        if (state.services.isEmpty)
-          _buildEmptyServicesList()
-        else
-          Container(
-            padding: kPaddH15T2B6,
-            decoration: BoxDecoration(
-              color: MyColors.cardBackground,
-              borderRadius: kRadius12,
-              border: Border.all(color: MyColors.softStroke),
-            ),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: EdgeInsets.zero,
-              // Add this line
-              itemCount: state.services.length,
-              separatorBuilder: (context, index) => const DottedLine(
-                direction: Axis.horizontal,
-                lineLength: double.infinity,
-                lineThickness: 1,
-                dashLength: 4.0,
-                dashColor: MyColors.softStroke,
+  Widget _buildTextArea({
+    required TextEditingController controller,
+    required String hintText,
+    required int maxLines,
+  }) {
+    return CustomBase(
+      padding: kPadd0,
+      child: TextField(
+        controller: controller,
+        style: const TextStyle(
+          fontSize: 15,
+          color: MyColors.textBlack,
+        ),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: TextStyle(
+            color: MyColors.textGrey.withValues(alpha: 0.7),
+            fontSize: 15,
+          ),
+          contentPadding: const EdgeInsets.all(20),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: MyColors.cardBackground,
+        ),
+        maxLines: maxLines,
+      ),
+    );
+  }
+
+  Widget _buildMapContainer() {
+    return Container(
+      height: 200,
+      decoration: BoxDecoration(
+        border:
+            Border.all(color: MyColors.grey.withValues(alpha: 0.3), width: 1),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: const GoogleMap(
+              initialCameraPosition: CameraPosition(
+                target: LatLng(45.521563, -122.677433),
+                zoom: 14.0,
               ),
-              itemBuilder: (context, index) {
-                final service = state.services[index];
-                return _buildServiceItem(
-                  context: context,
-                  service: service,
-                );
-              },
             ),
           ),
-
-        kGap10,
-
-        OutlinedButton.icon(
-          onPressed: () {
-            _addNewService(context);
-          },
-          icon: const Icon(Icons.add, size: 18),
-          label: const Text('Add Service'),
-          style: OutlinedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            foregroundColor: MyColors.primary,
-            shape: RoundedRectangleBorder(
-              borderRadius: kRadius10,
+          Positioned(
+            right: 12,
+            bottom: 12,
+            child: ElevatedButton.icon(
+              onPressed: () {
+                // Update map location
+              },
+              icon: const Icon(Icons.edit_location_alt, size: 16),
+              label: const Text('Update Location',
+                  style: TextStyle(
+                      fontSize: Font.small, fontWeight: FontWeight.normal)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: MyColors.primary,
+                elevation: 2,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
             ),
-            side: const BorderSide(
-              color: MyColors.primary,
-            ),
-            textStyle: const TextStyle(fontSize: Font.small),
-            padding: kPaddH12V8,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactFields() {
+    return Column(
+      children: [
+        _buildInputField(
+          controller: _phoneController,
+          icon: FontAwesomeIcons.phone,
+          hint: 'Phone number',
+          keyboardType: TextInputType.phone,
+        ),
+        kGap12,
+        _buildInputField(
+          controller: _addressController,
+          icon: FontAwesomeIcons.mapLocation,
+          hint: 'Clinic address',
+          keyboardType: TextInputType.streetAddress,
+        ),
+        kGap12,
+        _buildInputField(
+          controller: _notesController,
+          icon: FontAwesomeIcons.circleInfo,
+          hint: 'Additional notes (parking, access, etc.)',
+          keyboardType: TextInputType.text,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required IconData icon,
+    required String hint,
+    required TextInputType keyboardType,
+  }) {
+    return CustomInputField(
+      controller: controller,
+      keyboardType: keyboardType,
+      hintText: hint,
+      leadingWidget: FaIcon(icon, color: MyColors.primary, size: 20),
+      onChanged: (String) {},
+    );
+  }
+
+  Widget _buildServicesPage(BuildContext context, DesignState state) {
+    return CustomScrollView(
+      controller: _scrollController,
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: kPadd20,
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              // Services illustration
+              if (state.services.isEmpty) _buildServicesIllustration(),
+
+              // Services list
+              if (state.services.isNotEmpty) ...[
+                const Text(
+                  'Your patients can book these services',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: MyColors.textGrey,
+                  ),
+                ),
+                kGap16,
+                CustomBase(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: state.services.length,
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final service = state.services[index];
+                      return _buildServiceItem(
+                        context: context,
+                        service: service,
+                      );
+                    },
+                  ),
+                ),
+              ],
+
+              kGap24,
+
+              // Add service button - made more prominent
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    _addNewService(context);
+                  },
+                  icon: const Icon(Icons.add, size: 20),
+                  label: Text(
+                      state.services.isEmpty
+                          ? 'Add Your First Service'
+                          : 'Add Another Service',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.normal, fontSize: Font.small)),
+                  style: kElevatedButtonCommonStyleOutlined,
+                ),
+              ),
+            ]),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildEmptyServicesList() {
+  Widget _buildServicesIllustration() {
     return Container(
-      padding: kPadd30,
+      padding: const EdgeInsets.all(32),
+      margin: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
-        color: MyColors.blueGrey.withValues(alpha: 0.3),
-        borderRadius: kRadius12,
-        border: Border.all(color: MyColors.softStroke),
+        color: MyColors.cardBackground,
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FaIcon(
-            FontAwesomeIcons.clipboardList,
-            size: 48,
-            color: MyColors.primary.withValues(alpha: 0.5),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: MyColors.primary.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const FaIcon(
+              FontAwesomeIcons.clipboardList,
+              size: 48,
+              color: MyColors.primary,
+            ),
           ),
-          kGap16,
+          kGap24,
           const Text(
             'No Services Added Yet',
             style: TextStyle(
-              fontSize: Font.medium,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: MyColors.textBlack,
             ),
           ),
-          kGap8,
+          kGap12,
           const Text(
-            'Add your first service to start getting appointments',
+            'Define the services you provide to your patients. Each service can have its own duration, price, and appointment type.',
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: Font.small,
+              fontSize: 15,
               color: MyColors.textGrey,
+              height: 1.5,
             ),
+          ),
+          kGap12,
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 16),
+              SizedBox(width: 8),
+              Text('Define prices and duration',
+                  style: TextStyle(fontSize: 14)),
+            ],
+          ),
+          kGap8,
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 16),
+              SizedBox(width: 8),
+              Text('Offer online or in-person visits',
+                  style: TextStyle(fontSize: 14)),
+            ],
+          ),
+          kGap8,
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.check_circle, color: Colors.green, size: 16),
+              SizedBox(width: 8),
+              Text('Set up home visit options', style: TextStyle(fontSize: 14)),
+            ],
           ),
         ],
       ),
@@ -739,206 +868,189 @@ class _DesignScreenState extends State<DesignScreen> {
 
   Widget _buildServiceItem({
     required BuildContext context,
-    required DoctorService service,
+    required Service service,
   }) {
     return InkWell(
       onTap: () {
         _editService(context, service);
       },
-      child: Container(
-        padding: kPaddV10,
-        child: SizedBox(
-          height: 80,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                flex: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      service.title,
-                      style: const TextStyle(
-                        fontSize: Font.smallExtra,
-                        color: MyColors.textBlack,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    kGap4,
-                    Text(
-                      "${service.duration} mins",
-                      style: const TextStyle(
-                        fontSize: Font.extraSmall,
-                        color: MyColors.textGrey,
-                      ),
-                    ),
-                    kGap8,
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      child: Row(
-                        children: [
-                          if (service.isInPerson)
-                            _buildServiceTypeTag(
-                                FontAwesomeIcons.hospitalUser, 'In-Person'),
-                          if (service.isInPerson &&
-                              (service.isOnline || service.isHomeVisit))
-                            kGap4,
-                          if (service.isOnline)
-                            _buildServiceTypeTag(
-                                FontAwesomeIcons.video, 'Online'),
-                          if (service.isOnline && service.isHomeVisit) kGap4,
-                          if (service.isHomeVisit)
-                            _buildServiceTypeTag(
-                                FontAwesomeIcons.house, 'Home Visit'),
-                        ],
-                      ),
-                    ),
-                  ],
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Service icon
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: MyColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  alignment: Alignment.center,
+                  child: const FaIcon(
+                    FontAwesomeIcons.kitMedical,
+                    color: MyColors.primary,
+                    size: 20,
+                  ),
                 ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
+                kGap16,
+
+                // Service details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        service.title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: MyColors.textBlack,
+                        ),
+                      ),
+                      kGap4,
+                      Text(
+                        "${service.duration} mins",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: MyColors.textGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Price and actions
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
                       "\$${service.price.toStringAsFixed(0)}",
                       style: const TextStyle(
-                        fontSize: Font.mediumSmall,
-                        color: MyColors.textBlack,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: MyColors.primary,
                       ),
-                      textAlign: TextAlign.center,
                     ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: MyColors.blueGrey.withValues(alpha: 0.1),
-                            borderRadius: kRadius6,
-                          ),
-                          child: Tooltip(
-                            message: 'Delete service',
-                            child: InkWell(
-                              onTap: () {
-                                // Store bloc reference before showing dialog
-                                final designBloc = context.read<DesignBloc>();
-
-                                showDialog(
-                                  context: context,
-                                  builder: (dialogContext) => AlertDialog(
-                                    title: const Text(
-                                      'Delete Service',
-                                      style: TextStyle(
-                                        fontSize: Font.medium,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    content: RichText(
-                                      text: TextSpan(
-                                        style: const TextStyle(
-                                          fontSize: Font.small,
-                                          color: Colors.black,
-                                        ),
-                                        children: [
-                                          const TextSpan(
-                                              text:
-                                                  'Are you sure you want to delete '),
-                                          TextSpan(
-                                            text: service.title,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          const TextSpan(text: '?'),
-                                        ],
-                                      ),
-                                    ),
-                                    backgroundColor: MyColors.cardBackground,
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(dialogContext),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      ElevatedButton.icon(
-                                        icon: const Icon(Icons.delete_outline,
-                                            size: 16),
-                                        label: const Text('Delete'),
-                                        onPressed: () {
-                                          Navigator.pop(dialogContext);
-                                          // Use the stored bloc reference instead of context.read
-                                          designBloc
-                                              .add(DeleteService(service.id));
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content:
-                                                    Text('Service deleted')),
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: MyColors.buttonRed,
-                                          foregroundColor: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                              borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(6),
-                                bottomRight: Radius.circular(6),
-                              ),
-                              child: const Padding(
-                                padding: kPaddH12V8,
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.delete_outline,
-                                        size: 16, color: MyColors.buttonRed),
-                                    kGap4,
-                                    Text(
-                                      'Delete',
-                                      style: TextStyle(
-                                        fontSize: Font.extraSmall,
-                                        color: MyColors.buttonRed,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                    kGap8,
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline,
+                          color: Colors.red, size: 20),
+                      onPressed: () =>
+                          _showDeleteServiceDialog(context, service),
+                      padding: EdgeInsets.zero,
+                      visualDensity: const VisualDensity(
+                        horizontal: -4,
+                        vertical: -4,
+                      ),
+                      constraints: const BoxConstraints(),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+            kGap6,
+            Wrap(
+              runSpacing: 6,
+              spacing: 4,
+              children: [
+                if (service.isInPerson)
+                  _buildServiceTypeTag(
+                      FontAwesomeIcons.hospitalUser, 'In-Person'),
+                if (service.isInPerson &&
+                    (service.isOnline || service.isHomeVisit))
+                  kGap8,
+                if (service.isOnline)
+                  _buildServiceTypeTag(FontAwesomeIcons.video, 'Online'),
+                if (service.isOnline && service.isHomeVisit) kGap8,
+                if (service.isHomeVisit)
+                  _buildServiceTypeTag(FontAwesomeIcons.house, 'Home Visit'),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-// Helper methods to handle async navigation
+  void _showDeleteServiceDialog(BuildContext context, Service service) {
+    // Store bloc reference before showing dialog
+    final designBloc = context.read<DesignBloc>();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text(
+          'Delete Service',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: RichText(
+          text: TextSpan(
+            style: const TextStyle(
+              fontSize: 15,
+              color: Colors.black,
+            ),
+            children: [
+              const TextSpan(text: 'Are you sure you want to delete '),
+              TextSpan(
+                text: service.title,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const TextSpan(text: '?'),
+            ],
+          ),
+        ),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+            style: TextButton.styleFrom(
+              foregroundColor: MyColors.textGrey,
+            ),
+          ),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.delete_outline, size: 16),
+            label: const Text('Delete'),
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              designBloc.add(DeleteService(service.uid));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Service deleted')),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _addNewService(BuildContext context) async {
     // Store bloc reference before async gap
     final designBloc = context.read<DesignBloc>();
 
     // Navigate to service editor and get result back
-    final result = await Navigator.push<DoctorService?>(
+    final result = await Navigator.push<Service?>(
       context,
       ServiceEditorScreen.route(),
     );
-    final DoctorService? newService = result;
+    final Service? newService = result;
 
     // Check if state is still mounted and we have a service to add
     if (newService != null && context.mounted) {
@@ -954,27 +1066,31 @@ class _DesignScreenState extends State<DesignScreen> {
 
       // Show confirmation
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Service added successfully')),
+        const SnackBar(
+          content: Text('Service added successfully'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
 
-  Future<void> _editService(BuildContext context, DoctorService service) async {
+  Future<void> _editService(BuildContext context, Service service) async {
     // Store bloc reference before async gap
     final designBloc = context.read<DesignBloc>();
 
     // Navigate to service editor with existing service
-    final result = await Navigator.push<DoctorService?>(
+    final result = await Navigator.push<Service?>(
       context,
       ServiceEditorScreen.route(service: service),
     );
-    final DoctorService? updatedService = result;
+    final Service? updatedService = result;
 
     // Check if state is still mounted and we have an updated service
     if (updatedService != null && context.mounted) {
       // Update service in state using stored bloc reference
       designBloc.add(UpdateService(
-        id: updatedService.id,
+        id: updatedService.uid,
         title: updatedService.title,
         duration: updatedService.duration,
         price: updatedService.price,
@@ -985,17 +1101,21 @@ class _DesignScreenState extends State<DesignScreen> {
 
       // Show confirmation
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Service updated successfully')),
+        const SnackBar(
+          content: Text('Service updated successfully'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
 
   Widget _buildServiceTypeTag(IconData icon, String text) {
     return Container(
-      padding: kPaddH6V2,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: MyColors.primary.withValues(alpha: 0.1),
-        borderRadius: kRadiusAll,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: MyColors.primary.withValues(alpha: 0.3)),
       ),
       child: Row(
@@ -1006,7 +1126,7 @@ class _DesignScreenState extends State<DesignScreen> {
             size: 12,
             color: MyColors.primary,
           ),
-          kGap4,
+          const SizedBox(width: 4),
           Text(
             text,
             style: const TextStyle(
@@ -1020,389 +1140,772 @@ class _DesignScreenState extends State<DesignScreen> {
     );
   }
 
-// Replace the _buildSchedulePage method
   Widget _buildSchedulePage(BuildContext context, DesignState state) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Your Schedule', style: kSectionTitle),
-          kGap10,
-
-          // Week view tabs
-          Container(
-            decoration: BoxDecoration(
-              color: MyColors.blueGrey,
-              borderRadius: kRadius6,
-            ),
-            child: Row(
-              children: List.generate(7, (index) {
-                return _buildDayTab(
-                    _workingDaysTitles[index], _selectedDayIndex == index);
-              }),
-            ),
-          ),
-          kGap20,
-
-          // Working hours
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Working Hours',
-                style: TextStyle(
-                  fontSize: Font.mediumSmall,
-                  color: MyColors.textBlack,
-                  fontWeight: FontWeight.bold,
+    return CustomScrollView(
+      controller: _scrollController,
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: kPadd20,
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              // Day selector with improved design
+              Container(
+                decoration: BoxDecoration(
+                  color: MyColors.cardBackground,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ),
-              Switch(
-                value: _isWorkingDay,
-                onChanged: (value) {
-                  _setWorkingDay(value);
-                },
-                activeColor: MyColors.primary,
-              ),
-            ],
-          ),
-          kGap10,
-
-          // Time range - only visible if it's a working day
-          if (_isWorkingDay)
-            Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () => _selectTime(context, true),
-                    child: Container(
-                      padding: kPaddH10V8,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: MyColors.grey),
-                        borderRadius: kRadius6,
-                      ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: kPaddH20V8,
                       child: Row(
                         children: [
-                          const FaIcon(
-                            FontAwesomeIcons.clock,
-                            color: MyColors.primary,
-                            size: 16,
+                          const Text(
+                            'Select Day',
+                            style: kSectionTitle,
                           ),
-                          kGap10,
-                          Text(
-                            _formatTimeDisplay(_startTime),
-                            style: const TextStyle(
-                              fontSize: Font.small,
-                              color: MyColors.textBlack,
+                          const Spacer(),
+                          // Working day toggle
+                          Row(
+                            children: [
+                              Text(
+                                _isWorkingDay ? 'Working Day' : 'Off Day',
+                                style: TextStyle(
+                                  fontSize: Font.extraSmall,
+                                  fontWeight: FontWeight.w500,
+                                  color:
+                                      _isWorkingDay ? Colors.green : Colors.red,
+                                ),
+                              ),
+                              kGap8,
+                              Switch(
+                                value: _isWorkingDay,
+                                onChanged: (value) {
+                                  _setWorkingDay(value);
+                                },
+                                activeColor: Colors.green,
+                                inactiveThumbColor: Colors.red.shade300,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    _buildWeekDaySelector(),
+                  ],
+                ),
+              ),
+
+              kGap24,
+
+              // Working hours section - only visible if it's a working day
+              if (_isWorkingDay) ...[
+                CustomBase(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionHeading('Working Hours'),
+                      kGap16,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildTimeSelector(
+                              label: 'Start Time',
+                              time: _startTime,
+                              onTap: () => _selectTime(context, true),
+                            ),
+                          ),
+                          kGap16,
+                          Expanded(
+                            child: _buildTimeSelector(
+                              label: 'End Time',
+                              time: _endTime,
+                              onTap: () => _selectTime(context, false),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                kGap24,
+
+                // Break times section
+                CustomBase(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          _buildSectionHeading('Break Times'),
+                          const Spacer(),
+                          OutlinedButton.icon(
+                            onPressed: () => _showAddBreakDialog(context),
+                            icon: const Icon(Icons.add, size: 16),
+                            label: const Text('Add Break',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: Font.small)),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: MyColors.primary,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              side: const BorderSide(
+                                color: MyColors.primary,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                            ),
+                          ),
+                        ],
+                      ),
+                      kGap16,
+
+                      // Break items list
+                      if (_breaks.isEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'No breaks added yet',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: MyColors.textGrey,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        )
+                      else
+                        Column(
+                          children: _breaks.map((breakItem) {
+                            return _buildBreakItem(breakItem);
+                          }).toList(),
+                        ),
+                    ],
+                  ),
+                ),
+
+                kGap24,
+
+                // Time slot settings
+                CustomBase(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionHeading('Time Slot Settings'),
+                      kGap16,
+
+                      // Slot duration
+                      Row(
+                        children: [
+                          const Text(
+                            'Default Slot Duration:',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: MyColors.textGrey,
                             ),
                           ),
                           const Spacer(),
-                          const Icon(Icons.arrow_drop_down,
-                              color: MyColors.grey),
+                          _buildSettingSelector(
+                            value: getSlotDurationTime(),
+                            onTap: () => _showSlotDurationPicker(context),
+                          ),
                         ],
                       ),
-                    ),
-                  ),
-                ),
-                const Padding(
-                  padding: kPaddH8,
-                  child: Text('to', style: TextStyle(color: MyColors.textGrey)),
-                ),
-                Expanded(
-                  child: InkWell(
-                    onTap: () => _selectTime(context, false),
-                    child: Container(
-                      padding: kPaddH10V8,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: MyColors.grey),
-                        borderRadius: kRadius6,
-                      ),
-                      child: Row(
+                      kGap16,
+
+                      // Buffer time
+                      Row(
                         children: [
-                          const FaIcon(
-                            FontAwesomeIcons.clock,
-                            color: MyColors.primary,
-                            size: 16,
-                          ),
-                          kGap10,
-                          Text(
-                            _formatTimeDisplay(_endTime),
-                            style: const TextStyle(
-                              fontSize: Font.small,
-                              color: MyColors.textBlack,
+                          const Text(
+                            'Buffer Between Appointments:',
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: MyColors.textGrey,
                             ),
                           ),
                           const Spacer(),
-                          const Icon(Icons.arrow_drop_down,
-                              color: MyColors.grey),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-          if (_isWorkingDay) ...[
-            kGap20,
-            const DottedLine(
-              direction: Axis.horizontal,
-              lineLength: double.infinity,
-              lineThickness: 1,
-              dashLength: 4.0,
-              dashColor: MyColors.softStroke,
-            ),
-            kGap20,
-
-            // Break times
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Break Times',
-                  style: TextStyle(
-                    fontSize: Font.mediumSmall,
-                    color: MyColors.textBlack,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () => _showAddBreakDialog(context),
-                  icon: const Icon(Icons.add, size: 14),
-                  label: const Text('Add Break'),
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: kRadius10,
-                    ),
-                    side: const BorderSide(
-                      color: MyColors.primary,
-                    ),
-                    backgroundColor: Colors.transparent,
-                    foregroundColor: MyColors.primary,
-                    textStyle: const TextStyle(fontSize: Font.extraSmall),
-                    padding: kPaddH8V4,
-                  ),
-                ),
-              ],
-            ),
-            kGap10,
-
-            // Break items
-            if (_breaks.isEmpty)
-              const Padding(
-                padding: kPaddV10,
-                child: Text(
-                  'No breaks added yet',
-                  style: TextStyle(
-                    fontSize: Font.small,
-                    color: MyColors.textGrey,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              )
-            else
-              Column(
-                children: _breaks.map((breakItem) {
-                  return Padding(
-                    padding: kPaddB10,
-                    child: Container(
-                      padding: kPaddH14,
-                      decoration: BoxDecoration(
-                        color: MyColors.cardBackground,
-                        borderRadius: kRadius6,
-                        border: Border.all(color: MyColors.softStroke),
-                      ),
-                      child: Row(
-                        children: [
-                          const FaIcon(
-                            FontAwesomeIcons.mugSaucer,
-                            size: 14,
-                            color: MyColors.primary,
-                          ),
-                          kGap10,
-                          Text(breakItem.title,
-                              style: const TextStyle(
-                                  fontSize: Font.small,
-                                  color: MyColors.textBlack)),
-                          const Spacer(),
-                          Text(
-                              '${_formatTimeDisplay(breakItem.startTime)} - ${_formatTimeDisplay(breakItem.endTime)}',
-                              style: const TextStyle(
-                                  fontSize: Font.small,
-                                  color: MyColors.textGrey)),
-                          kGap10,
-                          IconButton(
-                            onPressed: () => _deleteBreak(breakItem),
-                            icon: const Icon(Icons.delete_outline,
-                                size: 18, color: MyColors.buttonRed),
-                            padding: kPadd0,
-                            constraints: const BoxConstraints(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-
-            const CardDivider(),
-
-            // Time slot settings
-            const Text('Time Slot Settings', style: kSectionTitle),
-            kGap10,
-
-            // Slot duration
-            Row(
-              children: [
-                const Text('Default Slot Duration:',
-                    style: TextStyle(
-                        fontSize: Font.small, color: MyColors.textGrey)),
-                const Spacer(), // Add spacer to push dropdown to the right
-                InkWell(
-                  onTap: () => _showSlotDurationPicker(context),
-                  child: Container(
-                    padding: kPaddH10V4,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: MyColors.grey),
-                      borderRadius: kRadius6,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(getSlotDurationTime(),
-                            style: const TextStyle(fontSize: Font.small)),
-                        const Icon(Icons.arrow_drop_down, size: 18),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            kGap10,
-
-            // Buffer time
-            Row(
-              children: [
-                const Text('Buffer Between Appointments:',
-                    style: TextStyle(
-                        fontSize: Font.small, color: MyColors.textGrey)),
-                const Spacer(), // Add spacer to push dropdown to the right
-                InkWell(
-                  onTap: () => _showBufferTimePicker(context),
-                  child: Container(
-                    padding: kPaddH10V4,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: MyColors.grey),
-                      borderRadius: kRadius6,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                            _bufferTime == 0
+                          _buildSettingSelector(
+                            value: _bufferTime == 0
                                 ? 'No buffer'
                                 : '$_bufferTime minutes',
-                            style: const TextStyle(fontSize: Font.small)),
-                        const Icon(Icons.arrow_drop_down, size: 18),
-                      ],
-                    ),
+                            onTap: () => _showBufferTimePicker(context),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                kGap24,
+
+                // Available slots preview
+                CustomBase(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildSectionHeading('Available Slots Preview'),
+                      // explain the meaning behind available slots and blocked slots
+                      kGap8,
+                      RichText(
+                        text: const TextSpan(
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: MyColors.textGrey,
+                          ),
+                          children: [
+                            TextSpan(text: 'An '),
+                            TextSpan(
+                              text: 'Available',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                            TextSpan(
+                                text:
+                                    ' slot is a time slot that can be booked by patients.'),
+                          ],
+                        ),
+                      ),
+                      kGap8,
+                      RichText(
+                        text: const TextSpan(
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: MyColors.textGrey,
+                          ),
+                          children: [
+                            TextSpan(text: 'A '),
+                            TextSpan(
+                              text: 'Blocked',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                              ),
+                            ),
+                            TextSpan(
+                                text:
+                                    ' slot is a time slot that is not available for booking. This is affected by your working hours, breaks, and buffer time.'),
+                          ],
+                        ),
+                      ),
+                      kGap16,
+                      _buildTimeSlotGrid(),
+                    ],
+                  ),
+                ),
+              ] else ...[
+                // Not a working day message
+                Container(
+                  padding: const EdgeInsets.all(32),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.event_busy,
+                          size: 48,
+                          color: Colors.red.shade300,
+                        ),
+                      ),
+                      kGap24,
+                      const Text(
+                        'Not a Working Day',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: MyColors.textBlack,
+                        ),
+                      ),
+                      kGap12,
+                      const Text(
+                        'You have marked this day as unavailable. Toggle the switch above if you want to work on this day.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: MyColors.textGrey,
+                          height: 1.5,
+                        ),
+                      ),
+                      kGap24,
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          _setWorkingDay(true);
+                        },
+                        icon: const Icon(Icons.check_circle),
+                        label: const Text('Make This a Working Day'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
-            ),
-            kGap20,
-            const DottedLine(
-              direction: Axis.horizontal,
-              lineLength: double.infinity,
-              lineThickness: 1,
-              dashLength: 4.0,
-              dashColor: MyColors.softStroke,
-            ),
-            kGap20,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Available Slots Preview', style: kSectionTitle),
-                kGap10,
-                _buildTimeSlotGrid(),
-                kGap10,
-              ],
-            ),
-          ] else ...[
-            // Not a working day message
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 30),
-              padding: kPadd20,
+
+              kGap20,
+            ]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWeekDaySelector() {
+    return Container(
+      height: 60,
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 7,
+        itemBuilder: (context, index) {
+          final isSelected = _selectedDayIndex == index;
+          final day = _workingDaysTitles[index];
+          final isWorkingDay = _scheduleMap[day]?.isWorking ?? false;
+
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                _selectedDayIndex = index;
+              });
+            },
+            child: Container(
+              width: 50,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
-                color: MyColors.blueGrey.withValues(alpha: 0.2),
-                borderRadius: kRadius12,
-                border: Border.all(color: MyColors.softStroke),
+                color: isSelected
+                    ? MyColors.primary
+                    : (isWorkingDay
+                        ? MyColors.primary.withValues(alpha: 0.1)
+                        : Colors.grey.withValues(alpha: 0.1)),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: isSelected
+                      ? MyColors.primary
+                      : (isWorkingDay
+                          ? MyColors.primary.withValues(alpha: 0.3)
+                          : Colors.grey.withValues(alpha: 0.3)),
+                ),
               ),
+              alignment: Alignment.center,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Text(
+                    day,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? Colors.white
+                          : (isWorkingDay ? MyColors.primary : Colors.grey),
+                    ),
+                  ),
+                  kGap4,
                   Icon(
-                    Icons.event_busy,
-                    size: 48,
-                    color: MyColors.textGrey.withValues(alpha: 0.7),
-                  ),
-                  kGap16,
-                  const Text(
-                    'Not a Working Day',
-                    style: TextStyle(
-                      fontSize: Font.medium,
-                      fontWeight: FontWeight.bold,
-                      color: MyColors.textBlack,
-                    ),
-                  ),
-                  kGap8,
-                  const Text(
-                    'You have marked this day as unavailable. Toggle the switch above if you want to work on this day.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: Font.small,
-                      color: MyColors.textGrey,
-                    ),
+                    isWorkingDay ? Icons.check_circle : Icons.cancel,
+                    size: 12,
+                    color: isSelected
+                        ? Colors.white
+                        : (isWorkingDay ? Colors.green : Colors.red.shade300),
                   ),
                 ],
               ),
             ),
-          ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTimeSelector({
+    required String label,
+    required String time,
+    required VoidCallback onTap,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: MyColors.textGrey,
+          ),
+        ),
+        kGap8,
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              border:
+                  Border.all(color: MyColors.primary.withValues(alpha: 0.3)),
+              borderRadius: BorderRadius.circular(12),
+              color: MyColors.primary.withValues(alpha: 0.05),
+            ),
+            child: Row(
+              children: [
+                const FaIcon(
+                  FontAwesomeIcons.clock,
+                  color: MyColors.primary,
+                  size: 16,
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  _formatTimeDisplay(time),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: MyColors.textBlack,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                const Icon(Icons.arrow_drop_down, color: MyColors.primary),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBreakItem(BreakTime breakItem) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: MyColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: MyColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const FaIcon(
+            FontAwesomeIcons.mugSaucer,
+            size: 16,
+            color: MyColors.primary,
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                breakItem.title!,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: MyColors.textBlack,
+                ),
+              ),
+              kGap4,
+              Text(
+                '${_formatTimeDisplay(breakItem.startTime)} - ${_formatTimeDisplay(breakItem.endTime)}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: MyColors.textGrey,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          IconButton(
+            onPressed: () => _deleteBreak(breakItem),
+            icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
         ],
       ),
     );
   }
 
-// Update the day tab selection method
-  Widget _buildDayTab(String day, bool isSelected) {
-    return Expanded(
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _selectedDayIndex = _workingDaysTitles.indexOf(day);
-          });
-        },
-        child: Container(
-          padding: kPaddV8,
-          decoration: BoxDecoration(
-            color: isSelected ? MyColors.primary : Colors.transparent,
-            borderRadius: kRadius6,
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            day,
-            style: TextStyle(
-              fontSize: Font.small,
-              color: isSelected
-                  ? Colors.white
-                  : MyColors.primary.withValues(alpha: 0.7),
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+  Widget _buildSettingSelector({
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: MyColors.primary.withValues(alpha: 0.3)),
+          borderRadius: BorderRadius.circular(8),
+          color: MyColors.primary.withValues(alpha: 0.05),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: MyColors.primary,
+              ),
             ),
-          ),
+            const SizedBox(width: 4),
+            const Icon(Icons.arrow_drop_down,
+                color: MyColors.primary, size: 20),
+          ],
         ),
       ),
     );
   }
 
-// Update _selectTime method
+  void _showAddBreakDialog(BuildContext context) {
+    final TextEditingController titleController = TextEditingController();
+    String startTime = '12:00';
+    String endTime = '13:00';
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              title: const Text(
+                'Add Break',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: titleController,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        color: MyColors.textBlack,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'Break Title',
+                        hintText: 'e.g. Lunch Break',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                              color: MyColors.primary, width: 2),
+                        ),
+                      ),
+                    ),
+                    kGap16,
+                    const Text(
+                      'Start Time',
+                      style: TextStyle(
+                        color: MyColors.textGrey,
+                        fontSize: 14,
+                      ),
+                    ),
+                    kGap8,
+                    InkWell(
+                      onTap: () async {
+                        // Parse current time
+                        final timeParts = startTime.split(':');
+                        final initialTime = TimeOfDay(
+                          hour: int.parse(timeParts[0]),
+                          minute: int.parse(timeParts[1]),
+                        );
+
+                        // Show time picker
+                        final TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: initialTime,
+                          builder: (context, child) {
+                            return timePickerTheme(child);
+                          },
+                        );
+
+                        if (pickedTime != null) {
+                          setState(() {
+                            final hour =
+                                pickedTime.hour.toString().padLeft(2, '0');
+                            final minute =
+                                pickedTime.minute.toString().padLeft(2, '0');
+                            startTime = '$hour:$minute';
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: MyColors.primary.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(12),
+                          color: MyColors.primary.withValues(alpha: 0.05),
+                        ),
+                        child: Row(
+                          children: [
+                            const FaIcon(
+                              FontAwesomeIcons.clock,
+                              color: MyColors.primary,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              _formatTimeDisplay(startTime),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: MyColors.textBlack,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const Spacer(),
+                            const Icon(Icons.arrow_drop_down,
+                                color: MyColors.primary),
+                          ],
+                        ),
+                      ),
+                    ),
+                    kGap16,
+                    const Text(
+                      'End Time',
+                      style: TextStyle(
+                        color: MyColors.textGrey,
+                        fontSize: 14,
+                      ),
+                    ),
+                    kGap8,
+                    InkWell(
+                      onTap: () async {
+                        // Parse current time
+                        final timeParts = endTime.split(':');
+                        final initialTime = TimeOfDay(
+                          hour: int.parse(timeParts[0]),
+                          minute: int.parse(timeParts[1]),
+                        );
+
+                        // Show time picker
+                        final TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: initialTime,
+                          builder: (context, child) {
+                            return timePickerTheme(child);
+                          },
+                        );
+
+                        if (pickedTime != null) {
+                          setState(() {
+                            final hour =
+                                pickedTime.hour.toString().padLeft(2, '0');
+                            final minute =
+                                pickedTime.minute.toString().padLeft(2, '0');
+                            endTime = '$hour:$minute';
+                          });
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                              color: MyColors.primary.withValues(alpha: 0.3)),
+                          borderRadius: BorderRadius.circular(12),
+                          color: MyColors.primary.withValues(alpha: 0.05),
+                        ),
+                        child: Row(
+                          children: [
+                            const FaIcon(
+                              FontAwesomeIcons.clock,
+                              color: MyColors.primary,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              _formatTimeDisplay(endTime),
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: MyColors.textBlack,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const Spacer(),
+                            const Icon(Icons.arrow_drop_down,
+                                color: MyColors.primary),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: MyColors.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                  ),
+                  child: const Text('Add'),
+                  onPressed: () {
+                    if (titleController.text.isNotEmpty) {
+                      _addBreak(BreakTime(
+                        title: titleController.text,
+                        startTime: startTime,
+                        endTime: endTime,
+                      ));
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Future<void> _selectTime(BuildContext context, bool isStartTime) async {
     // Parse current time
     final currentTime = isStartTime ? _startTime : _endTime;
@@ -1434,7 +1937,7 @@ class _DesignScreenState extends State<DesignScreen> {
     }
   }
 
-// Format time for display (convert 24h to 12h format with AM/PM)
+  // Format time for display (convert 24h to 12h format with AM/PM)
   String _formatTimeDisplay(String time24h) {
     final timeParts = time24h.split(':');
     final hour = int.parse(timeParts[0]);
@@ -1446,673 +1949,6 @@ class _DesignScreenState extends State<DesignScreen> {
     return '$hour12:$minute $period';
   }
 
-// Show dialog to add a break
-// Update the _showAddBreakDialog method
-  void _showAddBreakDialog(BuildContext context) {
-    final TextEditingController titleController = TextEditingController();
-    String startTime = '12:00';
-    String endTime = '13:00';
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: MyColors.cardBackground,
-              title: const Text('Add Break'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: titleController,
-                      style: const TextStyle(
-                        fontSize: Font.small,
-                        color: MyColors.textBlack,
-                      ),
-                      decoration: const InputDecoration(
-                        labelText: 'Break Title',
-                        hintStyle: TextStyle(
-                          color: MyColors.textGrey,
-                          fontSize: Font.small,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        labelStyle: TextStyle(
-                          color: MyColors.textGrey,
-                          fontSize: Font.small,
-                        ),
-                        hintText: 'e.g. Lunch Break',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    kGap16,
-                    const Text('Start Time',
-                        style: TextStyle(
-                            color: MyColors.textGrey, fontSize: Font.small)),
-                    kGap4,
-                    InkWell(
-                      onTap: () async {
-                        // Parse current time
-                        final timeParts = startTime.split(':');
-                        final initialTime = TimeOfDay(
-                          hour: int.parse(timeParts[0]),
-                          minute: int.parse(timeParts[1]),
-                        );
-
-                        // Show time picker
-                        final TimeOfDay? pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: initialTime,
-                          builder: (context, child) {
-                            return timePickerTheme(child);
-                          },
-                        );
-
-                        if (pickedTime != null) {
-                          setState(() {
-                            final hour =
-                                pickedTime.hour.toString().padLeft(2, '0');
-                            final minute =
-                                pickedTime.minute.toString().padLeft(2, '0');
-                            startTime = '$hour:$minute';
-                          });
-                        }
-                      },
-                      child: Container(
-                        padding: kPaddH10V8,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: MyColors.grey),
-                          borderRadius: kRadius6,
-                        ),
-                        child: Row(
-                          children: [
-                            const FaIcon(
-                              FontAwesomeIcons.clock,
-                              color: MyColors.primary,
-                              size: 16,
-                            ),
-                            kGap10,
-                            Text(
-                              _formatTimeDisplay(startTime),
-                              style: const TextStyle(
-                                fontSize: Font.small,
-                                color: MyColors.textBlack,
-                              ),
-                            ),
-                            const Spacer(),
-                            const Icon(Icons.arrow_drop_down,
-                                color: MyColors.grey),
-                          ],
-                        ),
-                      ),
-                    ),
-                    kGap16,
-                    const Text('End Time',
-                        style: TextStyle(
-                            color: MyColors.textGrey, fontSize: Font.small)),
-                    kGap4,
-                    InkWell(
-                      onTap: () async {
-                        // Parse current time
-                        final timeParts = endTime.split(':');
-                        final initialTime = TimeOfDay(
-                          hour: int.parse(timeParts[0]),
-                          minute: int.parse(timeParts[1]),
-                        );
-
-                        // Show time picker
-                        final TimeOfDay? pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: initialTime,
-                          builder: (context, child) {
-                            return timePickerTheme(child);
-                          },
-                        );
-
-                        if (pickedTime != null) {
-                          setState(() {
-                            final hour =
-                                pickedTime.hour.toString().padLeft(2, '0');
-                            final minute =
-                                pickedTime.minute.toString().padLeft(2, '0');
-                            endTime = '$hour:$minute';
-                          });
-                        }
-                      },
-                      child: Container(
-                        padding: kPaddH10V8,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: MyColors.grey),
-                          borderRadius: kRadius6,
-                        ),
-                        child: Row(
-                          children: [
-                            const FaIcon(
-                              FontAwesomeIcons.clock,
-                              color: MyColors.primary,
-                              size: 16,
-                            ),
-                            kGap10,
-                            Text(
-                              _formatTimeDisplay(endTime),
-                              style: const TextStyle(
-                                fontSize: Font.small,
-                                color: MyColors.textBlack,
-                              ),
-                            ),
-                            const Spacer(),
-                            const Icon(Icons.arrow_drop_down,
-                                color: MyColors.grey),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: MyColors.primary,
-                  ),
-                  child: const Text('Add'),
-                  onPressed: () {
-                    if (titleController.text.isNotEmpty) {
-                      _addBreak(BreakTime(
-                        title: titleController.text,
-                        startTime: startTime,
-                        endTime: endTime,
-                      ));
-                      Navigator.of(context).pop();
-                    }
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // Add this method to your class
-  void _showBookingAdvancePicker(BuildContext context) {
-    const line = DottedLine(
-      direction: Axis.horizontal,
-      lineLength: double.infinity,
-      lineThickness: 1,
-      dashLength: 4.0,
-      dashColor: MyColors.softStroke,
-    );
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: MyColors.cardBackground,
-      builder: (BuildContext context) {
-        return Container(
-          height: 400,
-          padding: kPadd16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Booking Advance Notice',
-                style: TextStyle(
-                  fontSize: Font.medium,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              kGap10,
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildBookingAdvanceOption(context, 1, '1 hour'),
-                    line,
-                    _buildBookingAdvanceOption(context, 2, '2 hours'),
-                    line,
-                    _buildBookingAdvanceOption(context, 12, '12 hours'),
-                    line,
-                    _buildBookingAdvanceOption(context, 24, '1 day'),
-                    line,
-                    _buildBookingAdvanceOption(context, 48, '2 days'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildBufferOption(BuildContext context, int value, String label) {
-    bool isSelected = _bufferTime == value;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _bufferTime = value;
-        });
-        Navigator.pop(context);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? MyColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: Font.medium,
-                color: isSelected ? MyColors.primary : MyColors.textBlack,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: MyColors.primary,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCancellationPolicyOption(
-      BuildContext context, int value, String label) {
-    bool isSelected = _cancellationPolicy == value;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _cancellationPolicy = value;
-        });
-        Navigator.pop(context);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? MyColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: Font.medium,
-                color: isSelected ? MyColors.primary : MyColors.textBlack,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: MyColors.primary,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBookingWindowOption(
-      BuildContext context, int value, String label) {
-    bool isSelected = _bookingWindow == value;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _bookingWindow = value;
-        });
-        Navigator.pop(context);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? MyColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: Font.medium,
-                color: isSelected ? MyColors.primary : MyColors.textBlack,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: MyColors.primary,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBookingAdvanceOption(
-      BuildContext context, int value, String label) {
-    bool isSelected = _advanceNotice == value;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _advanceNotice = value;
-        });
-        Navigator.pop(context);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? MyColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: Font.medium,
-                color: isSelected ? MyColors.primary : MyColors.textBlack,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: MyColors.primary,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSlotDurationOption(
-      BuildContext context, int value, String label) {
-    bool isSelected = _slotDuration == value;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _slotDuration = value;
-        });
-        Navigator.pop(context);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? MyColors.primary.withValues(alpha: 0.1)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: Font.medium,
-                color: isSelected ? MyColors.primary : MyColors.textBlack,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-            ),
-            const Spacer(),
-            if (isSelected)
-              const Icon(
-                Icons.check_circle,
-                color: MyColors.primary,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Add this method to your class
-  void _showBookingWindowPicker(BuildContext context) {
-    const line = DottedLine(
-      direction: Axis.horizontal,
-      lineLength: double.infinity,
-      lineThickness: 1,
-      dashLength: 4.0,
-      dashColor: MyColors.softStroke,
-    );
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: MyColors.cardBackground,
-      builder: (BuildContext context) {
-        return Container(
-          height: 400,
-          padding: kPadd16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Booking Window',
-                style: TextStyle(
-                  fontSize: Font.medium,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              kGap10,
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildBookingWindowOption(context, 1, '1 week'),
-                    line,
-                    _buildBookingWindowOption(context, 2, '2 weeks'),
-                    line,
-                    _buildBookingWindowOption(context, 4, '1 month'),
-                    line,
-                    _buildBookingWindowOption(context, 12, '3 months'),
-                    line,
-                    _buildBookingWindowOption(context, 24, '6 months'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Add this method to your class
-  void _showCancellationPolicyPicker(BuildContext context) {
-    const line = DottedLine(
-      direction: Axis.horizontal,
-      lineLength: double.infinity,
-      lineThickness: 1,
-      dashLength: 4.0,
-      dashColor: MyColors.softStroke,
-    );
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: MyColors.cardBackground,
-      builder: (BuildContext context) {
-        return Container(
-          height: 450,
-          padding: kPadd16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Cancellation Policy Notice',
-                style: TextStyle(
-                  fontSize: Font.medium,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              kGap10,
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildCancellationPolicyOption(
-                        context, 0, 'No cancellations'),
-                    line,
-                    _buildCancellationPolicyOption(context, 1, '1 hour notice'),
-                    line,
-                    _buildCancellationPolicyOption(
-                        context, 3, '3 hours notice'),
-                    line,
-                    _buildCancellationPolicyOption(
-                        context, 6, '6 hours notice'),
-                    line,
-                    _buildCancellationPolicyOption(
-                        context, 12, '12 hours notice'),
-                    line,
-                    _buildCancellationPolicyOption(context, 24, '1 day notice'),
-                    line,
-                    _buildCancellationPolicyOption(
-                        context, 48, '2 days notice'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Add this method to your class
-  void _showSlotDurationPicker(BuildContext context) {
-    const line = DottedLine(
-      direction: Axis.horizontal,
-      lineLength: double.infinity,
-      lineThickness: 1,
-      dashLength: 4.0,
-      dashColor: MyColors.softStroke,
-    );
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: MyColors.cardBackground,
-      builder: (BuildContext context) {
-        return Container(
-          height: 400,
-          padding: kPadd16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Default Slot Duration',
-                style: TextStyle(
-                  fontSize: Font.medium,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              kGap10,
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildSlotDurationOption(context, 15, '15 minutes'),
-                    line,
-                    _buildSlotDurationOption(context, 30, '30 minutes'),
-                    line,
-                    _buildSlotDurationOption(context, 45, '45 minutes'),
-                    line,
-                    _buildSlotDurationOption(context, 60, '1 hour'),
-                    line,
-                    _buildSlotDurationOption(context, 90, '1.5 hours'),
-                    line,
-                    _buildSlotDurationOption(context, 120, '2 hours'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Add this method to your class
-  void _showBufferTimePicker(BuildContext context) {
-    const line = DottedLine(
-      direction: Axis.horizontal,
-      lineLength: double.infinity,
-      lineThickness: 1,
-      dashLength: 4.0,
-      dashColor: MyColors.softStroke,
-    );
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: MyColors.cardBackground,
-      builder: (BuildContext context) {
-        return Container(
-          height: 450,
-          padding: kPadd16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Buffer Between Appointments',
-                style: TextStyle(
-                  fontSize: Font.medium,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              kGap10,
-              Expanded(
-                child: ListView(
-                  children: [
-                    _buildBufferOption(context, 0, 'No buffer'),
-                    line,
-                    _buildBufferOption(context, 5, '5 minutes'),
-                    line,
-                    _buildBufferOption(context, 10, '10 minutes'),
-                    line,
-                    _buildBufferOption(context, 15, '15 minutes'),
-                    line,
-                    _buildBufferOption(context, 20, '20 minutes'),
-                    line,
-                    _buildBufferOption(context, 25, '25 minutes'),
-                    line,
-                    _buildBufferOption(context, 30, '30 minutes'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-// Build time slot grid
   Widget _buildTimeSlotGrid() {
     // Calculate the total available time in minutes
     final startParts = _startTime.split(':');
@@ -2137,22 +1973,32 @@ class _DesignScreenState extends State<DesignScreen> {
 
     // If there are no slots, show a message
     if (slots.isEmpty) {
-      return const Center(
-        child: Text(
-          'No available slots for the selected time range',
-          style: TextStyle(
-            fontSize: Font.small,
-            color: MyColors.textGrey,
-            fontStyle: FontStyle.italic,
-          ),
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 30),
+        alignment: Alignment.center,
+        child: Column(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.amber[700],
+              size: 40,
+            ),
+            kGap16,
+            const Text(
+              'No available slots for the selected time range',
+              style: TextStyle(
+                fontSize: 15,
+                color: MyColors.textGrey,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       );
     }
 
-    // Calculate rows needed (with 3 columns)
-    (slots.length / 3).ceil();
-
-    // calculate number of active slots
+    // Calculate number of active slots
     int activeSlots = 0;
 
     for (final slot in slots) {
@@ -2186,24 +2032,67 @@ class _DesignScreenState extends State<DesignScreen> {
       }
     }
 
-    // Don't limit the height, allow container to expand based on content
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Total available slots: $activeSlots / ${slots.length}',
-          style: const TextStyle(
-            fontSize: Font.extraSmall,
-            color: MyColors.textGrey,
-          ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.event_available,
+                      color: Colors.green, size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    '$activeSlots available',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            kGap8,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.block, color: Colors.red, size: 14),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${slots.length - activeSlots} blocked',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        kGap10,
+        kGap16,
         Container(
           constraints: const BoxConstraints(maxHeight: 400),
           child: GridView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
-            // Use ClampingScrollPhysics to allow scrolling but prevent overscroll effect
             physics: const ClampingScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
@@ -2251,17 +2140,20 @@ class _DesignScreenState extends State<DesignScreen> {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: isAvailable
-                      ? MyColors.primary.withValues(alpha: 0.1)
-                      : MyColors.grey.withValues(alpha: 0.1),
-                  borderRadius: kRadius6,
+                      ? Colors.green.withValues(alpha: 0.1)
+                      : Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                      color: isAvailable ? MyColors.primary : MyColors.grey),
+                      color: isAvailable ? Colors.green : Colors.red.shade300),
                 ),
                 child: Text(
                   "$displayHour:$minuteStr $amPm",
                   style: TextStyle(
-                    fontSize: Font.small,
-                    color: isAvailable ? MyColors.primary : MyColors.grey,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: isAvailable
+                        ? Colors.green.shade700
+                        : Colors.red.shade700,
                   ),
                 ),
               );
@@ -2273,184 +2165,370 @@ class _DesignScreenState extends State<DesignScreen> {
   }
 
   Widget _buildSettingsPage(BuildContext context, DesignState state) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text('Appointment Settings', style: kSectionTitle),
-          kGap20,
-
-          // Booking advance notice
-          _buildSettingItem(
-            title: 'Booking Advance Notice',
-            description: 'Minimum time before an appointment can be booked',
-            child: InkWell(
-              onTap: () => _showBookingAdvancePicker(context),
-              child: Container(
-                padding: kPaddH10V4,
-                decoration: BoxDecoration(
-                  border: Border.all(color: MyColors.grey),
-                  borderRadius: kRadius6,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return CustomScrollView(
+      controller: _scrollController,
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverPadding(
+          padding: kPadd20,
+          sliver: SliverList(
+            delegate: SliverChildListDelegate([
+              // Appointment Settings Card
+              CustomBase(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(getBookingAdvanceTime(),
-                        style: const TextStyle(fontSize: Font.small)),
-                    const Icon(Icons.arrow_drop_down, size: 18),
+                    _buildSectionHeading('Appointment Settings'),
+                    kGap20,
+
+                    // Booking advance notice
+                    _buildSettingItem(
+                      icon: Icons.access_time,
+                      title: 'Booking Advance Notice',
+                      description:
+                          'Minimum time before an appointment can be booked',
+                      child: _buildSettingSelector(
+                        value: getBookingAdvanceTime(),
+                        onTap: () => _showBookingAdvancePicker(context),
+                      ),
+                    ),
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Divider(height: 1),
+                    ),
+
+                    // Booking window
+                    _buildSettingItem(
+                      icon: Icons.date_range,
+                      title: 'Booking Window',
+                      description:
+                          'How far in advance patients can book appointments',
+                      child: _buildSettingSelector(
+                        value: getBookingWindowTime(),
+                        onTap: () => _showBookingWindowPicker(context),
+                      ),
+                    ),
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Divider(height: 1),
+                    ),
+
+                    // Auto confirmation
+                    _buildSettingItem(
+                      icon: Icons.check_circle,
+                      title: 'Auto Confirmation',
+                      description:
+                          'Automatically confirm appointments when booked',
+                      child: Switch(
+                        value: _autoConfirmation,
+                        onChanged: (value) {
+                          setState(() {
+                            _autoConfirmation = value;
+                          });
+                        },
+                        activeColor: MyColors.primary,
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
-          ),
 
-          kGap14,
-          const DottedLine(
-            direction: Axis.horizontal,
-            lineLength: double.infinity,
-            lineThickness: 1,
-            dashLength: 4.0,
-            dashColor: MyColors.softStroke,
-          ),
-          kGap14,
+              kGap24,
 
-          // Booking window
-          _buildSettingItem(
-            title: 'Booking Window',
-            description: 'How far in advance patients can book appointments',
-            child: InkWell(
-              onTap: () => _showBookingWindowPicker(context),
-              child: Container(
-                padding: kPaddH10V4,
-                decoration: BoxDecoration(
-                  border: Border.all(color: MyColors.grey),
-                  borderRadius: kRadius6,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Payment Settings Card
+              CustomBase(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(getBookingWindowTime(),
-                        style: const TextStyle(fontSize: Font.small)),
-                    const Icon(Icons.arrow_drop_down, size: 18),
+                    _buildSectionHeading('Payment Settings'),
+                    kGap20,
+
+                    // Payment methods
+                    _buildSettingItem(
+                      icon: Icons.credit_card,
+                      title: 'Accepted Payment Methods',
+                      description:
+                          'Methods patients can use to pay for appointments',
+                      child: const SizedBox(),
+                    ),
+
+                    // Payment methods checkboxes with improved design
+                    Padding(
+                      padding: const EdgeInsets.only(left: 40, top: 8),
+                      child: Column(
+                        children: [
+                          _buildSettingsCheckbox(
+                            title: 'Credit/Debit Card',
+                            value: _acceptCreditCard,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _acceptCreditCard = value;
+                                });
+                              }
+                            },
+                          ),
+                          _buildSettingsCheckbox(
+                            title: 'Cash',
+                            value: _acceptCash,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _acceptCash = value;
+                                });
+                              }
+                            },
+                          ),
+                          _buildSettingsCheckbox(
+                            title: 'Insurance',
+                            value: _acceptInsurance,
+                            onChanged: (value) {
+                              if (value != null) {
+                                setState(() {
+                                  _acceptInsurance = value;
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Divider(height: 1),
+                    ),
+
+                    // Cancellation policy
+                    _buildSettingItem(
+                      icon: Icons.event_busy,
+                      title: 'Cancellation Policy',
+                      description:
+                          'Set your policy for appointment cancellations',
+                      child: _buildSettingSelector(
+                        value: getCancellationPolicyTime(),
+                        onTap: () => _showCancellationPolicyPicker(context),
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ),
+            ]),
           ),
+        ),
+      ],
+    );
+  }
 
-          kGap14,
-          const DottedLine(
-            direction: Axis.horizontal,
-            lineLength: double.infinity,
-            lineThickness: 1,
-            dashLength: 4.0,
-            dashColor: MyColors.softStroke,
+  Widget _buildSettingItem({
+    required IconData icon,
+    required String title,
+    required String description,
+    required Widget child,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 24,
+          child: Icon(
+            icon,
+            size: 18,
+            color: MyColors.primary,
           ),
-          kGap14,
-
-          // Auto confirmation
-          _buildSettingItem(
-            title: 'Auto Confirmation',
-            description: 'Automatically confirm appointments when booked',
-            child: _buildSettingsToggle(
-              value: _autoConfirmation,
-              onChanged: (value) {
-                setState(() {
-                  _autoConfirmation = value;
-                });
-              },
-            ),
-          ),
-
-          kGap10,
-          const CardDivider(),
-
-          // Payment settings
-          const Text('Payment Settings', style: kSectionTitle),
-          kGap20,
-
-          // Payment methods
-          _buildSettingItem(
-            title: 'Accepted Payment Methods',
-            description: 'Methods patients can use to pay for appointments',
-            child: const SizedBox(),
-          ),
-
-          kGap10,
-          // Payment methods checkboxes
-          Column(
+        ),
+        kGap16,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSettingsCheckbox(
-                title: 'Credit/Debit Card',
-                value: _acceptCreditCard,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _acceptCreditCard = value;
-                    });
-                  }
-                },
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: MyColors.textBlack,
+                ),
               ),
-              _buildSettingsCheckbox(
-                title: 'Cash',
-                value: _acceptCash,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _acceptCash = value;
-                    });
-                  }
-                },
-              ),
-              _buildSettingsCheckbox(
-                title: 'Insurance',
-                value: _acceptInsurance,
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _acceptInsurance = value;
-                    });
-                  }
-                },
+              kGap4,
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: MyColors.textGrey,
+                ),
               ),
             ],
           ),
+        ),
+        if (child is! SizedBox) kGap16,
+        child,
+      ],
+    );
+  }
 
-          kGap14,
-          const DottedLine(
-            direction: Axis.horizontal,
-            lineLength: double.infinity,
-            lineThickness: 1,
-            dashLength: 4.0,
-            dashColor: MyColors.softStroke,
-          ),
-          kGap14,
-
-          // Cancellation policy
-          _buildSettingItem(
-            title: 'Cancellation Policy',
-            description: 'Set your policy for appointment cancellations',
-            child: InkWell(
-              onTap: () => _showCancellationPolicyPicker(context),
-              child: Container(
-                padding: kPaddH10V4,
-                decoration: BoxDecoration(
-                  border: Border.all(color: MyColors.grey),
-                  borderRadius: kRadius6,
+  Widget _buildSettingsCheckbox({
+    required String title,
+    required bool value,
+    required Function(bool?) onChanged,
+  }) {
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: value
+                      ? MyColors.primary
+                      : MyColors.textGrey.withValues(alpha: 0.5),
+                  width: 2,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(getCancellationPolicyTime(),
-                        style: const TextStyle(fontSize: Font.small)),
-                    const Icon(Icons.arrow_drop_down, size: 18),
-                  ],
-                ),
+                color: value ? MyColors.primary : Colors.transparent,
+              ),
+              child: value
+                  ? const Icon(
+                      Icons.check,
+                      size: 16,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: value ? MyColors.textBlack : MyColors.textGrey,
+                fontWeight: value ? FontWeight.w500 : FontWeight.normal,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+
+  void _showBookingAdvancePicker(BuildContext context) {
+    final options = [
+      {'value': 1, 'label': '1 hour'},
+      {'value': 2, 'label': '2 hours'},
+      {'value': 12, 'label': '12 hours'},
+      {'value': 24, 'label': '1 day'},
+      {'value': 48, 'label': '2 days'},
+    ];
+
+    showOptionsPicker(
+      context,
+      'Booking Advance Notice',
+      options,
+      _advanceNotice,
+      (value) {
+        setState(() {
+          _advanceNotice = value;
+        });
+      },
+    );
+  }
+
+  void _showBookingWindowPicker(BuildContext context) {
+    final options = [
+      {'value': 1, 'label': '1 week'},
+      {'value': 2, 'label': '2 weeks'},
+      {'value': 4, 'label': '1 month'},
+      {'value': 12, 'label': '3 months'},
+      {'value': 24, 'label': '6 months'},
+    ];
+
+    showOptionsPicker(
+      context,
+      'Booking Window',
+      options,
+      _bookingWindow,
+      (value) {
+        setState(() {
+          _bookingWindow = value;
+        });
+      },
+    );
+  }
+
+  void _showCancellationPolicyPicker(BuildContext context) {
+    final options = [
+      {'value': 0, 'label': 'No cancellations'},
+      {'value': 1, 'label': '1 hour notice'},
+      {'value': 3, 'label': '3 hours notice'},
+      {'value': 6, 'label': '6 hours notice'},
+      {'value': 12, 'label': '12 hours notice'},
+      {'value': 24, 'label': '1 day notice'},
+      {'value': 48, 'label': '2 days notice'},
+    ];
+
+    showOptionsPicker(
+      context,
+      'Cancellation Policy Notice',
+      options,
+      _cancellationPolicy,
+      (value) {
+        setState(() {
+          _cancellationPolicy = value;
+        });
+      },
+    );
+  }
+
+  void _showSlotDurationPicker(BuildContext context) {
+    final options = [
+      {'value': 15, 'label': '15 minutes'},
+      {'value': 30, 'label': '30 minutes'},
+      {'value': 45, 'label': '45 minutes'},
+      {'value': 60, 'label': '1 hour'},
+      {'value': 90, 'label': '1.5 hours'},
+      {'value': 120, 'label': '2 hours'},
+    ];
+
+    showOptionsPicker(
+      context,
+      'Default Slot Duration',
+      options,
+      _slotDuration,
+      (value) {
+        setState(() {
+          _slotDuration = value;
+        });
+      },
+    );
+  }
+
+  void _showBufferTimePicker(BuildContext context) {
+    final options = [
+      {'value': 0, 'label': 'No buffer'},
+      {'value': 5, 'label': '5 minutes'},
+      {'value': 10, 'label': '10 minutes'},
+      {'value': 15, 'label': '15 minutes'},
+      {'value': 20, 'label': '20 minutes'},
+      {'value': 25, 'label': '25 minutes'},
+      {'value': 30, 'label': '30 minutes'},
+    ];
+
+    showOptionsPicker(
+      context,
+      'Buffer Between Appointments',
+      options,
+      _bufferTime,
+      (value) {
+        setState(() {
+          _bufferTime = value;
+        });
+      },
     );
   }
 
@@ -2529,15 +2607,24 @@ class _DesignScreenState extends State<DesignScreen> {
 
   Widget _buildQualificationItem(String title, String subtitle,
       {required bool isEditable}) {
-    return Container(
-      padding: kPadd10,
-      decoration: BoxDecoration(
-        color: MyColors.cardBackground,
-        borderRadius: kRadius6,
-        border: Border.all(color: MyColors.softStroke),
-      ),
+    return CustomBase(
       child: Row(
         children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: MyColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              Icons.school,
+              color: MyColors.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2545,15 +2632,16 @@ class _DesignScreenState extends State<DesignScreen> {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: Font.small,
+                    fontSize: 15,
                     color: MyColors.textBlack,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                kGap4,
                 Text(
                   subtitle,
                   style: const TextStyle(
-                    fontSize: Font.extraSmall,
+                    fontSize: 13,
                     color: MyColors.textGrey,
                   ),
                 ),
@@ -2562,16 +2650,17 @@ class _DesignScreenState extends State<DesignScreen> {
           ),
           if (isEditable) ...[
             IconButton(
-              icon: const Icon(Icons.edit, size: 20),
+              icon: const Icon(Icons.edit, size: 20, color: MyColors.primary),
               onPressed: () {},
-              padding: kPadd4,
+              padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
+            kGap8,
             IconButton(
-              icon: const Icon(Icons.delete_outline,
-                  size: 20, color: MyColors.buttonRed),
+              icon:
+                  const Icon(Icons.delete_outline, size: 20, color: Colors.red),
               onPressed: () {},
-              padding: kPadd4,
+              padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
             ),
           ],
@@ -2580,73 +2669,86 @@ class _DesignScreenState extends State<DesignScreen> {
     );
   }
 
-  Widget _buildSettingItem({
-    required String title,
-    required String description,
-    required Widget child,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: Font.small,
-                  color: MyColors.textBlack,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                description,
-                style: const TextStyle(
-                  fontSize: Font.extraSmall,
-                  color: MyColors.textGrey,
-                ),
-              ),
-            ],
-          ),
+  Widget _buildSaveButton(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: MyColors.cardBackground,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
-        kGap30,
-        child,
-      ],
+        boxShadow: [
+          BoxShadow(
+            color: MyColors.primary.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        onPressed: () {
+          // Save profile changes
+          context.read<DesignBloc>().add(SaveDoctorProfile(
+                // Profile data
+                bio: _bioController.text,
+                phone: _phoneController.text,
+                address: _addressController.text,
+                notes: _notesController.text,
+
+                // Schedule data
+                schedule: _scheduleMap,
+              ));
+
+          // Show success animation
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 10),
+                  Text('Profile and settings saved successfully',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      )),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              margin: const EdgeInsets.all(8),
+            ),
+          );
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: MyColors.primary,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 4,
+          shadowColor: MyColors.primary.withValues(alpha: 0.4),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.save),
+            SizedBox(width: 8),
+            Text(
+              'Save Changes',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
-
-// Toggle widget for settings
-  Widget _buildSettingsToggle({
-    required bool value,
-    required Function(bool) onChanged,
-  }) {
-    return Switch(
-      value: value,
-      onChanged: onChanged,
-      activeColor: MyColors.primary,
-    );
-  }
-
-// Checkbox widget for settings
-  Widget _buildSettingsCheckbox({
-    required String title,
-    required bool value,
-    required Function(bool?) onChanged,
-  }) {
-    return CheckboxListTile(
-      value: value,
-      onChanged: onChanged,
-      activeColor: MyColors.primary,
-      overlayColor:
-          WidgetStateProperty.all(MyColors.primary.withValues(alpha: 0.1)),
-      title: Text(title, style: const TextStyle(fontSize: Font.small)),
-      contentPadding: kPadd0,
-      dense: true,
-      visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
-      controlAffinity: ListTileControlAffinity.leading,
-    );
-  }
-
-// Add this to the reminder schedule container to display custom reminders
 }

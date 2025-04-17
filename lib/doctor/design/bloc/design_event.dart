@@ -1,3 +1,4 @@
+import 'package:backend/backend.dart';
 import 'package:equatable/equatable.dart';
 
 import '../models/design_models.dart';

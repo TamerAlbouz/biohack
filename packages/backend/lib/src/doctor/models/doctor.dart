@@ -4,30 +4,38 @@ import '../../../backend.dart';
 
 part 'doctor.g.dart';
 
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true)
 class Doctor extends User {
-  const Doctor(
-      {required super.email,
-      required super.uid,
-      required this.state,
-      required this.licNum,
-      required this.govIdUrl,
-      required this.medicalLicenseUrl,
-      required this.active,
-      super.name,
-      required super.role,
-      super.busy,
-      super.profilePictureUrl,
-      super.createdAt,
-      super.updatedAt,
-      super.sex,
-      super.tokens,
-      super.biography,
-      this.specialties,
-      required this.availability,
-      this.notes,
-      this.clinicId,
-      this.patientIds});
+  const Doctor({
+    required super.email,
+    required super.uid,
+    required this.licNum,
+    required this.govIdUrl,
+    required this.medicalLicenseUrl,
+    required this.active,
+    super.name,
+    required super.role,
+    super.busy,
+    super.profilePictureUrl,
+    super.createdAt,
+    super.updatedAt,
+    super.sex,
+    super.tokens,
+    super.biography,
+    this.specialties,
+    required this.availability,
+    this.services,
+    this.patientIds,
+    // New fields from the signup form
+    this.previousName,
+    this.licenseType,
+    this.zone,
+    this.location,
+    this.isAtlanticRegistry,
+    this.registryHomeJurisdiction,
+    this.registrantType,
+    this.termsAccepted,
+  });
 
   /// URL of the doctor's government ID.
   final String govIdUrl;
@@ -38,9 +46,6 @@ class Doctor extends User {
   /// Whether the doctor is active or not.
   final bool active;
 
-  /// The state in which the doctor is licensed.
-  final String state;
-
   /// License Number
   final String licNum;
 
@@ -48,16 +53,37 @@ class Doctor extends User {
   final List<String>? specialties;
 
   /// Example: {'monday': ['09:00', '10:00']}
-  final Map<String, List<String>?> availability;
-
-  /// IDs of Notes taken by the doctor during or after a consultation.
-  final List<String>? notes;
-
-  /// ID of clinic
-  final String? clinicId;
+  final Map<String, WorkingHours?> availability;
 
   /// List of patient IDs associated with this doctor.
   final List<String>? patientIds;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final List<Service>? services;
+
+  /// Previous name of the doctor if applicable
+  final String? previousName;
+
+  /// Type of license that the doctor holds
+  final String? licenseType;
+
+  /// Zone where the doctor practices (e.g., 'Central Zone', 'Eastern Zone')
+  final String? zone;
+
+  /// Specific location where the doctor practices
+  final String? location;
+
+  /// Whether the doctor is part of the Atlantic Registry
+  final bool? isAtlanticRegistry;
+
+  /// Home jurisdiction if part of Atlantic Registry
+  final String? registryHomeJurisdiction;
+
+  /// Type of registrant (e.g., 'Family Physicians', 'Specialty')
+  final String? registrantType;
+
+  /// Whether the doctor has accepted CPSNS Virtual Care Standards
+  final bool? termsAccepted;
 
   /// Returns a new [Doctor] with updated fields.
   @override
@@ -77,10 +103,18 @@ class Doctor extends User {
     List<String>? tokens,
     String? biography,
     List<String>? specialties,
-    Map<String, List<String>?>? availability,
-    List<String>? notes,
-    String? clinicId,
+    Map<String, WorkingHours?>? availability,
     List<String>? patientIds,
+    List<Service>? services,
+    // New fields
+    String? previousName,
+    String? licenseType,
+    String? zone,
+    String? location,
+    bool? isAtlanticRegistry,
+    String? registryHomeJurisdiction,
+    String? registrantType,
+    bool? termsAccepted,
   }) {
     return Doctor(
       active: active ?? this.active,
@@ -88,7 +122,6 @@ class Doctor extends User {
       uid: uid,
       name: name ?? this.name,
       sex: sex ?? this.sex,
-      state: state ?? this.state,
       licNum: licNum ?? this.licNum,
       govIdUrl: govIdUrl ?? this.govIdUrl,
       medicalLicenseUrl: medicalLicenseUrl ?? this.medicalLicenseUrl,
@@ -101,9 +134,18 @@ class Doctor extends User {
       biography: biography ?? this.biography,
       specialties: specialties ?? this.specialties,
       availability: availability ?? this.availability,
-      notes: notes ?? this.notes,
-      clinicId: clinicId ?? this.clinicId,
       patientIds: patientIds ?? this.patientIds,
+      services: services ?? this.services,
+      // New fields
+      previousName: previousName ?? this.previousName,
+      licenseType: licenseType ?? this.licenseType,
+      zone: zone ?? this.zone,
+      location: location ?? this.location,
+      isAtlanticRegistry: isAtlanticRegistry ?? this.isAtlanticRegistry,
+      registryHomeJurisdiction:
+      registryHomeJurisdiction ?? this.registryHomeJurisdiction,
+      registrantType: registrantType ?? this.registrantType,
+      termsAccepted: termsAccepted ?? this.termsAccepted,
     );
   }
 
@@ -114,7 +156,6 @@ class Doctor extends User {
       uid: docId,
       active: data['active'],
       name: data['name'],
-      state: data['state'],
       sex: data['sex'],
       licNum: data['licNum'],
       govIdUrl: data['govIdUrl'],
@@ -130,12 +171,24 @@ class Doctor extends User {
           ? List<String>.from(data['specialties'])
           : null,
       availability: (data['availability'] as Map<String, dynamic>)
-          .map((k, v) => MapEntry(k, List<String>.from(v))),
-      notes: data['notes'] != null ? List<String>.from(data['notes']) : null,
-      clinicId: data['clinicId'],
+          .map((k, v) => MapEntry(k, WorkingHours.fromJson(v))),
       patientIds: data['patientIds'] != null
           ? List<String>.from(data['patientIds'])
           : null,
+      services: data['services'] != null
+          ? (data['services'] as List<dynamic>)
+          .map((e) => Service.fromJson(e))
+          .toList()
+          : null,
+      // New fields
+      previousName: data['previousName'],
+      licenseType: data['licenseType'],
+      zone: data['zone'],
+      location: data['location'],
+      isAtlanticRegistry: data['isAtlanticRegistry'],
+      registryHomeJurisdiction: data['registryHomeJurisdiction'],
+      registrantType: data['registrantType'],
+      termsAccepted: data['termsAccepted'],
     );
   }
 
@@ -147,7 +200,6 @@ class Doctor extends User {
       'active': active,
       'sex': sex,
       'name': name,
-      'state': state,
       'licNum': licNum,
       'govIdUrl': govIdUrl,
       'medicalLicenseUrl': medicalLicenseUrl,
@@ -160,18 +212,25 @@ class Doctor extends User {
       'biography': biography,
       'specialties': specialties,
       'availability': availability,
-      'notes': notes,
-      'clinicId': clinicId,
       'patientIds': patientIds,
+      // New fields
+      'previousName': previousName,
+      'licenseType': licenseType,
+      'zone': zone,
+      'location': location,
+      'isAtlanticRegistry': isAtlanticRegistry,
+      'registryHomeJurisdiction': registryHomeJurisdiction,
+      'registrantType': registrantType,
+      'termsAccepted': termsAccepted,
     };
   }
 
   @override
-  List<Object?> get props => [
+  List<Object?> get props =>
+      [
         email,
         uid,
         name,
-        state,
         licNum,
         govIdUrl,
         medicalLicenseUrl,
@@ -186,9 +245,17 @@ class Doctor extends User {
         biography,
         specialties,
         availability,
-        notes,
-        clinicId,
         patientIds,
+        services,
+        // New fields
+        previousName,
+        licenseType,
+        zone,
+        location,
+        isAtlanticRegistry,
+        registryHomeJurisdiction,
+        registrantType,
+        termsAccepted,
       ];
 
   factory Doctor.fromJson(Map<String, dynamic> json) => _$DoctorFromJson(json);
