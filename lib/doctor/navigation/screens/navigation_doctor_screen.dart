@@ -1,17 +1,16 @@
 import 'dart:math';
 
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/app/bloc/auth/route_bloc.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/doctor/appointments/bloc/doctor_appointments_bloc.dart';
 import 'package:medtalk/doctor/dashboard/screens/doctor_dashboard_screen.dart';
 import 'package:medtalk/doctor/design/screens/design_screen.dart';
 import 'package:medtalk/doctor/patients/screens/patients_screen.dart';
 import 'package:medtalk/styles/styles/button.dart';
 import 'package:medtalk/styles/styles/text.dart';
-import 'package:p_logger/p_logger.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../common/widgets/custom_bottom_navbar.dart';
@@ -39,34 +38,15 @@ class NavigationDoctorScreen extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<NavigationDoctorCubit>(
-            create: (context) => NavigationDoctorCubit(
-                  doctorRepo: getIt<IDoctorRepository>(),
-                  authRepo: getIt<IAuthenticationRepository>(),
-                )),
+            create: (context) => getIt<NavigationDoctorCubit>()),
         BlocProvider<DoctorAppointmentsBloc>(
-            create: (context) => DoctorAppointmentsBloc(
-                  getIt<IAppointmentRepository>(),
-                  context.read<IAuthenticationRepository>(),
-                  getIt<IPatientRepository>(),
-                )..add(LoadDoctorAppointments())),
+            create: (context) =>
+                getIt<DoctorAppointmentsBloc>()..add(LoadDoctorAppointments())),
         BlocProvider<DoctorDashboardBloc>(
-            create: (context) => DoctorDashboardBloc(
-                  getIt<IAuthenticationRepository>(),
-                  getIt<IAppointmentRepository>(),
-                  getIt<IPatientRepository>(),
-                )),
+            create: (context) => getIt<DoctorDashboardBloc>()),
         BlocProvider<DoctorStatsBloc>(
-            create: (context) => DoctorStatsBloc(
-                  getIt<IAuthenticationRepository>(),
-                  getIt<IAppointmentRepository>(),
-                  getIt<IPatientRepository>(),
-                )),
-        BlocProvider<PatientsBloc>(
-            create: (context) => PatientsBloc(
-                  getIt<IAuthenticationRepository>(),
-                  getIt<IPatientRepository>(),
-                  getIt<IAppointmentRepository>(),
-                )),
+            create: (context) => getIt<DoctorStatsBloc>()),
+        BlocProvider<PatientsBloc>(create: (context) => getIt<PatientsBloc>()),
       ],
       child: const NavigationPatientView(),
     );
@@ -822,7 +802,6 @@ class _DoctorInactiveScreenState extends State<DoctorInactiveScreen>
     // Launch URL without using context in the callback
     launchUrl(uri).then((_) {}).catchError((error) {
       // This is just to catch errors, but we don't use context here
-      logger.e('Error launching email client: $error');
     });
   }
 }

@@ -1,21 +1,26 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/doctor/interfaces/doctor_interface.dart';
+import 'package:medtalk/backend/doctor/models/doctor.dart';
 
 part 'search_doctors_event.dart';
 part 'search_doctors_state.dart';
 
+@injectable
 class SearchDoctorsBloc extends Bloc<SearchDoctorsEvent, SearchDoctorsState> {
   SearchDoctorsBloc(
     this._doctorRepository,
+    this.logger,
   ) : super(SearchDoctorsInitial()) {
     on<SearchDoctorsLoad>(_onSearchDoctorsLoad);
     on<SearchDoctorsLoadMore>(_onSearchDoctorsLoadMore);
   }
 
   final IDoctorRepository _doctorRepository;
+  final Logger logger;
   static const int _pageSize = 20;
 
   Future<void> _onSearchDoctorsLoad(

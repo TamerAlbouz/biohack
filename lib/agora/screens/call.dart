@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medtalk/agora/bloc/agora_bloc.dart';
+import 'package:medtalk/backend/injectable.dart';
 
 class VideoCallScreen extends StatelessWidget {
   const VideoCallScreen({super.key});
@@ -16,7 +17,7 @@ class VideoCallScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       lazy: false,
-      create: (_) => AgoraBloc()
+      create: (_) => getIt<AgoraBloc>()
         ..add(AgoraRequestPermissions())
         ..add(AgoraInitializeEngine())
         ..add(const AgoraJoinChannel(

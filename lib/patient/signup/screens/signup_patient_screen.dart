@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:backend/backend.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +7,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/common/functions/generate_random_password.dart';
 import 'package:medtalk/common/widgets/random_hexagons.dart';
 import 'package:medtalk/styles/font.dart';
@@ -82,13 +82,7 @@ class _SignUpPatientScreenState extends State<SignUpPatientScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _signUpBloc = SignUpPatientBloc(
-      getIt<ICryptoRepository>(),
-      getIt<IAuthenticationRepository>(),
-      getIt<IEncryptionRepository>(),
-      getIt<IPatientRepository>(),
-      getIt<ISecureStorageRepository>(),
-    );
+    _signUpBloc = getIt<SignUpPatientBloc>();
     _controllers = {
       'email': TextEditingController(),
       'password': TextEditingController(),

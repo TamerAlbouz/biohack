@@ -1,8 +1,9 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/appointment/models/appointment.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/doctor/patients/screens/patient_details.dart';
 import 'package:medtalk/styles/colors.dart';

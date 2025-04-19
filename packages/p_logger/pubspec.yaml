@@ -1,9 +1,0 @@
-name: p_logger
-description: Dart package which manages the logging process for the app.
-publish_to: none
-
-environment:
-  sdk: ">=3.0.0 <4.0.0"
-
-dependencies:
-  logger: ^2.4.0

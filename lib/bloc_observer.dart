@@ -1,7 +1,13 @@
 import 'package:bloc/bloc.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 
+@injectable
 class CustomBlocObserver extends BlocObserver {
+  final Logger logger;
+
+  CustomBlocObserver(this.logger);
+
   @override
   void onChange(BlocBase bloc, Change change) {
     super.onChange(bloc, change);

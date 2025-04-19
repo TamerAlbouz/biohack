@@ -1,16 +1,16 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
+import 'package:medtalk/backend/medical_doc/interfaces/medical_doc_interface.dart';
+import 'package:medtalk/backend/medical_doc/models/medical_doc.dart';
 
 part 'document_event.dart';
 part 'document_state.dart';
 
+@injectable
 class PatientDocumentBloc
     extends Bloc<PatientDocumentEvent, PatientDocumentState> {
-  PatientDocumentBloc({
-    required IMedicalDocumentRepository documentRepo,
-  })  : _documentRepo = documentRepo,
-        super(PatientDocumentsInitial()) {
+  PatientDocumentBloc(this._documentRepo) : super(PatientDocumentsInitial()) {
     on<LoadPatientDocuments>(_onLoadPatientDocuments);
   }
 

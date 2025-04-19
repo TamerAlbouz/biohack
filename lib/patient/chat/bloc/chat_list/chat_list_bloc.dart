@@ -1,15 +1,19 @@
 // chats_list_bloc.dart
-import 'package:backend/backend.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/chat/interfaces/chat_interface.dart';
 
 import 'chat_list_event.dart';
 import 'chat_list_state.dart';
 
+@injectable
 class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
   final IChatRepository _chatRepository;
+  final Logger logger;
 
-  ChatsListBloc(this._chatRepository) : super(ChatsListInitial()) {
+  ChatsListBloc(this._chatRepository, this.logger) : super(ChatsListInitial()) {
     on<LoadChatsList>(_onLoadChatsList);
     on<RefreshChatsList>(_onRefreshChatsList);
   }

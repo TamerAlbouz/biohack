@@ -1,18 +1,34 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:crypton/crypton.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:formz/formz.dart';
-import 'package:formz_inputs/formz_inputs.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/authentication/enums/role.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/doctor/interfaces/doctor_interface.dart';
+import 'package:medtalk/backend/doctor/models/doctor.dart';
+import 'package:medtalk/backend/encryption/interfaces/crypto_interface.dart';
+import 'package:medtalk/backend/encryption/interfaces/encryption_interface.dart';
+import 'package:medtalk/backend/encryption/models/private_key_decryption_result.dart';
+import 'package:medtalk/backend/encryption/models/private_key_encryption_result.dart';
+import 'package:medtalk/backend/patient/interfaces/patient_interface.dart';
+import 'package:medtalk/backend/secure_storage/interfaces/secure_storage_interface.dart';
+import 'package:medtalk/backend/storage/interfaces/storage_interface.dart';
+import 'package:medtalk/formz_inputs/intro/patient/date_of_birth.dart';
+import 'package:medtalk/formz_inputs/intro/patient/full_name.dart';
+import 'package:medtalk/formz_inputs/intro/patient/sex.dart';
+import 'package:medtalk/formz_inputs/login/email.dart';
+import 'package:medtalk/formz_inputs/login/password.dart';
 
 part 'signup_doctor_event.dart';
 part 'signup_doctor_state.dart';
 
+@injectable
 class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
   final IDoctorRepository _doctorRepository;
   final IPatientRepository _doctorPatientRepository;
@@ -21,6 +37,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
   final IEncryptionRepository _encryptionRepository;
   final ISecureStorageRepository _secureStorageRepository;
   final IStorageRepository _storageRepository;
+  final Logger logger;
 
   SignUpDoctorBloc(
     this._crypto,
@@ -30,6 +47,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
     this._doctorPatientRepository,
     this._secureStorageRepository,
     this._storageRepository,
+    this.logger,
   ) : super(const SignUpDoctorState()) {
     on<SignUpEmailChanged>(_onEmailChanged);
     on<SignUpPasswordChanged>(_onPasswordChanged);

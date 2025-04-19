@@ -1,20 +1,25 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/patient/interfaces/patient_interface.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 
 part 'patient_profile_event.dart';
 part 'patient_profile_state.dart';
 
+@injectable
 class PatientProfileBloc
     extends Bloc<PatientProfileEvent, PatientProfileState> {
   PatientProfileBloc(
     this._patientRepository,
+    this.logger,
   ) : super(PatientProfileInitial()) {
     on<LoadPatientProfile>(_onLoadPatientProfile);
   }
 
   final IPatientRepository _patientRepository;
+  final Logger logger;
 
   void _onLoadPatientProfile(
     LoadPatientProfile event,

@@ -1,21 +1,29 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_status.dart';
+import 'package:medtalk/backend/appointment/interfaces/appointment_interface.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/patient/interfaces/patient_interface.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 
 part 'doctor_dashboard_event.dart';
 part 'doctor_dashboard_state.dart';
 
+@injectable
 class DoctorDashboardBloc
     extends Bloc<DoctorDashboardEvent, DoctorDashboardState> {
   final IAuthenticationRepository _authRepository;
   final IAppointmentRepository _appointmentRepository;
   final IPatientRepository _patientRepository;
+  final Logger logger;
 
   DoctorDashboardBloc(
     this._authRepository,
     this._appointmentRepository,
     this._patientRepository,
+    this.logger,
   ) : super(DoctorDashboardInitial()) {
     on<LoadDashboardData>(_onLoadDashboardData);
   }

@@ -1,6 +1,7 @@
 // chat_event.dart
-import 'package:backend/backend.dart';
+
 import 'package:equatable/equatable.dart';
+import 'package:medtalk/backend/chat/models/chat_message.dart';
 
 abstract class ChatEvent extends Equatable {
   const ChatEvent();

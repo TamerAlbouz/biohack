@@ -64,6 +64,7 @@ dependencies:
   webview_flutter: ^4.10.0
   flutter_markdown: ^0.7.7
   url_launcher: ^6.3.1
+  injectable: ^2.5.0
 
   # encryption
   crypton: ^2.2.1
@@ -74,23 +75,28 @@ dependencies:
   # Agora
   agora_rtc_engine: ^6.5.0
 
-  # Local packages
-  p_logger:
-    path: packages/p_logger
-  formz_inputs:
-    path: packages/formz_inputs
-  backend:
-    path: packages/backend
   lottie: ^3.2.0
 
-
+  firebase_storage: ^12.3.6
+  get_it: ^8.0.0
+  pointycastle: ^3.9.1
+  flutter_secure_storage: ^9.2.2
+  json_annotation: ^4.9.0
+  async: 2.12.0
+  logger: ^2.4.0
+  shared_preferences: ^2.3.4
+  cloud_functions: ^5.2.0
+  http: ^1.2.2
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^4.0.0
   build_runner: ^2.4.13
+  injectable_generator: ^2.6.2
   envied_generator: ^0.5.4+1
+  json_serializable: ^6.8.0
 
 flutter:
 

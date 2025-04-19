@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/patients_models.dart';
@@ -7,20 +8,11 @@ import '../models/patients_models.dart';
 part 'chat_event.dart';
 part 'chat_state.dart';
 
-// BLoC
+@injectable
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
-  final String patientId;
-  // Add repositories as needed
-  // final IMessageRepository messageRepository;
-  // final IDocumentRepository documentRepository;
-
   static const uuid = Uuid();
 
-  ChatBloc({
-    required this.patientId,
-    // required this.messageRepository,
-    // required this.documentRepository,
-  }) : super(ChatInitial()) {
+  ChatBloc() : super(ChatInitial()) {
     on<LoadChatHistory>(_onLoadChatHistory);
     on<SendMessage>(_onSendMessage);
     on<ReceiveMessage>(_onReceiveMessage);
@@ -36,7 +28,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       // final messages = await messageRepository.getChatHistory(patientId);
 
       // For demonstration purposes, use dummy data
-      final messages = _getDummyMessages();
+      final messages = _getDummyMessages(event.patientId);
 
       emit(ChatHistoryLoaded(messages: messages));
     } catch (e) {
@@ -73,12 +65,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
               content: event.content.isNotEmpty
                   ? event.content
                   : 'Shared a file: ${attachment.fileName}',
-              senderId: 'doctor_id', // In real app, use actual doctor ID
+              senderId: 'doctor_id',
+              // In real app, use actual doctor ID
               receiverId: event.patientId,
               timestamp: DateTime.now(),
               isRead: false,
-              attachmentUrl:
-                  'file://${attachment.filePath}', // In real app, use server URL
+              attachmentUrl: 'file://${attachment.filePath}',
+              // In real app, use server URL
               attachmentType: attachment.fileType,
               attachmentName: attachment.fileName,
             );
@@ -96,7 +89,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           final message = Message(
             id: uuid.v4(),
             content: event.content,
-            senderId: 'doctor_id', // In real app, use actual doctor ID
+            senderId: 'doctor_id',
+            // In real app, use actual doctor ID
             receiverId: event.patientId,
             timestamp: DateTime.now(),
             isRead: false,
@@ -130,7 +124,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   // For demonstration purposes only
-  List<Message> _getDummyMessages() {
+  List<Message> _getDummyMessages(String patientId) {
     return [
       Message(
         id: '1',

@@ -1,7 +1,6 @@
-import 'package:backend/backend.dart';
 import 'package:equatable/equatable.dart';
-
-import '../models/design_models.dart';
+import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/services/models/service.dart';
 
 // Events
 abstract class DesignEvent extends Equatable {
@@ -41,6 +40,9 @@ class AddService extends DesignEvent {
   final bool isOnline;
   final bool isInPerson;
   final bool isHomeVisit;
+  final String description;
+  final String? preAppointmentInstructions;
+  final ServiceAvailability? customAvailability;
 
   const AddService({
     required this.title,
@@ -49,11 +51,14 @@ class AddService extends DesignEvent {
     required this.isOnline,
     required this.isInPerson,
     required this.isHomeVisit,
+    required this.description,
+    this.preAppointmentInstructions,
+    this.customAvailability,
   });
 
   @override
   List<Object> get props =>
-      [title, duration, price, isOnline, isInPerson, isHomeVisit];
+      [title, duration, price, isOnline, isInPerson, isHomeVisit, description];
 }
 
 class UpdateService extends DesignEvent {
@@ -64,6 +69,9 @@ class UpdateService extends DesignEvent {
   final bool isOnline;
   final bool isInPerson;
   final bool isHomeVisit;
+  final String? preAppointmentInstructions;
+  final ServiceAvailability? customAvailability;
+  final String description;
 
   const UpdateService({
     required this.id,
@@ -73,11 +81,22 @@ class UpdateService extends DesignEvent {
     required this.isOnline,
     required this.isInPerson,
     required this.isHomeVisit,
+    required this.description,
+    this.preAppointmentInstructions,
+    this.customAvailability,
   });
 
   @override
-  List<Object> get props =>
-      [id, title, duration, price, isOnline, isInPerson, isHomeVisit];
+  List<Object> get props => [
+        id,
+        title,
+        duration,
+        price,
+        isOnline,
+        isInPerson,
+        isHomeVisit,
+        description
+      ];
 }
 
 class DeleteService extends DesignEvent {

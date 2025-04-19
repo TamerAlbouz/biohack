@@ -1,6 +1,8 @@
 // State
-import 'package:backend/backend.dart';
+
 import 'package:equatable/equatable.dart';
+import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/services/models/service.dart';
 
 class DesignState extends Equatable {
   final String bio;

@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:backend/backend.dart';
 import 'package:equatable/equatable.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 
 enum StatsPeriod { week, month, quarter, year, allTime }
 

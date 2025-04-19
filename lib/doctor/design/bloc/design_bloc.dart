@@ -1,16 +1,23 @@
 // BLoC
-import 'package:backend/backend.dart';
+
 import 'package:bloc/bloc.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/doctor/interfaces/doctor_interface.dart';
+import 'package:medtalk/backend/doctor/models/doctor.dart';
+import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/services/models/service.dart';
 import 'package:medtalk/doctor/design/bloc/design_event.dart';
 import 'package:medtalk/doctor/design/bloc/design_state.dart';
 
+@injectable
 class DesignBloc extends Bloc<DesignEvent, DesignState> {
-  DesignBloc({
-    required IAuthenticationRepository authenticationRepository,
-    required IDoctorRepository doctorRepository,
-  })  : _authenticationRepository = authenticationRepository,
-        _doctorRepository = doctorRepository,
-        super(const DesignState(
+  DesignBloc(
+    this._authenticationRepository,
+    this._doctorRepository,
+    this.logger,
+  ) : super(const DesignState(
           // Initialize with default services
           services: [],
           // Initialize with default schedule
@@ -28,6 +35,7 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
 
   final IAuthenticationRepository _authenticationRepository;
   final IDoctorRepository _doctorRepository;
+  final Logger logger;
 
   Future<void> _onLoadDoctorProfile(
     LoadDoctorProfile event,
@@ -154,6 +162,9 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
       isOnline: event.isOnline,
       isInPerson: event.isInPerson,
       isHomeVisit: event.isHomeVisit,
+      customAvailability: event.customAvailability,
+      description: event.description,
+      preAppointmentInstructions: event.preAppointmentInstructions,
     );
 
     // Add to existing services
@@ -177,6 +188,9 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
           isOnline: event.isOnline,
           isInPerson: event.isInPerson,
           isHomeVisit: event.isHomeVisit,
+          customAvailability: service.customAvailability,
+          description: service.description,
+          preAppointmentInstructions: service.preAppointmentInstructions,
         );
       }
       return service;

@@ -1,9 +1,22 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_status.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_type.dart';
+import 'package:medtalk/backend/appointment/interfaces/appointment_interface.dart';
+import 'package:medtalk/backend/appointment/models/appointment.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/doctor/interfaces/doctor_interface.dart';
+import 'package:medtalk/backend/doctor/models/doctor.dart';
+import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/mail/interfaces/mail_interface.dart';
+import 'package:medtalk/backend/patient/interfaces/patient_interface.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
+import 'package:medtalk/backend/payment/enums/payment_type.dart';
+import 'package:medtalk/backend/services/models/service.dart';
 
 import '../models/search_doctors_models.dart';
 import '../models/selection_item.dart';
@@ -11,22 +24,19 @@ import '../models/selection_item.dart';
 part 'setup_appointment_event.dart';
 part 'setup_appointment_state.dart';
 
+@injectable
 class SetupAppointmentBloc
     extends Bloc<SetupAppointmentEvent, SetupAppointmentState> {
   bool reBuild = false;
 
-  SetupAppointmentBloc({
-    required IMailRepository mailRepository,
-    required IAppointmentRepository appointmentRepository,
-    required IAuthenticationRepository authenticationRepository,
-    required IDoctorRepository doctorRepository,
-    required IPatientRepository patientRepository,
-  })  : _mailRepository = mailRepository,
-        _appointmentRepository = appointmentRepository,
-        _authenticationRepository = authenticationRepository,
-        _doctorRepository = doctorRepository,
-        _patientRepository = patientRepository,
-        super(const SetupAppointmentState()) {
+  SetupAppointmentBloc(
+      this._mailRepository,
+      this._appointmentRepository,
+      this._authenticationRepository,
+      this._doctorRepository,
+      this._patientRepository,
+      this.logger)
+      : super(const SetupAppointmentState()) {
     on<ToggleRebuild>(_onToggleRebuild);
     on<LoadInitialData>(_onLoadInitialData);
     on<UpdateServiceType>(_onUpdateServiceType);
@@ -47,6 +57,7 @@ class SetupAppointmentBloc
   final IAuthenticationRepository _authenticationRepository;
   final IDoctorRepository _doctorRepository;
   final IPatientRepository _patientRepository;
+  final Logger logger;
 
   void _onSelectCreditCard(
       SelectCreditCard event, Emitter<SetupAppointmentState> emit) {

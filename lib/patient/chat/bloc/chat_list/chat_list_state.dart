@@ -1,6 +1,7 @@
 // chats_list_state.dart
-import 'package:backend/backend.dart';
+
 import 'package:equatable/equatable.dart';
+import 'package:medtalk/backend/chat/models/chat_room.dart';
 
 abstract class ChatsListState extends Equatable {
   const ChatsListState();

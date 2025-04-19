@@ -1,10 +1,15 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_type.dart';
+import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/injectable.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
+import 'package:medtalk/backend/payment/enums/payment_type.dart';
+import 'package:medtalk/backend/services/models/service.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
@@ -119,13 +124,8 @@ class _SetupAppointmentScreenState extends State<SetupAppointmentScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SetupAppointmentBloc(
-        mailRepository: getIt<IMailRepository>(),
-        appointmentRepository: getIt<IAppointmentRepository>(),
-        authenticationRepository: getIt<IAuthenticationRepository>(),
-        doctorRepository: getIt<IDoctorRepository>(),
-        patientRepository: getIt<IPatientRepository>(),
-      )..add(LoadInitialData(
+      create: (context) => getIt<SetupAppointmentBloc>()
+        ..add(LoadInitialData(
           widget.doctorId,
           widget.specialty,
         )),

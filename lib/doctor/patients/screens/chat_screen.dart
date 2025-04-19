@@ -1,10 +1,11 @@
-import 'package:backend/backend.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/injectable.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/font.dart';
@@ -57,10 +58,10 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ChatBloc(
-        patientId: widget.patient.uid,
-        // Initialize with repositories as needed
-      )..add(LoadChatHistory()),
+      create: (context) => getIt<ChatBloc>(
+          // Initialize with repositories as needed
+          )
+        ..add(LoadChatHistory(patientId: widget.patient.uid)),
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: kToolbarHeight,

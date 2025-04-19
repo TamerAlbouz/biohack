@@ -1,8 +1,9 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
+import 'package:medtalk/backend/authentication/enums/role.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/login/bloc/login_bloc.dart';
 import 'package:medtalk/styles/sizes.dart';
 
@@ -69,12 +70,7 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     return BlocProvider(
       lazy: false,
-      create: (_) => LoginBloc(
-        getIt<IAuthenticationRepository>(),
-        getIt<IEncryptionRepository>(),
-        getIt<ISecureStorageRepository>(),
-        getIt<ICryptoRepository>(),
-      ),
+      create: (_) => getIt<LoginBloc>(),
       child: SingleChildScrollView(
         child: Column(
           children: [

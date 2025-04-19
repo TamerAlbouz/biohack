@@ -1,7 +1,10 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:medtalk/backend/authentication/enums/auth_status.dart';
+import 'package:medtalk/backend/authentication/enums/role.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/doctor/navigation/screens/navigation_doctor_screen.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
@@ -31,32 +34,18 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
+    return MultiBlocProvider(
       providers: [
-        RepositoryProvider<IAuthenticationRepository>.value(
-          value: _authenticationRepository,
+        BlocProvider(
+          lazy: false,
+          create: (_) => getIt<RouteBloc>()
+            ..add(InitialRun())
+            ..add(AuthSubscriptionRequested()),
         ),
+        BlocProvider(create: (_) => getIt<PatientBloc>()..add(LoadPatient())),
       ],
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            lazy: false,
-            create: (_) => RouteBloc(
-              authRepo: _authenticationRepository,
-              userPreferences: getIt<UserPreferences>(),
-            )
-              ..add(InitialRun())
-              ..add(AuthSubscriptionRequested()),
-          ),
-          BlocProvider(
-              create: (_) => PatientBloc(
-                    patientRepo: getIt<IPatientRepository>(),
-                    authRepo: getIt<IAuthenticationRepository>(),
-                  )..add(LoadPatient())),
-        ],
-        child: _AppView(
-          authenticationRepository: _authenticationRepository,
-        ),
+      child: _AppView(
+        authenticationRepository: _authenticationRepository,
       ),
     );
   }

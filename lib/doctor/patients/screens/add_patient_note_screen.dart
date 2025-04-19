@@ -1,8 +1,8 @@
-import 'package:backend/backend.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/common/widgets/rows/cancel_confirm.dart';
 import 'package:medtalk/common/widgets/toggle.dart';

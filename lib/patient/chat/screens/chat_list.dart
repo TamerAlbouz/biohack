@@ -1,7 +1,8 @@
 // chats_list_screen.dart
-import 'package:backend/backend.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medtalk/backend/chat/models/chat_room.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/styles/colors.dart';
 

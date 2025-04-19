@@ -1,10 +1,12 @@
 import 'package:bloc/bloc.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../common/state/navbar_state_base.dart';
 import '../enums/navbar_screen_items_patients.dart';
 
 part 'navigation_state.dart';
 
+@injectable
 class NavigationPatientCubit extends Cubit<NavigationPatientState> {
   NavigationPatientCubit()
       : super(NavigationPatientState(NavbarScreenItemsPatient.dashboard, 0));

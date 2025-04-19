@@ -1,19 +1,21 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/doctor/interfaces/doctor_interface.dart';
 
 import '../../../common/state/navbar_state_base.dart';
 import '../enums/navbar_screen_items_doctor.dart';
 
 part 'navigation_state.dart';
 
+@injectable
 class NavigationDoctorCubit extends Cubit<NavigationDoctorState> {
-  NavigationDoctorCubit({
-    required IAuthenticationRepository authRepo,
-    required IDoctorRepository doctorRepo,
-  })  : _authRepo = authRepo,
-        _doctorRepo = doctorRepo,
-        super(NavigationDoctorState(
+  NavigationDoctorCubit(
+    this._authRepo,
+    this._doctorRepo,
+    this.logger,
+  ) : super(NavigationDoctorState(
             navbarItem: NavbarScreenItemsDoctor.dashboard, index: 0)) {
     // Check doctor's active status upon initialization
     checkDoctorActiveStatus();
@@ -21,6 +23,7 @@ class NavigationDoctorCubit extends Cubit<NavigationDoctorState> {
 
   final IAuthenticationRepository _authRepo;
   final IDoctorRepository _doctorRepo;
+  final Logger logger;
 
   Future<void> checkDoctorActiveStatus() async {
     try {

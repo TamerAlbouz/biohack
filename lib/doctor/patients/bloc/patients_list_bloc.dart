@@ -1,20 +1,28 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/appointment/interfaces/appointment_interface.dart';
+import 'package:medtalk/backend/appointment/models/appointment.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/patient/interfaces/patient_interface.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 
 part 'patients_list_event.dart';
 part 'patients_list_state.dart';
 
+@injectable
 class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
   final IAuthenticationRepository _authRepository;
   final IPatientRepository _patientRepository;
   final IAppointmentRepository _appointmentRepository;
+  final Logger logger;
 
   PatientsBloc(
     this._authRepository,
     this._patientRepository,
     this._appointmentRepository,
+    this.logger,
   ) : super(PatientsInitial()) {
     on<LoadPatients>(_onLoadPatients);
     on<SearchPatients>(_onSearchPatients);

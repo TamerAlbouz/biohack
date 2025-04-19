@@ -1,14 +1,15 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_type.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
+import 'package:medtalk/backend/payment/enums/payment_type.dart';
 
 import '../../../common/widgets/base/custom_base.dart';
 import '../../../styles/colors.dart';
 import '../../../styles/font.dart';
 import '../../../styles/sizes.dart';
 import '../bloc/setup_appointment_bloc.dart';
-import '../models/search_doctors_models.dart';
 
 class AppointmentsDetailsCard extends StatelessWidget {
   const AppointmentsDetailsCard({

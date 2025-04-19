@@ -1,7 +1,7 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_status.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/font.dart';

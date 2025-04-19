@@ -1,10 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 
 part 'doctor_profile_event.dart';
 part 'doctor_profile_state.dart';
 
-// Bloc implementation
+@injectable
 class DoctorProfileBloc extends Bloc<DoctorProfileEvent, DoctorProfileState> {
   DoctorProfileBloc() : super(const DoctorProfileState()) {
     on<LoadDoctorProfile>(_onLoadDoctorProfile);

@@ -1,15 +1,19 @@
 // chat_bloc.dart
-import 'package:backend/backend.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/chat/interfaces/chat_interface.dart';
 
 import 'chat_event.dart';
 import 'chat_state.dart';
 
+@injectable
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final IChatRepository _chatRepository;
+  final Logger logger;
 
-  ChatBloc(this._chatRepository) : super(ChatInitial()) {
+  ChatBloc(this._chatRepository, this.logger) : super(ChatInitial()) {
     on<InitializeChatRoom>(_onInitializeChatRoom);
     on<SendMessage>(_onSendMessage);
     on<LoadMoreMessages>(_onLoadChatMessages);

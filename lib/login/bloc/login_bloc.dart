@@ -1,23 +1,29 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
-import 'package:formz_inputs/formz_inputs.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/authentication/exceptions/auth_exception.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/encryption/exceptions/encryption_exception.dart';
+import 'package:medtalk/backend/encryption/interfaces/crypto_interface.dart';
+import 'package:medtalk/backend/encryption/interfaces/encryption_interface.dart';
+import 'package:medtalk/backend/encryption/models/private_key_decryption_result.dart';
+import 'package:medtalk/backend/secure_storage/interfaces/secure_storage_interface.dart';
+import 'package:medtalk/formz_inputs/login/email.dart';
+import 'package:medtalk/formz_inputs/login/password.dart';
 
 part 'login_event.dart';
 part 'login_state.dart';
 
+@injectable
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  LoginBloc(
-    this._authenticationRepository,
-    this._encryptionRepository,
-    this._secureStorageRepository,
-    this._crypto,
-  ) : super(const LoginState()) {
+  LoginBloc(this._authenticationRepository, this._encryptionRepository,
+      this._secureStorageRepository, this._crypto, this.logger)
+      : super(const LoginState()) {
     on<SignInEmailChanged>(_signInEmailChanged);
     on<SignInPasswordChanged>(_signInPasswordChanged);
     on<LogInWithCredentials>(_logInWithCredentials);
@@ -29,6 +35,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final IEncryptionRepository _encryptionRepository;
   final ISecureStorageRepository _secureStorageRepository;
   final ICryptoRepository _crypto;
+  final Logger logger;
 
   void _signInEmailChanged(SignInEmailChanged event, Emitter<LoginState> emit) {
     final email = Email.dirty(event.email);

@@ -1,7 +1,9 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/backend/doctor/models/doctor.dart';
+import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/common/widgets/common_error_widget.dart';
 import 'package:medtalk/common/widgets/dividers/section_divider.dart';
 import 'package:medtalk/common/widgets/dropdown/custom_complex_dropdown.dart';
@@ -41,9 +43,7 @@ class _SearchDoctorsScreenState extends State<SearchDoctorsScreen> {
   @override
   void initState() {
     super.initState();
-    _searchDoctorsBloc = SearchDoctorsBloc(
-      getIt<IDoctorRepository>(),
-    )..add(SearchDoctorsLoad());
+    _searchDoctorsBloc = getIt<SearchDoctorsBloc>()..add(SearchDoctorsLoad());
     _infiniteScrollController = InfiniteScrollController();
   }
 

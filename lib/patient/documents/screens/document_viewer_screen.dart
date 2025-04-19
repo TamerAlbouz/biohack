@@ -8,7 +8,6 @@ import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
 import 'package:open_file/open_file.dart';
-import 'package:p_logger/p_logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:share_plus/share_plus.dart';
@@ -54,7 +53,6 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      logger.e('Error loading document: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -167,7 +165,6 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
       final xFile = XFile(file.path);
       await Share.shareXFiles([xFile], text: 'Sharing ${_document.name}');
     } catch (e) {
-      logger.e('Error sharing document: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -215,7 +212,6 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
           Navigator.pop(context);
         }
       } catch (e) {
-        logger.e('Error deleting document: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -366,10 +362,24 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
                     });
                   },
                   onError: (error) {
-                    logger.e('Error rendering PDF: $error');
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error loading PDF: $error'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   },
                   onPageError: (page, error) {
-                    logger.e('Error on page $page: $error');
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Error on page $page: $error'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   },
                   onViewCreated: (PDFViewController pdfViewController) {
                     // You could store the controller for later use

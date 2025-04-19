@@ -6,7 +6,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
-import 'package:p_logger/p_logger.dart';
 
 import '../models/documents_models.dart';
 import 'document_viewer_screen.dart';
@@ -228,7 +227,14 @@ class _DocumentManagementScreenState extends State<DocumentManagementScreen> {
       // Apply initial sorting
       _sortDocuments();
     } catch (e) {
-      logger.e('Error initializing documents: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error initializing documents: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 

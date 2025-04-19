@@ -1,14 +1,14 @@
-import 'package:backend/backend.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/chat/models/chat_message.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/styles/colors.dart';
 import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
-import 'package:p_logger/p_logger.dart';
 import 'package:uuid/uuid.dart';
 
 import '../bloc/chat_room/chat_bloc.dart';
@@ -104,7 +104,6 @@ class _ChatScreenState extends State<ChatScreen> {
       }
     } catch (e) {
       // Show error using ScaffoldMessenger in the build method
-      logger.e('Error picking image: $e');
       _showErrorMessage('Error picking image: $e');
     }
   }
@@ -256,7 +255,7 @@ class _ChatScreenState extends State<ChatScreen> {
         backgroundColor: MyColors.cardBackground,
       ),
       body: BlocProvider(
-        create: (context) => ChatBloc(getIt<IChatRepository>())
+        create: (context) => getIt<ChatBloc>()
           ..add(InitializeChatRoom(
               currentUserId: widget.currentUserId,
               otherUserId: widget.otherUserId)),

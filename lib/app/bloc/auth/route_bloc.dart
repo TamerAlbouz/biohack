@@ -1,28 +1,42 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/authentication/enums/auth_status.dart';
+import 'package:medtalk/backend/authentication/enums/role.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/cache/shared_preferences.dart';
+import 'package:medtalk/backend/secure_storage/interfaces/secure_storage_interface.dart';
+import 'package:medtalk/backend/user/models/user.dart';
 
 part 'route_event.dart';
 part 'route_state.dart';
 
+@injectable
 class RouteBloc extends Bloc<RouteEvent, RouteState> {
-  RouteBloc({
-    required IAuthenticationRepository authRepo,
-    required UserPreferences userPreferences,
-  })  : _authRepo = authRepo,
-        _userPreferences = userPreferences,
-        super(RouteInitial(user: authRepo.currentUser)) {
+  RouteBloc(
+    this._authRepo,
+    this._userPreferences,
+    this._secureStorageRepository,
+    this.logger,
+  ) : super(RouteInitial(user: User.empty)) {
     on<InitialRun>(_onInitialRun);
     on<AuthSubscriptionRequested>(_onSubscriptionRequested);
     on<AuthLogoutPressed>(_onLogoutPressed);
     on<ChooseRole>(_onChooseRole);
     on<SwitchRoles>(_onSwitchRoles);
+
+    // Initialize with the current user after constructor
+    if (_authRepo.currentUser != User.empty) {
+      add(InitialRun());
+    }
   }
 
   final IAuthenticationRepository _authRepo;
   final UserPreferences _userPreferences;
+  final ISecureStorageRepository _secureStorageRepository;
+  final Logger logger;
 
   String getRole() {
     return _userPreferences.getRole()?.name ?? '';
@@ -134,11 +148,8 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
   Future<void> signOut() async {
     await _userPreferences.clearRole();
 
-    // empty the secure storage
-    ISecureStorageRepository secureEncryptionStorage =
-        getIt<ISecureStorageRepository>();
-
-    await secureEncryptionStorage.deleteAll();
+    // Use the injected secure storage
+    await _secureStorageRepository.deleteAll();
 
     _authRepo.logOut();
 

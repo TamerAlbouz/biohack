@@ -1,10 +1,13 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/injectable.dart';
+import 'package:medtalk/backend/services/models/service.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
+import 'package:medtalk/common/widgets/dividers/section_divider.dart';
 import 'package:medtalk/common/widgets/dummy/profile_picture.dart';
 import 'package:medtalk/common/widgets/show_model_sheet.dart';
 import 'package:medtalk/doctor/design/bloc/design_bloc.dart';
@@ -18,6 +21,7 @@ import 'package:medtalk/styles/styles/text.dart';
 import '../../../common/widgets/themes/time_picker.dart';
 import '../../../styles/font.dart';
 import '../bloc/design_event.dart';
+import 'location_picker_screen.dart';
 
 class DesignScreen extends StatefulWidget {
   const DesignScreen({super.key});
@@ -33,11 +37,18 @@ class DesignScreen extends StatefulWidget {
 }
 
 class _DesignScreenState extends State<DesignScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
+
+  // Change these declarations
+  late final AnimationController _tabIndicatorAnimationController;
+  late final Animation<double> _tabIndicatorPosition;
+
+  // Add a Tween to control the animation
+  late final Tween<double> _tabPositionTween;
 
   // Settings state variables
   int _advanceNotice = 24; // in hours
@@ -47,6 +58,9 @@ class _DesignScreenState extends State<DesignScreen>
   bool _acceptCash = true;
   bool _acceptInsurance = false;
   int _cancellationPolicy = 24; // in hours
+  // Add these to your state variables
+  late LatLng _clinicLocation = const LatLng(45.521563, -122.677433);
+  late GoogleMapController _mapController;
 
   int _selectedDayIndex = 0;
   final List<String> _workingDaysTitles = [
@@ -57,6 +71,19 @@ class _DesignScreenState extends State<DesignScreen>
     'Fri',
     'Sat',
     'Sun'
+  ];
+
+  // Add this to your state variables in _DesignScreenState class
+  final List<Map<String, String>> _qualifications = [
+    {
+      'title': 'MD, Stanford University School of Medicine',
+      'subtitle': '2010 - 2014'
+    },
+    {'title': 'Residency, UCSF Medical Center', 'subtitle': '2014 - 2017'},
+    {
+      'title': 'Board Certification, American Board of Medical Specialties',
+      'subtitle': '2018'
+    },
   ];
   final Map<String, WorkingHours> _scheduleMap = {};
   int _slotDuration = 30; // in minutes
@@ -73,6 +100,23 @@ class _DesignScreenState extends State<DesignScreen>
   @override
   void initState() {
     super.initState();
+// Initialize the Tween
+    _tabPositionTween = Tween<double>(begin: 0, end: 0);
+
+    // Initialize animation controller for tab indicator
+    _tabIndicatorAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    // Create the animation using the Tween
+    _tabIndicatorPosition = _tabPositionTween.animate(
+      CurvedAnimation(
+        parent: _tabIndicatorAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
     _pageController = PageController();
     _animationController = AnimationController(
       vsync: this,
@@ -129,6 +173,119 @@ class _DesignScreenState extends State<DesignScreen>
         breaks: current.breaks,
       );
     });
+  }
+
+  // Method to show location picker dialog
+
+  // Method to show dialog and add qualification
+  void _showAddQualificationDialog(BuildContext context) {
+    final TextEditingController titleController = TextEditingController();
+    final TextEditingController subtitleController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: const Text(
+            'Add Qualification',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: titleController,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: MyColors.textBlack,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Qualification Title',
+                    hintText: 'e.g. MD, Harvard Medical School',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          const BorderSide(color: MyColors.primary, width: 2),
+                    ),
+                  ),
+                ),
+                kGap16,
+                TextField(
+                  controller: subtitleController,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: MyColors.textBlack,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Year/Time Period',
+                    hintText: 'e.g. 2010 - 2014',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          const BorderSide(color: MyColors.primary, width: 2),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MyColors.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ),
+              child: const Text('Add'),
+              onPressed: () {
+                if (titleController.text.isNotEmpty) {
+                  setState(() {
+                    _qualifications.add({
+                      'title': titleController.text,
+                      'subtitle': subtitleController.text,
+                    });
+                  });
+                  Navigator.of(context).pop();
+
+                  // Show success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Qualification added successfully'),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _setStartTime(String value) {
@@ -189,11 +346,13 @@ class _DesignScreenState extends State<DesignScreen>
   }
 
   void _animateToPage(int page) {
+    // Don't change current page state immediately
+    // Just track that we're animating
     setState(() {
       _isPageChanging = true;
-      _currentPage = page;
     });
 
+    // Perform the page change animation
     _pageController
         .animateToPage(
       page,
@@ -201,23 +360,26 @@ class _DesignScreenState extends State<DesignScreen>
       curve: Curves.easeInOutCubic,
     )
         .then((_) {
+      // After animation completes, update the state
       setState(() {
+        _currentPage = page;
         _isPageChanging = false;
       });
-    });
 
-    // Scroll to top when changing pages
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        0,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+      // Only after page animation is complete, scroll to top
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
+    _tabIndicatorAnimationController.dispose();
     _bioController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
@@ -231,10 +393,7 @@ class _DesignScreenState extends State<DesignScreen>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => DesignBloc(
-          authenticationRepository: getIt<IAuthenticationRepository>(),
-          doctorRepository: getIt<IDoctorRepository>())
-        ..add(LoadDoctorProfile()),
+      create: (context) => getIt<DesignBloc>()..add(LoadDoctorProfile()),
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         // Dismiss keyboard on tap outside
@@ -250,38 +409,22 @@ class _DesignScreenState extends State<DesignScreen>
 
                     kGap10,
                     // Navigation tabs with improved design
-                    Padding(
-                      padding: kPaddH20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: MyColors.blueGrey.withValues(alpha: 0.4),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        padding: const EdgeInsets.all(6),
-                        child: Row(
-                          children: [
-                            _buildNavTab(
-                                0, 'Profile', FontAwesomeIcons.userDoctor),
-                            _buildNavTab(
-                                1, 'Services', FontAwesomeIcons.kitMedical),
-                            _buildNavTab(
-                                2, 'Schedule', FontAwesomeIcons.calendar),
-                            _buildNavTab(3, 'Settings', FontAwesomeIcons.gear),
-                          ],
-                        ),
-                      ),
-                    ),
+                    _buildNavTabs(),
 
                     // Main content
                     Expanded(
                       child: PageView(
                         controller: _pageController,
-                        physics: const NeverScrollableScrollPhysics(),
-                        // Disable swiping between pages
+                        // Remove NeverScrollableScrollPhysics() to allow proper animation
+                        // Or use a custom physics that only allows programmatic sliding:
+                        physics: const BouncingScrollPhysics(),
                         onPageChanged: (index) {
-                          setState(() {
-                            _currentPage = index;
-                          });
+                          // Let the animation finish before updating state
+                          if (!_isPageChanging) {
+                            setState(() {
+                              _currentPage = index;
+                            });
+                          }
                         },
                         children: [
                           _buildProfilePage(context, state),
@@ -335,9 +478,9 @@ class _DesignScreenState extends State<DesignScreen>
                   color: MyColors.primary,
                 ),
                 const SizedBox(width: 6),
-                Text(
-                  _getSaveText(),
-                  style: const TextStyle(
+                const Text(
+                  'Editing',
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: MyColors.primary,
@@ -370,63 +513,129 @@ class _DesignScreenState extends State<DesignScreen>
     return _currentPage < 3 ? Icons.edit : Icons.check_circle;
   }
 
-  String _getSaveText() {
-    return _currentPage < 3 ? 'Editing' : 'Final Step';
+  Widget _buildNavTabs() {
+    return Padding(
+      padding: kPaddH20,
+      child: Container(
+        decoration: BoxDecoration(
+          color: MyColors.blueGrey.withValues(alpha: 0.4),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.all(6),
+        child: Stack(
+          children: [
+            // Animated blue indicator that slides
+            AnimatedBuilder(
+              animation: _tabIndicatorAnimationController,
+              builder: (context, child) {
+                return Positioned(
+                  left: _tabIndicatorPosition.value,
+                  top: 0,
+                  bottom: 0,
+                  width: (MediaQuery.of(context).size.width - 40 - 12) / 4,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: MyColors.primary,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: MyColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            // Tab buttons
+            Row(
+              children: [
+                _buildNavTab(0, 'Profile', FontAwesomeIcons.userDoctor),
+                _buildNavTab(1, 'Services', FontAwesomeIcons.kitMedical),
+                _buildNavTab(2, 'Schedule', FontAwesomeIcons.calendar),
+                _buildNavTab(3, 'Settings', FontAwesomeIcons.gear),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildNavTab(int index, String title, IconData icon) {
-    bool isSelected = _currentPage == index;
-
-    // Calculate animation values
-    final isAnimating = _isPageChanging && _currentPage == index;
-    final bgColor = isSelected ? MyColors.primary : Colors.transparent;
-    final textColor = isSelected ? Colors.white : MyColors.textGrey;
-    final iconColor =
-        isSelected ? Colors.white : MyColors.primary.withValues(alpha: 0.7);
+    final bool isCurrentTab = _currentPage == index;
+    final bool isTargetTab = ((_tabPositionTween.end ?? 0) /
+                ((MediaQuery.of(context).size.width - 40 - 12) / 4))
+            .round() ==
+        index;
 
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          if (!isSelected) {
+          if (!isCurrentTab) {
+            // Update the Tween values
+            final tabWidth = (MediaQuery.of(context).size.width - 40 - 12) / 4;
+            _tabPositionTween.begin = _tabPositionTween.end;
+            _tabPositionTween.end = index * tabWidth;
+
+            // Reset and start the animation
+            _tabIndicatorAnimationController.reset();
+            _tabIndicatorAnimationController.forward();
+
+            // Navigate to the page
             _animateToPage(index);
           }
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOutCubic,
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: MyColors.primary.withValues(alpha: 0.3),
-                      blurRadius: isAnimating ? 8 : 4,
-                      offset: const Offset(0, 2),
-                    )
-                  ]
-                : null,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              FaIcon(
-                icon,
-                color: iconColor,
-                size: 16,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedBuilder(
+          animation: _tabIndicatorAnimationController,
+          builder: (context, child) {
+            // Calculate color transition based on indicator position
+            final tabWidth = (MediaQuery.of(context).size.width - 40 - 12) / 4;
+            final indicatorCenter =
+                _tabIndicatorPosition.value + (tabWidth / 2);
+            final thisTabCenter = index * tabWidth + (tabWidth / 2);
+
+            // Calculate distance as percentage (0.0 = centered on this tab, 1.0 = centered on next tab)
+            final distancePercent =
+                (indicatorCenter - thisTabCenter).abs() / tabWidth;
+            final colorPercent =
+                1.0 - (distancePercent > 1.0 ? 1.0 : distancePercent);
+
+            final iconColor = Color.lerp(
+                MyColors.primary.withValues(alpha: 0.7),
+                Colors.white,
+                colorPercent);
+
+            final fontWeight =
+                isTargetTab ? FontWeight.bold : FontWeight.normal;
+
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FaIcon(
+                    icon,
+                    color: iconColor,
+                    size: 16,
+                  ),
+                  kGap6,
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: iconColor,
+                      fontWeight: fontWeight,
+                    ),
+                  ),
+                ],
               ),
-              kGap6,
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textColor,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -459,27 +668,13 @@ class _DesignScreenState extends State<DesignScreen>
               // Qualifications section
               _buildSectionHeading('Qualifications & Experience'),
               kGap12,
-              ...List.generate(3, (index) {
-                final qualifications = [
-                  {
-                    'title': 'MD, Stanford University School of Medicine',
-                    'subtitle': '2010 - 2014'
-                  },
-                  {
-                    'title': 'Residency, UCSF Medical Center',
-                    'subtitle': '2014 - 2017'
-                  },
-                  {
-                    'title':
-                        'Board Certification, American Board of Medical Specialties',
-                    'subtitle': '2018'
-                  },
-                ];
+// Replace the current qualifications section with this
+              ...List.generate(_qualifications.length, (index) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: _buildQualificationItem(
-                    qualifications[index]['title']!,
-                    qualifications[index]['subtitle']!,
+                    _qualifications[index]['title']!,
+                    _qualifications[index]['subtitle']!,
                     isEditable: true,
                   ),
                 );
@@ -488,7 +683,7 @@ class _DesignScreenState extends State<DesignScreen>
               Center(
                 child: ElevatedButton.icon(
                   onPressed: () {
-                    // Add new qualification
+                    _showAddQualificationDialog(context);
                   },
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('Add Qualification',
@@ -647,19 +842,62 @@ class _DesignScreenState extends State<DesignScreen>
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: const GoogleMap(
+            child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: LatLng(45.521563, -122.677433),
+                target: _clinicLocation,
                 zoom: 14.0,
               ),
+              onMapCreated: (controller) {
+                _mapController = controller;
+              },
+              markers: {
+                Marker(
+                  markerId: const MarkerId('clinic'),
+                  position: _clinicLocation,
+                  infoWindow: const InfoWindow(title: 'Your Clinic'),
+                ),
+              },
+              scrollGesturesEnabled: false,
+              zoomGesturesEnabled: false,
+              zoomControlsEnabled: false,
+              rotateGesturesEnabled: false,
+              tiltGesturesEnabled: false,
+              myLocationButtonEnabled: false,
             ),
           ),
           Positioned(
             right: 12,
             bottom: 12,
             child: ElevatedButton.icon(
-              onPressed: () {
-                // Update map location
+              onPressed: () async {
+                // Navigate to location picker screen
+                final LatLng? result = await Navigator.push<LatLng>(
+                  context,
+                  LocationPickerScreen.route(_clinicLocation),
+                );
+
+                // Update location if a result was returned
+                if (result != null) {
+                  setState(() {
+                    _clinicLocation = result;
+                  });
+
+                  // Update map view
+                  _mapController.animateCamera(
+                    CameraUpdate.newLatLng(_clinicLocation),
+                  );
+
+                  if (mounted) {
+                    // Show confirmation
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Clinic location updated'),
+                        backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                }
               },
               icon: const Icon(Icons.edit_location_alt, size: 16),
               label: const Text('Update Location',
@@ -720,7 +958,7 @@ class _DesignScreenState extends State<DesignScreen>
       keyboardType: keyboardType,
       hintText: hint,
       leadingWidget: FaIcon(icon, color: MyColors.primary, size: 20),
-      onChanged: (String) {},
+      onChanged: (String value) {},
     );
   }
 
@@ -752,7 +990,7 @@ class _DesignScreenState extends State<DesignScreen>
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: state.services.length,
                     separatorBuilder: (context, index) =>
-                        const Divider(height: 1),
+                        const SectionDivider(height: 20),
                     itemBuilder: (context, index) {
                       final service = state.services[index];
                       return _buildServiceItem(
@@ -919,6 +1157,19 @@ class _DesignScreenState extends State<DesignScreen>
                           color: MyColors.textGrey,
                         ),
                       ),
+                      // Description preview - only show if not empty
+                      if (service.description.isNotEmpty) ...[
+                        kGap4,
+                        Text(
+                          service.description,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: MyColors.textGrey,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -936,23 +1187,70 @@ class _DesignScreenState extends State<DesignScreen>
                       ),
                     ),
                     kGap8,
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline,
-                          color: Colors.red, size: 20),
-                      onPressed: () =>
-                          _showDeleteServiceDialog(context, service),
-                      padding: EdgeInsets.zero,
-                      visualDensity: const VisualDensity(
-                        horizontal: -4,
-                        vertical: -4,
-                      ),
-                      constraints: const BoxConstraints(),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Pre-appointment instructions indicator
+                        if (service.preAppointmentInstructions != null &&
+                            service.preAppointmentInstructions!.isNotEmpty)
+                          Tooltip(
+                            message: 'Has pre-appointment instructions',
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const FaIcon(
+                                FontAwesomeIcons.notesMedical,
+                                color: Colors.amber,
+                                size: 12,
+                              ),
+                            ),
+                          ),
+
+                        // Custom availability indicator
+                        if (service.customAvailability != null)
+                          Tooltip(
+                            message: 'Has custom availability',
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const FaIcon(
+                                FontAwesomeIcons.calendarDay,
+                                color: Colors.blue,
+                                size: 12,
+                              ),
+                            ),
+                          ),
+
+                        // Delete button
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline,
+                              color: Colors.red, size: 20),
+                          onPressed: () =>
+                              _showDeleteServiceDialog(context, service),
+                          padding: EdgeInsets.zero,
+                          visualDensity: const VisualDensity(
+                            horizontal: -4,
+                            vertical: -4,
+                          ),
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ],
             ),
-            kGap6,
+            kGap10,
+
+            // Service type tags
             Wrap(
               runSpacing: 6,
               spacing: 4,
@@ -1013,10 +1311,10 @@ class _DesignScreenState extends State<DesignScreen>
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
             style: TextButton.styleFrom(
               foregroundColor: MyColors.textGrey,
             ),
+            child: const Text('Cancel'),
           ),
           ElevatedButton.icon(
             icon: const Icon(Icons.delete_outline, size: 16),
@@ -1062,6 +1360,9 @@ class _DesignScreenState extends State<DesignScreen>
         isOnline: newService.isOnline,
         isInPerson: newService.isInPerson,
         isHomeVisit: newService.isHomeVisit,
+        description: newService.description,
+        preAppointmentInstructions: newService.preAppointmentInstructions,
+        customAvailability: newService.customAvailability,
       ));
 
       // Show confirmation
@@ -1097,6 +1398,9 @@ class _DesignScreenState extends State<DesignScreen>
         isOnline: updatedService.isOnline,
         isInPerson: updatedService.isInPerson,
         isHomeVisit: updatedService.isHomeVisit,
+        description: updatedService.description,
+        preAppointmentInstructions: updatedService.preAppointmentInstructions,
+        customAvailability: updatedService.customAvailability,
       ));
 
       // Show confirmation
@@ -1401,25 +1705,14 @@ class _DesignScreenState extends State<DesignScreen>
                 ),
               ] else ...[
                 // Not a working day message
-                Container(
-                  padding: const EdgeInsets.all(32),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
+                CustomBase(
+                  padding: kPadd30,
                   child: Column(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade50,
+                          color: Colors.red.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(

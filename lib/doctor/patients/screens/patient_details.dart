@@ -1,8 +1,11 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_status.dart';
+import 'package:medtalk/backend/appointment/models/appointment.dart';
+import 'package:medtalk/backend/injectable.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/common/widgets/cards/appointment_doctor_card.dart';
 import 'package:medtalk/common/widgets/dividers/section_divider.dart';
@@ -34,19 +37,21 @@ class PatientDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => PatientDetailsBloc(
+      create: (context) => getIt<PatientDetailsBloc>(
+          // Add other repositories as needed
+          )
+        ..add(LoadPatientDetails(patientId)),
+      child: PatientDetailsView(
         patientId: patientId,
-        patientRepository: getIt<IPatientRepository>(),
-        appointmentRepository: getIt<IAppointmentRepository>(),
-        // Add other repositories as needed
-      )..add(LoadPatientDetails()),
-      child: const PatientDetailsView(),
+      ),
     );
   }
 }
 
 class PatientDetailsView extends StatefulWidget {
-  const PatientDetailsView({super.key});
+  final String patientId;
+
+  const PatientDetailsView({super.key, required this.patientId});
 
   @override
   State<PatientDetailsView> createState() => _PatientDetailsViewState();
@@ -192,7 +197,7 @@ class _PatientDetailsViewState extends State<PatientDetailsView>
                   onPressed: () {
                     context
                         .read<PatientDetailsBloc>()
-                        .add(LoadPatientDetails());
+                        .add(LoadPatientDetails(widget.patientId));
                   },
                   child: const Text('Retry'),
                 ),

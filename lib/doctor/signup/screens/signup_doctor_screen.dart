@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:backend/backend.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/gestures.dart';
@@ -10,12 +9,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:formz/formz.dart';
 import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/common/functions/generate_random_password.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/common/widgets/random_hexagons.dart';
 import 'package:medtalk/doctor/signup/bloc/signup_doctor_bloc.dart';
 import 'package:medtalk/doctor/signup/models/location.dart';
-import 'package:p_logger/p_logger.dart';
 
 import '../../../app/bloc/auth/route_bloc.dart';
 import '../../../common/widgets/button/loading_button.dart';
@@ -77,15 +76,7 @@ class _SignUpDoctorScreenState extends State<SignUpDoctorScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _signUpBloc = SignUpDoctorBloc(
-      getIt<ICryptoRepository>(),
-      getIt<IAuthenticationRepository>(),
-      getIt<IEncryptionRepository>(),
-      getIt<IDoctorRepository>(),
-      getIt<IPatientRepository>(),
-      getIt<ISecureStorageRepository>(),
-      getIt<IStorageRepository>(),
-    );
+    _signUpBloc = getIt<SignUpDoctorBloc>();
     recoveryCode = generateRandomCode(14);
   }
 
@@ -1042,7 +1033,6 @@ class _SignUpDoctorScreenState extends State<SignUpDoctorScreen>
 
                   if (result != null) {
                     final file = result.files.single;
-                    logger.i('Medical certificate file: ${file.name}');
                     context
                         .read<SignUpDoctorBloc>()
                         .add(MedicalLicenseUploaded(file));
@@ -1086,7 +1076,6 @@ class _SignUpDoctorScreenState extends State<SignUpDoctorScreen>
 
                   if (result != null) {
                     final file = result.files.single;
-                    logger.i('Government ID file: ${file.name}');
                     context
                         .read<SignUpDoctorBloc>()
                         .add(GovernmentIdUploaded(file));

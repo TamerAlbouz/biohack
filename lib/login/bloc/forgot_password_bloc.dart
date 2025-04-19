@@ -1,15 +1,24 @@
 import 'dart:typed_data';
 
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
-import 'package:formz_inputs/formz_inputs.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/authentication/exceptions/send_reset_password_exception.dart';
+import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
+import 'package:medtalk/backend/encryption/interfaces/crypto_interface.dart';
+import 'package:medtalk/backend/encryption/interfaces/encryption_interface.dart';
+import 'package:medtalk/backend/encryption/models/private_key_encryption_result.dart';
+import 'package:medtalk/backend/rate_limiter/interfaces/rate_limiter_interface.dart';
+import 'package:medtalk/backend/rate_limiter/models/rate_limiter_result.dart';
+import 'package:medtalk/formz_inputs/login/email.dart';
+import 'package:medtalk/formz_inputs/login/password.dart';
 
 part 'forgot_password_event.dart';
 part 'forgot_password_state.dart';
 
+@injectable
 class ForgotPasswordBloc
     extends Bloc<ForgotPasswordEvent, ForgotPasswordState> {
   ForgotPasswordBloc(
@@ -17,6 +26,7 @@ class ForgotPasswordBloc
     this._encryptionRepository,
     this._crypto,
     this._rateLimiter,
+    this.logger,
   ) : super(const ForgotPasswordState()) {
     on<SendEmailVerification>(_sendEmailVerification);
     on<ResetPasswordWithCode>(_resetPasswordWithCode);
@@ -31,6 +41,7 @@ class ForgotPasswordBloc
   final IEncryptionRepository _encryptionRepository;
   final ICryptoRepository _crypto;
   final IRateLimiter _rateLimiter;
+  final Logger logger;
 
   void _recoveryCodeChanged(
       RecoveryCodeChanged event, Emitter<ForgotPasswordState> emit) {

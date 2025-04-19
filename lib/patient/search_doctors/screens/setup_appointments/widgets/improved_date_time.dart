@@ -1,7 +1,7 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
 
 import '../../../../../styles/colors.dart';
 import '../../../../../styles/font.dart';

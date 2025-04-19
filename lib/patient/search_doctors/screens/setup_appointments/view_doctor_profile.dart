@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/patient/search_doctors/bloc/doctor_profile_bloc.dart';
 import 'package:medtalk/patient/search_doctors/screens/setup_appointments/widgets/improved_doctor_profile.dart';
@@ -15,11 +16,11 @@ class ViewDoctorProfileScreen extends StatefulWidget {
   final String specialty;
 
   const ViewDoctorProfileScreen({
-    Key? key,
+    super.key,
     required this.doctorId,
     required this.doctorName,
     required this.specialty,
-  }) : super(key: key);
+  });
 
   static Route<void> route({
     required String doctorId,
@@ -60,7 +61,7 @@ class _ViewDoctorProfileScreenState extends State<ViewDoctorProfileScreen>
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) =>
-          DoctorProfileBloc()..add(LoadDoctorProfile(widget.doctorId)),
+          getIt<DoctorProfileBloc>()..add(LoadDoctorProfile(widget.doctorId)),
       child: Scaffold(
         backgroundColor: MyColors.background,
         appBar: AppBar(

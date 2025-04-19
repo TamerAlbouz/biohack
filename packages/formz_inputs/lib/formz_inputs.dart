@@ -1,9 +1,0 @@
-export 'src/intro/patient/biography.dart';
-export 'src/intro/patient/blood_group.dart';
-export 'src/intro/patient/date_of_birth.dart';
-export 'src/intro/patient/full_name.dart';
-export 'src/intro/patient/height.dart';
-export 'src/intro/patient/sex.dart';
-export 'src/intro/patient/weight.dart';
-export 'src/login/email.dart';
-export 'src/login/password.dart';

@@ -1,7 +1,8 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../common/env/env.dart';
@@ -9,8 +10,13 @@ import '../../common/env/env.dart';
 part 'agora_event.dart';
 part 'agora_state.dart';
 
+@injectable
 class AgoraBloc extends Bloc<AgoraEvent, AgoraState> {
-  AgoraBloc() : super(AgoraInitial()) {
+  final Logger logger;
+
+  AgoraBloc(
+    this.logger,
+  ) : super(AgoraInitial()) {
     on<AgoraRequestPermissions>(_onRequestPermissions);
     on<AgoraInitializeEngine>(_onInitializeEngine);
     on<AgoraJoinChannel>(_onJoinChannel);

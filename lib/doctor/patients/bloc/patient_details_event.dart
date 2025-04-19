@@ -5,4 +5,11 @@ abstract class PatientDetailsEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadPatientDetails extends PatientDetailsEvent {}
+class LoadPatientDetails extends PatientDetailsEvent {
+  final String patientId;
+
+  LoadPatientDetails(this.patientId);
+
+  @override
+  List<Object?> get props => [patientId];
+}

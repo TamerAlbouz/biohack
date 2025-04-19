@@ -16,21 +16,6 @@ ThemeData get lightTheme {
     ),
     // You can also set it directly here, though colorScheme is preferred in newer Flutter versions
     primaryColor: MyColors.primary,
-    // snack bar by default is floating and color is white
-    snackBarTheme: const SnackBarThemeData(
-      backgroundColor: MyColors.white,
-      contentTextStyle: TextStyle(
-        fontFamily: Font.family,
-        fontSize: Font.mediumSmall,
-        color: MyColors.textBlack,
-      ),
-      actionTextColor: MyColors.primary,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8)),
-      ),
-      elevation: 3,
-    ),
     timePickerTheme: TimePickerThemeData(
       helpTextStyle: const TextStyle(
         fontSize: Font.medium,

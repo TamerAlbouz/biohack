@@ -1,26 +1,31 @@
-import 'package:backend/backend.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:p_logger/p_logger.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
+import 'package:medtalk/backend/appointment/interfaces/appointment_interface.dart';
+import 'package:medtalk/backend/appointment/models/appointment.dart';
+import 'package:medtalk/backend/patient/interfaces/patient_interface.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 
 import '../models/patients_models.dart';
 
 part 'patient_details_event.dart';
 part 'patient_details_state.dart';
 
+@injectable
 class PatientDetailsBloc
     extends Bloc<PatientDetailsEvent, PatientDetailsState> {
-  final String patientId;
   final IPatientRepository patientRepository;
   final IAppointmentRepository appointmentRepository;
+  final Logger logger;
 
   // In a real app, you'd also have message and document repositories
 
-  PatientDetailsBloc({
-    required this.patientId,
-    required this.patientRepository,
-    required this.appointmentRepository,
-  }) : super(PatientDetailsInitial()) {
+  PatientDetailsBloc(
+    this.patientRepository,
+    this.appointmentRepository,
+    this.logger,
+  ) : super(PatientDetailsInitial()) {
     on<LoadPatientDetails>(_onLoadPatientDetails);
   }
 
@@ -32,7 +37,7 @@ class PatientDetailsBloc
       emit(PatientDetailsLoading());
 
       // Get patient details
-      final patient = await patientRepository.getPatient(patientId);
+      final patient = await patientRepository.getPatient(event.patientId);
 
       if (patient == null) {
         emit(PatientDetailsError('Patient not found'));
@@ -41,7 +46,7 @@ class PatientDetailsBloc
 
       // Get patient's appointments
       final appointments =
-          await appointmentRepository.getPatientAppointments(patientId);
+          await appointmentRepository.getPatientAppointments(event.patientId);
 
       // Sort appointments by date (newest first)
       appointments
@@ -49,7 +54,7 @@ class PatientDetailsBloc
 
       // In a real app, you would fetch messages and documents here
       // For this example, we'll create mock data
-      final messages = _createMockMessages();
+      final messages = _createMockMessages(event.patientId);
       final documents = _createMockDocuments();
 
       emit(PatientDetailsLoaded(
@@ -64,7 +69,7 @@ class PatientDetailsBloc
     }
   }
 
-  List<Message> _createMockMessages() {
+  List<Message> _createMockMessages(String patientId) {
     final now = DateTime.now();
 
     return [

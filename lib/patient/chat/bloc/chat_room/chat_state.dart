@@ -1,6 +1,7 @@
 // chat_state.dart
-import 'package:backend/backend.dart';
+
 import 'package:equatable/equatable.dart';
+import 'package:medtalk/backend/chat/models/chat_message.dart';
 
 abstract class ChatState extends Equatable {
   const ChatState();

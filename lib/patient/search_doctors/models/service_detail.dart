@@ -1,4 +1,4 @@
-import 'package:backend/backend.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_type.dart';
 
 class ServiceDetail {
   final String name;

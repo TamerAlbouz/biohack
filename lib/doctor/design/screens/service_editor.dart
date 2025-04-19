@@ -1,8 +1,8 @@
-import 'package:backend/backend.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/backend/services/models/service.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
 import 'package:medtalk/common/widgets/dividers/card_divider.dart';
 import 'package:medtalk/common/widgets/rows/cancel_confirm.dart';

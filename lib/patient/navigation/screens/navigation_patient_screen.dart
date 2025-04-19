@@ -1,6 +1,6 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/patient/dashboard/bloc/appointment/appointment_bloc.dart';
 import 'package:medtalk/patient/dashboard/bloc/doctor/doctor_bloc.dart';
 import 'package:medtalk/patient/profile/screens/profile_screen.dart';
@@ -34,33 +34,27 @@ class NavigationPatientScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-            create: (_) => PatientAppointmentBloc(
-                  appointmentRepo: getIt<IAppointmentRepository>(),
-                )),
+        BlocProvider(create: (_) => getIt<PatientAppointmentBloc>()),
         BlocProvider<NavigationPatientCubit>(
-            create: (context) => NavigationPatientCubit()),
+            create: (context) => getIt<NavigationPatientCubit>()),
         BlocProvider(
-          create: (context) => ChatsListBloc(getIt<IChatRepository>())
+          create: (context) => getIt<ChatsListBloc>()
             ..add(LoadChatsList(
                 (context.read<RouteBloc>().state as AuthSuccess).user.uid)),
         ),
         BlocProvider(
-          create: (_) => PatientProfileBloc(
-            getIt<IPatientRepository>(),
-          )..add(
+          create: (_) => getIt<PatientProfileBloc>()
+            ..add(
               LoadPatientProfile(patientId),
             ),
         ),
         // document
         BlocProvider<PatientDocumentBloc>(
-            create: (BuildContext context) => PatientDocumentBloc(
-                  documentRepo: getIt<IMedicalDocumentRepository>(),
-                )..add(LoadPatientDocuments(patientId))),
+            create: (BuildContext context) => getIt<PatientDocumentBloc>()
+              ..add(LoadPatientDocuments(patientId))),
         BlocProvider<PatientDoctorBloc>(
-            create: (BuildContext context) => PatientDoctorBloc(
-                  doctorRepo: getIt<IDoctorRepository>(),
-                )..add(LoadPatientDoctors(patientId))),
+            create: (BuildContext context) =>
+                getIt<PatientDoctorBloc>()..add(LoadPatientDoctors(patientId))),
       ],
       child: const NavigationPatientView(),
     );

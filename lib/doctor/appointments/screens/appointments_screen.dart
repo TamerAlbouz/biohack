@@ -1,9 +1,10 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:medtalk/agora/screens/call.dart';
+import 'package:medtalk/backend/appointment/enums/appointment_status.dart';
+import 'package:medtalk/backend/appointment/models/appointment.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/common/widgets/cards/appointment_doctor_card.dart';
 import 'package:medtalk/styles/colors.dart';

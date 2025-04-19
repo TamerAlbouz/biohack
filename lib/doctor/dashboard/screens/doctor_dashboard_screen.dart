@@ -1,9 +1,9 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:medtalk/agora/screens/call.dart';
+import 'package:medtalk/backend/patient/models/patient.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/doctor/appointments/bloc/doctor_appointments_bloc.dart';
 import 'package:medtalk/doctor/dashboard/bloc/doctor_dashboard_bloc.dart';
@@ -14,6 +14,7 @@ import 'package:medtalk/styles/styles/text.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 import '../../../app/bloc/auth/route_bloc.dart';
+import '../../../backend/appointment/enums/appointment_status.dart';
 import '../../../common/globals/globals.dart';
 import '../../appointments/models/appointments_models.dart';
 

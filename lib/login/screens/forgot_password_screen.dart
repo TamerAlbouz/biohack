@@ -1,8 +1,8 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 import 'package:lottie/lottie.dart';
+import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/common/functions/generate_random_password.dart';
 import 'package:medtalk/common/widgets/button/loading_button.dart';
 import 'package:medtalk/common/widgets/custom_input_field.dart';
@@ -32,12 +32,7 @@ class ForgotPasswordScreen extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: BlocProvider(
-        create: (_) => ForgotPasswordBloc(
-          getIt<IAuthenticationRepository>(),
-          getIt<IEncryptionRepository>(),
-          getIt<ICryptoRepository>(),
-          getIt<IRateLimiter>(),
-        ),
+        create: (_) => getIt<ForgotPasswordBloc>(),
         child: SingleChildScrollView(
           child: Column(
             children: [

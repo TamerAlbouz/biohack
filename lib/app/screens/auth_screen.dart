@@ -1,7 +1,7 @@
-import 'package:backend/backend.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:medtalk/backend/authentication/enums/role.dart';
 import 'package:medtalk/styles/sizes.dart';
 
 import '../../common/widgets/logo_widget.dart';
