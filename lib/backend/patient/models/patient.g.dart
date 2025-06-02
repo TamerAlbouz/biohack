@@ -13,12 +13,8 @@ Patient _$PatientFromJson(Map<String, dynamic> json) => Patient(
       role: $enumDecodeNullable(_$RoleEnumMap, json['role']),
       busy: json['busy'] as bool? ?? false,
       profilePictureUrl: json['profilePictureUrl'] as String?,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
+      createdAt: const TimestampConverter().fromJson(json['createdAt']),
+      updatedAt: const TimestampConverter().fromJson(json['updatedAt']),
       tokens:
           (json['tokens'] as List<dynamic>?)?.map((e) => e as String).toList(),
       biography: json['biography'] as String?,
@@ -29,9 +25,7 @@ Patient _$PatientFromJson(Map<String, dynamic> json) => Patient(
           ?.map((e) => e as String)
           .toList(),
       sex: json['sex'] as String?,
-      dateOfBirth: json['dateOfBirth'] == null
-          ? null
-          : DateTime.parse(json['dateOfBirth'] as String),
+      dateOfBirth: const TimestampConverter().fromJson(json['dateOfBirth']),
       bloodType: json['bloodType'] as String?,
       weight: (json['weight'] as num?)?.toDouble(),
       height: (json['height'] as num?)?.toDouble(),
@@ -44,8 +38,8 @@ Map<String, dynamic> _$PatientToJson(Patient instance) => <String, dynamic>{
       'sex': instance.sex,
       'role': _$RoleEnumMap[instance.role],
       'profilePictureUrl': instance.profilePictureUrl,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'createdAt': const TimestampConverter().toJson(instance.createdAt),
+      'updatedAt': const TimestampConverter().toJson(instance.updatedAt),
       'email': instance.email,
       'uid': instance.uid,
       'name': instance.name,
@@ -54,7 +48,7 @@ Map<String, dynamic> _$PatientToJson(Patient instance) => <String, dynamic>{
       'biography': instance.biography,
       'medicalRecords': instance.medicalRecords,
       'recentDoctors': instance.recentDoctors,
-      'dateOfBirth': instance.dateOfBirth?.toIso8601String(),
+      'dateOfBirth': const TimestampConverter().toJson(instance.dateOfBirth),
       'bloodType': instance.bloodType,
       'weight': instance.weight,
       'height': instance.height,

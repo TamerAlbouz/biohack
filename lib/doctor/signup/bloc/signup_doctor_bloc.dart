@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypton/crypton.dart';
 import 'package:equatable/equatable.dart';
 import 'package:file_picker/file_picker.dart';
@@ -105,7 +106,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
         ));
       }
     } catch (e) {
-      logger.e('Error checking if email exists: $e');
+      addError(e);
       emit(state.copyWith(
         status: FormzSubmissionStatus.failure,
         errorMessage: 'Error checking email: $e',
@@ -127,7 +128,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
       await _authenticationRepository.sendEmailVerification();
       emit(state.copyWith(errorMessage: null));
     } catch (e) {
-      logger.e('Error resending verification email: $e');
+      addError(e);
       emit(state.copyWith(
           errorMessage: e.toString(), status: FormzSubmissionStatus.failure));
     }
@@ -358,7 +359,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
         ),
       ));
     } catch (e) {
-      logger.e('Error uploading medical license: $e');
+      addError(e);
       emit(state.copyWith(
         errorMessage: 'Error uploading medical license: $e',
       ));
@@ -412,7 +413,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
         ));
       }
     } catch (e) {
-      logger.e('Error while checking email verification: $e');
+      addError(e);
       emit(state.copyWith(
           errorMessage: e.toString(),
           requiresEmailVerification: false,
@@ -506,7 +507,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
         showRecoveryCodes: true,
       ));
     } catch (e) {
-      logger.e('Error generating keys: $e');
+      addError(e);
       emit(state.copyWith(
           errorMessage: e.toString(),
           generateKeys: false,
@@ -561,7 +562,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
         name: state.fullName.value,
         sex: state.sex.value,
         uid: _authenticationRepository.currentUser.uid,
-        createdAt: DateTime.now(),
+        createdAt: Timestamp.now(),
         role: Role.doctor,
         licNum: state.licenseNumber,
         govIdUrl: govIdUrl,
@@ -589,7 +590,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
           status: FormzSubmissionStatus.inProgress,
           requiresEmailVerification: true));
     } catch (e) {
-      logger.e('Error during signup submission: $e');
+      addError(e);
       emit(state.copyWith(
         status: FormzSubmissionStatus.failure,
         requiresEmailVerification: false,
@@ -658,7 +659,7 @@ class SignUpDoctorBloc extends Bloc<SignUpDoctorEvent, SignUpDoctorState> {
 
       return url;
     } catch (e) {
-      logger.e('Error uploading file: $e');
+      addError(e);
       throw Exception('Failed to upload file: $e');
     }
   }

@@ -861,7 +861,7 @@ class _PatientInfoTab extends StatelessWidget {
                 _buildInfoRow(
                   'Age',
                   patient.dateOfBirth != null
-                      ? '${_calculateAge(patient.dateOfBirth!)} years'
+                      ? '${_calculateAge(patient.dateOfBirth!.toDate())} years'
                       : 'Not provided',
                   FontAwesomeIcons.solidHourglass,
                 ),

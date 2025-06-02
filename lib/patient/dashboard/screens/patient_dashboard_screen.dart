@@ -15,9 +15,7 @@ import '../../../app/bloc/auth/route_bloc.dart';
 import '../../../backend/medical_doc/enums/medical_doc_type.dart';
 import '../../../common/widgets/cards/appointment_patient_card.dart';
 import '../../../styles/colors.dart';
-import '../../../styles/font.dart';
 import '../../../styles/sizes.dart';
-import '../../../styles/styles/text.dart';
 import '../bloc/appointment/appointment_bloc.dart';
 import '../bloc/doctor/doctor_bloc.dart';
 import '../bloc/document/document_bloc.dart';
@@ -42,6 +40,8 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: () async {
@@ -76,13 +76,14 @@ class DashboardView extends StatelessWidget {
                                   Container(
                                       height: 16,
                                       width: 120,
-                                      color: Colors.grey[300]),
+                                      color: theme.colorScheme.onSurface
+                                          .withValues(alpha: 0.1)),
                                   Container(
                                       height: 24,
                                       width: 60,
                                       decoration: BoxDecoration(
-                                        border:
-                                            Border.all(color: MyColors.primary),
+                                        border: Border.all(
+                                            color: theme.primaryColor),
                                         borderRadius: kRadius10,
                                       )),
                                 ],
@@ -91,12 +92,14 @@ class DashboardView extends StatelessWidget {
                               Container(
                                   height: 24,
                                   width: 180,
-                                  color: Colors.grey[300]),
+                                  color: theme.colorScheme.onSurface
+                                      .withValues(alpha: 0.1)),
                               kGap4,
                               Container(
                                   height: 14,
                                   width: 150,
-                                  color: Colors.grey[300]),
+                                  color: theme.colorScheme.onSurface
+                                      .withValues(alpha: 0.1)),
                               kGap20,
 
                               // Skeleton upcoming appointment
@@ -110,11 +113,13 @@ class DashboardView extends StatelessWidget {
                                       Container(
                                           height: 20,
                                           width: 180,
-                                          color: Colors.grey[300]),
+                                          color: theme.colorScheme.onSurface
+                                              .withValues(alpha: 0.1)),
                                       Container(
                                           height: 16,
                                           width: 50,
-                                          color: Colors.grey[300]),
+                                          color: theme.colorScheme.onSurface
+                                              .withValues(alpha: 0.1)),
                                     ],
                                   ),
                                   kGap10,
@@ -135,15 +140,18 @@ class DashboardView extends StatelessWidget {
                                   Container(
                                       height: 20,
                                       width: 120,
-                                      color: Colors.grey[300]),
+                                      color: theme.colorScheme.onSurface
+                                          .withValues(alpha: 0.1)),
                                   kGap10,
-                                  const CustomBase(
+                                  CustomBase(
                                     shadow: false,
                                     fixedHeight: 130,
                                     child: Center(
                                       child: Text(
                                         'Loading doctors...',
-                                        style: TextStyle(color: Colors.grey),
+                                        style: TextStyle(
+                                            color: theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.5)),
                                       ),
                                     ),
                                   ),
@@ -153,15 +161,18 @@ class DashboardView extends StatelessWidget {
                                   Container(
                                       height: 20,
                                       width: 160,
-                                      color: Colors.grey[300]),
+                                      color: theme.colorScheme.onSurface
+                                          .withValues(alpha: 0.1)),
                                   kGap10,
-                                  const CustomBase(
+                                  CustomBase(
                                     shadow: false,
                                     fixedHeight: 130,
                                     child: Center(
                                       child: Text(
                                         'Loading docs...',
-                                        style: TextStyle(color: Colors.grey),
+                                        style: TextStyle(
+                                            color: theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.5)),
                                       ),
                                     ),
                                   ),
@@ -204,15 +215,15 @@ class DashboardView extends StatelessWidget {
         children: [
           // Welcome section
           _WelcomeSection(patientName: patient.name ?? 'Patient'),
-          kGap10,
+          kGap20,
 
           // Upcoming appointment section
           const _UpcomingAppointmentSection(),
-          kGap10,
+          kGap20,
 
           // My Doctors Section
           const _MyDoctorsSection(),
-          kGap10,
+          kGap20,
 
           // Recent Documents Section
           const _RecentDocumentsSection(),
@@ -230,6 +241,7 @@ class _WelcomeSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final now = DateTime.now();
     final greeting = _getGreeting(now.hour);
 
@@ -245,17 +257,16 @@ class _WelcomeSection extends StatelessWidget {
               children: [
                 Text(
                   greeting,
-                  style: const TextStyle(
-                    fontSize: Font.medium,
-                    color: MyColors.subtitleDark,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.brightness == Brightness.light
+                        ? MyColors.subtitleDark
+                        : MyColors.textGrey,
                   ),
                 ),
                 Text(
                   patientName,
-                  style: const TextStyle(
-                    fontSize: Font.large,
-                    fontWeight: FontWeight.bold,
-                    color: MyColors.primary,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.primaryColor,
                   ),
                 ),
               ],
@@ -265,9 +276,10 @@ class _WelcomeSection extends StatelessWidget {
         ),
         Text(
           DateFormat('EEEE, MMM dd, yyyy').format(now),
-          style: const TextStyle(
-            fontSize: Font.small,
-            color: MyColors.subtitleDark,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.brightness == Brightness.light
+                ? MyColors.subtitleDark
+                : MyColors.textGrey,
           ),
         ),
       ],
@@ -290,6 +302,8 @@ class _UpcomingAppointmentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocBuilder<PatientAppointmentBloc, PatientAppointmentState>(
       builder: (context, state) {
         if (state is AppointmentLoaded) {
@@ -299,16 +313,18 @@ class _UpcomingAppointmentSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text("Upcoming Appointments", style: kSectionTitle),
+                  Text(
+                    "Upcoming Appointments",
+                    style: theme.textTheme.titleSmall,
+                  ),
                   TextButton(
                     onPressed: () {
                       // Navigate to appointments list
                     },
-                    child: const Text(
+                    child: Text(
                       'View All',
-                      style: TextStyle(
-                        color: MyColors.primary,
-                        fontSize: Font.small,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.primaryColor,
                       ),
                     ),
                   ),
@@ -366,6 +382,8 @@ class _MyDoctorsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocBuilder<PatientDoctorBloc, PatientDoctorState>(
       builder: (context, state) {
         if (state is PatientDocumentsLoading) {
@@ -375,26 +393,28 @@ class _MyDoctorsSection extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('My Doctors', style: kSectionTitle),
+                  Text(
+                    'My Doctors',
+                    style: theme.textTheme.titleSmall,
+                  ),
                   TextButton(
                     onPressed: () {
                       // Navigate to doctors list
                     },
-                    child: const Text(
+                    child: Text(
                       'View All',
-                      style: TextStyle(
-                        color: MyColors.primary,
-                        fontSize: Font.small,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.primaryColor,
                       ),
                     ),
                   ),
                 ],
               ),
               kGap4,
-              const Skeletonizer(
+              Skeletonizer(
                 enabled: true,
                 enableSwitchAnimation: true,
-                switchAnimationConfig: SwitchAnimationConfig(
+                switchAnimationConfig: const SwitchAnimationConfig(
                   duration: Duration(milliseconds: 500),
                 ),
                 child: CustomBase(
@@ -403,7 +423,9 @@ class _MyDoctorsSection extends StatelessWidget {
                   child: Center(
                     child: Text(
                       'Loading doctors...',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.5)),
                     ),
                   ),
                 ),
@@ -423,16 +445,18 @@ class _MyDoctorsSection extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('My Doctors', style: kSectionTitle),
+                Text(
+                  'My Doctors',
+                  style: theme.textTheme.titleSmall,
+                ),
                 TextButton(
                   onPressed: () {
                     // Navigate to doctors list
                   },
-                  child: const Text(
+                  child: Text(
                     'View All',
-                    style: TextStyle(
-                      color: MyColors.primary,
-                      fontSize: Font.small,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.primaryColor,
                     ),
                   ),
                 ),
@@ -442,7 +466,7 @@ class _MyDoctorsSection extends StatelessWidget {
             SizedBox(
               height: 130,
               child: doctors.isEmpty
-                  ? _emptyDoctorsWidget()
+                  ? _emptyDoctorsWidget(context)
                   : ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: doctors.length,
@@ -457,8 +481,10 @@ class _MyDoctorsSection extends StatelessWidget {
     );
   }
 
-  Widget _emptyDoctorsWidget() {
-    return const CustomBase(
+  Widget _emptyDoctorsWidget(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return CustomBase(
       shadow: false,
       child: Center(
         child: Column(
@@ -467,14 +493,13 @@ class _MyDoctorsSection extends StatelessWidget {
             FaIcon(
               FontAwesomeIcons.userDoctor,
               size: 30,
-              color: Colors.grey,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             kGap10,
             Text(
               'No doctors yet',
-              style: TextStyle(
-                fontSize: Font.small,
-                color: Colors.grey,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -491,6 +516,8 @@ class _DoctorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: 130,
       margin: const EdgeInsets.only(right: 10),
@@ -504,7 +531,7 @@ class _DoctorCard extends StatelessWidget {
               height: 50,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: MyColors.primary.withValues(alpha: 0.1),
+                color: theme.primaryColor.withValues(alpha: 0.1),
               ),
               child: doctor.profilePictureUrl != null
                   ? ClipRRect(
@@ -512,19 +539,19 @@ class _DoctorCard extends StatelessWidget {
                       child: Image.network(
                         doctor.profilePictureUrl!,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(
+                        errorBuilder: (_, __, ___) => Center(
                           child: FaIcon(
                             FontAwesomeIcons.userDoctor,
-                            color: MyColors.primary,
+                            color: theme.primaryColor,
                             size: 20,
                           ),
                         ),
                       ),
                     )
-                  : const Center(
+                  : Center(
                       child: FaIcon(
                         FontAwesomeIcons.userDoctor,
-                        color: MyColors.primary,
+                        color: theme.primaryColor,
                         size: 20,
                       ),
                     ),
@@ -532,8 +559,7 @@ class _DoctorCard extends StatelessWidget {
             kGap6,
             Text(
               'Dr. ${doctor.name ?? "Unknown"}',
-              style: const TextStyle(
-                fontSize: Font.small,
+              style: theme.textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
@@ -544,9 +570,8 @@ class _DoctorCard extends StatelessWidget {
               doctor.specialties?.isNotEmpty ?? false
                   ? doctor.specialties!.first
                   : 'General',
-              style: const TextStyle(
-                fontSize: Font.extraSmall,
-                color: Colors.grey,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               textAlign: TextAlign.center,
               overflow: TextOverflow.ellipsis,
@@ -563,23 +588,27 @@ class _RecentDocumentsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocBuilder<PatientDocumentBloc, PatientDocumentState>(
       builder: (context, state) {
         if (state is PatientDocumentsLoading) {
-          return const Column(
+          return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Recent Documents', style: kSectionTitle),
+                  Text(
+                    'Recent Documents',
+                    style: theme.textTheme.titleSmall,
+                  ),
                   TextButton(
                     onPressed: null,
                     child: Text(
                       'View All',
-                      style: TextStyle(
-                        color: MyColors.primary,
-                        fontSize: Font.small,
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.primaryColor,
                       ),
                     ),
                   ),
@@ -589,7 +618,7 @@ class _RecentDocumentsSection extends StatelessWidget {
               Skeletonizer(
                 enabled: true,
                 enableSwitchAnimation: true,
-                switchAnimationConfig: SwitchAnimationConfig(
+                switchAnimationConfig: const SwitchAnimationConfig(
                   duration: Duration(milliseconds: 500),
                 ),
                 child: CustomBase(
@@ -598,7 +627,9 @@ class _RecentDocumentsSection extends StatelessWidget {
                   child: Center(
                     child: Text(
                       'Loading docs...',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                          color: theme.colorScheme.onSurface
+                              .withValues(alpha: 0.5)),
                     ),
                   ),
                 ),
@@ -618,16 +649,18 @@ class _RecentDocumentsSection extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Recent Documents', style: kSectionTitle),
+                Text(
+                  'Recent Documents',
+                  style: theme.textTheme.titleSmall,
+                ),
                 TextButton(
                   onPressed: () {
                     // Navigate to documents list
                   },
-                  child: const Text(
+                  child: Text(
                     'View All',
-                    style: TextStyle(
-                      color: MyColors.primary,
-                      fontSize: Font.small,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.primaryColor,
                     ),
                   ),
                 ),
@@ -635,7 +668,7 @@ class _RecentDocumentsSection extends StatelessWidget {
             ),
             kGap4,
             documents.isEmpty
-                ? _emptyDocumentsWidget()
+                ? _emptyDocumentsWidget(context)
                 : Column(
                     children: documents
                         .take(3)
@@ -648,8 +681,10 @@ class _RecentDocumentsSection extends StatelessWidget {
     );
   }
 
-  Widget _emptyDocumentsWidget() {
-    return const CustomBase(
+  Widget _emptyDocumentsWidget(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return CustomBase(
       shadow: false,
       fixedHeight: 120,
       child: Center(
@@ -659,14 +694,13 @@ class _RecentDocumentsSection extends StatelessWidget {
             FaIcon(
               FontAwesomeIcons.fileLines,
               size: 30,
-              color: Colors.grey,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             kGap10,
             Text(
               'No documents yet',
-              style: TextStyle(
-                fontSize: Font.small,
-                color: Colors.grey,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -683,6 +717,7 @@ class _DocumentItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     IconData typeIcon;
     Color typeColor;
 
@@ -702,7 +737,7 @@ class _DocumentItem extends StatelessWidget {
         break;
       default:
         typeIcon = FontAwesomeIcons.fileLines;
-        typeColor = Colors.grey;
+        typeColor = theme.colorScheme.onSurface.withValues(alpha: 0.5);
     }
 
     return InkWell(
@@ -713,7 +748,8 @@ class _DocumentItem extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: kPadd10,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -740,8 +776,7 @@ class _DocumentItem extends StatelessWidget {
                 children: [
                   Text(
                     document.title ?? 'Unnamed Document',
-                    style: const TextStyle(
-                      fontSize: Font.small,
+                    style: theme.textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -749,19 +784,19 @@ class _DocumentItem extends StatelessWidget {
                   if (document.createdAt != null)
                     Text(
                       DateFormat('MMM dd, yyyy').format(document.createdAt!),
-                      style: const TextStyle(
-                        fontSize: Font.extraSmall,
-                        color: Colors.grey,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color:
+                            theme.colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                 ],
               ),
             ),
             IconButton(
-              icon: const FaIcon(
+              icon: FaIcon(
                 FontAwesomeIcons.download,
                 size: 16,
-                color: MyColors.primary,
+                color: theme.primaryColor,
               ),
               onPressed: () {
                 // Download document
@@ -779,24 +814,27 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-        backgroundColor: MyColors.background,
-        foregroundColor: MyColors.primary,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: theme.primaryColor,
         shape: RoundedRectangleBorder(
           borderRadius: kRadius10,
         ),
-        side: const BorderSide(color: MyColors.primary),
+        side: BorderSide(color: theme.primaryColor),
         padding: kPaddH10V0,
       ),
       onPressed: () {
         context.read<RouteBloc>().add(AuthLogoutPressed());
       },
-      child: const Text('Logout',
-          style: TextStyle(
-            fontSize: Font.small,
-            fontWeight: FontWeight.bold,
-          )),
+      child: Text(
+        'Logout',
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: theme.primaryColor,
+        ),
+      ),
     );
   }
 }
@@ -808,6 +846,8 @@ class _DashboardError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -820,7 +860,7 @@ class _DashboardError extends StatelessWidget {
           kGap20,
           Text(
             'Error: $message',
-            style: const TextStyle(color: Colors.red),
+            style: TextStyle(color: Colors.red),
           ),
           kGap20,
           ElevatedButton(
@@ -828,8 +868,8 @@ class _DashboardError extends StatelessWidget {
               context.read<PatientBloc>().add(LoadPatient());
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: MyColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: theme.primaryColor,
+              foregroundColor: theme.colorScheme.onPrimary,
             ),
             child: const Text('Retry'),
           ),

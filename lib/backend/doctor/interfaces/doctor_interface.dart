@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:medtalk/backend/doctor/models/update_doctor_dto.dart';
 
 import '../../user/interfaces/user_interface.dart';
 import '../models/doctor.dart';
@@ -16,4 +17,10 @@ abstract class IDoctorRepository extends IUserRepository {
   Future<List<Doctor>> getPatientDoctors(String patientId);
 
   Future<bool> checkEmailExists(String email);
+
+//updateDoctorProfile
+  Future<void> updateDoctorProfile(UpdateDoctorDto dto);
+
+  //getDoctorActiveStatus
+  Future<bool?> getDoctorActiveStatus(String userId);
 }

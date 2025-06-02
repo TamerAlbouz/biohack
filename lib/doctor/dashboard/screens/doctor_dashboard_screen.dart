@@ -967,99 +967,6 @@ class _StatusLegendItem extends StatelessWidget {
   }
 }
 
-class _RecentPatientsSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // For demo purposes, we'll create some mock patients
-    // In a real app, this would come from a BLoC or provider
-    final List<Patient> recentPatients = [
-      Patient(
-        uid: '1',
-        name: 'Sarah Johnson',
-        dateOfBirth: DateTime(1985, 5, 15),
-        email: '',
-        role: null,
-      ),
-      Patient(
-        uid: '2',
-        name: 'Michael Chen',
-        dateOfBirth: DateTime(1992, 8, 22),
-        email: '',
-        role: null,
-      ),
-      Patient(
-        uid: '3',
-        name: 'Emma Wilson',
-        dateOfBirth: DateTime(1978, 11, 10),
-        email: '',
-        role: null,
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Recent Patients', style: kSectionTitle),
-            TextButton(
-              onPressed: () {
-                // Navigate to patients list
-              },
-              child: const Text(
-                'View All',
-                style: TextStyle(
-                  color: MyColors.primary,
-                  fontSize: Font.small,
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 130,
-          child: recentPatients.isEmpty
-              ? _emptyPatientsWidget()
-              : ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: recentPatients.length,
-                  itemBuilder: (context, index) {
-                    return _PatientCard(patient: recentPatients[index]);
-                  },
-                ),
-        ),
-      ],
-    );
-  }
-
-  Widget _emptyPatientsWidget() {
-    return const CustomBase(
-      shadow: false,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FaIcon(
-              FontAwesomeIcons.users,
-              size: 30,
-              color: Colors.grey,
-            ),
-            kGap10,
-            Text(
-              'No recent patients',
-              style: TextStyle(
-                fontSize: Font.small,
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _PatientCard extends StatelessWidget {
   final Patient patient;
 
@@ -1069,7 +976,7 @@ class _PatientCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Calculate age
     final now = DateTime.now();
-    final age = now.year - (patient.dateOfBirth?.year ?? now.year);
+    final age = now.year - (patient.dateOfBirth?.toDate().year ?? now.year);
 
     return Container(
       width: 130,

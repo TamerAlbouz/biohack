@@ -1,11 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:medtalk/backend/extensions/timestamp_converter.dart';
 
 import '../../authentication/enums/role.dart';
 import '../../user/models/user.dart';
 
 part 'patient.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, converters: [
+  TimestampConverter(),
+])
 class Patient extends User {
   const Patient({
     required super.email,
@@ -35,7 +39,8 @@ class Patient extends User {
   final List<String>? recentDoctors;
 
   /// The current user's date of birth.
-  final DateTime? dateOfBirth;
+  @TimestampConverter()
+  final Timestamp? dateOfBirth;
 
   /// The current user's blood type.
   final String? bloodType;
@@ -56,14 +61,14 @@ class Patient extends User {
     String? name,
     bool? firstTime,
     String? profilePictureUrl,
-    DateTime? updatedAt,
+    Timestamp? updatedAt,
     bool? busy,
     String? biography,
     List<String>? tokens,
     List<String>? medicalRecords,
     List<String>? recentDoctors,
     String? sex,
-    DateTime? dateOfBirth,
+    Timestamp? dateOfBirth,
     String? bloodType,
     double? weight,
     double? height,
@@ -89,71 +94,6 @@ class Patient extends User {
       biography: biography ?? this.biography,
       savedCreditCards: savedCreditCards ?? this.savedCreditCards,
     );
-  }
-
-  /// Converts a [Map<String, dynamic>] to a [Patient].
-  factory Patient.fromMap(String docId, Map<String, dynamic> data) {
-    return Patient(
-      email: data['email'],
-      uid: docId,
-      name: data['name'],
-      role: Role.values.byName(data['role']),
-      profilePictureUrl: data['profilePictureUrl'],
-      createdAt: data['createdAt'].toDate(),
-      updatedAt: data['updatedAt']?.toDate(),
-      busy: data['busy'],
-      tokens: data['tokens'],
-      biography: data['biography'],
-      medicalRecords: data['medicalRecords'],
-      recentDoctors: data['recentDoctors'],
-      sex: data['sex'],
-      dateOfBirth: data['dateOfBirth']?.toDate(),
-      bloodType: data['bloodType'],
-      weight: data['weight'],
-      height: data['height'],
-      savedCreditCards: (data['savedCreditCards'] as List<dynamic>?)
-          ?.map((e) => SavedCreditCard(
-                id: e['id'],
-                cardNumber: e['cardNumber'],
-                cardholderName: e['cardholderName'],
-                expiryDate: e['expiryDate'],
-                cardType: e['cardType'],
-                isDefault: e['isDefault'] ?? false,
-              ))
-          .toList(),
-    );
-  }
-
-  /// Converts a [Patient] to a [Map<String, dynamic>].
-  Map<String, dynamic> get toMap {
-    return {
-      'email': email,
-      'name': name,
-      'role': role!.name,
-      'profilePictureUrl': profilePictureUrl,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'busy': busy,
-      'tokens': tokens,
-      'biography': biography,
-      'medicalRecords': medicalRecords,
-      'recentDoctors': recentDoctors,
-      'sex': sex,
-      'dateOfBirth': dateOfBirth,
-      'bloodType': bloodType,
-      'weight': weight,
-      'height': height,
-      'savedCreditCards': savedCreditCards
-          ?.map((e) => {
-                'id': e.id,
-                'cardNumber': e.cardNumber,
-                'cardholderName': e.cardholderName,
-                'expiryDate': e.expiryDate,
-                'cardType': e.cardType,
-                'isDefault': e.isDefault,
-              })
-          .toList(),
-    };
   }
 
   @override

@@ -64,7 +64,7 @@ class PatientDetailsBloc
         documents: documents,
       ));
     } catch (e) {
-      logger.e('Error loading patient details: $e');
+      addError(e);
       emit(PatientDetailsError(e.toString()));
     }
   }

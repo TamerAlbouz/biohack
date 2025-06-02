@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:medtalk/backend/appointment/enums/appointment_status.dart';
 import 'package:medtalk/common/widgets/base/custom_base.dart';
 import 'package:medtalk/styles/colors.dart';
-import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
 
 class AppointmentWidgetPatient extends StatelessWidget {
@@ -41,7 +40,8 @@ class AppointmentWidgetPatient extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = _getStatusColor(status);
+    final theme = Theme.of(context);
+    final statusColor = _getStatusColor(status, theme);
     final isCanceled = status == AppointmentStatus.cancelled;
 
     return GestureDetector(
@@ -56,9 +56,8 @@ class AppointmentWidgetPatient extends StatelessWidget {
               children: [
                 Text(
                   serviceName,
-                  style: const TextStyle(
-                    fontSize: Font.medium,
-                    color: MyColors.primary,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.primaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -69,13 +68,12 @@ class AppointmentWidgetPatient extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
+                    color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     _getStatusText(status),
-                    style: TextStyle(
-                      fontSize: Font.extraSmall,
+                    style: theme.textTheme.labelSmall?.copyWith(
                       color: statusColor,
                       fontWeight: FontWeight.bold,
                     ),
@@ -87,10 +85,11 @@ class AppointmentWidgetPatient extends StatelessWidget {
             // Doctor name
             Text(
               name,
-              style: const TextStyle(
-                fontSize: Font.cardSubTitleSize,
+              style: theme.textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.normal,
-                color: MyColors.subtitle,
+                color: theme.brightness == Brightness.light
+                    ? MyColors.subtitle
+                    : MyColors.textGrey,
               ),
             ),
             kGap8,
@@ -98,16 +97,15 @@ class AppointmentWidgetPatient extends StatelessWidget {
             // Date and time
             Row(
               children: [
-                const FaIcon(
+                FaIcon(
                   FontAwesomeIcons.calendarCheck,
                   size: 16,
-                  color: MyColors.primary,
+                  color: theme.primaryColor,
                 ),
                 kGap8,
                 Text(
                   DateFormat('EEEE, MMM dd, yyyy').format(appointmentDate),
-                  style: const TextStyle(
-                    fontSize: Font.small,
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -118,31 +116,31 @@ class AppointmentWidgetPatient extends StatelessWidget {
             // Time and service
             Row(
               children: [
-                const FaIcon(
+                FaIcon(
                   FontAwesomeIcons.clock,
                   size: 14,
-                  color: MyColors.subtitleDark,
+                  color: theme.brightness == Brightness.light
+                      ? MyColors.subtitleDark
+                      : MyColors.textGrey,
                 ),
                 kGap8,
                 Text(
                   DateFormat('h:mm a').format(appointmentDate),
-                  style: const TextStyle(
-                    fontSize: Font.small,
-                  ),
+                  style: theme.textTheme.labelMedium,
                 ),
                 kGap16,
-                const FaIcon(
+                FaIcon(
                   FontAwesomeIcons.stethoscope,
                   size: 14,
-                  color: MyColors.subtitleDark,
+                  color: theme.brightness == Brightness.light
+                      ? MyColors.subtitleDark
+                      : MyColors.textGrey,
                 ),
                 kGap8,
                 Expanded(
                   child: Text(
                     specialty,
-                    style: const TextStyle(
-                      fontSize: Font.small,
-                    ),
+                    style: theme.textTheme.labelMedium,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -153,25 +151,24 @@ class AppointmentWidgetPatient extends StatelessWidget {
             // Location and fee
             Row(
               children: [
-                const FaIcon(
+                FaIcon(
                   FontAwesomeIcons.locationDot,
                   size: 14,
-                  color: MyColors.subtitleDark,
+                  color: theme.brightness == Brightness.light
+                      ? MyColors.subtitleDark
+                      : MyColors.textGrey,
                 ),
                 kGap8,
                 Expanded(
                   child: Text(
                     location,
-                    style: const TextStyle(
-                      fontSize: Font.small,
-                    ),
+                    style: theme.textTheme.labelMedium,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Text(
                   '\$${fee.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: Font.small,
+                  style: theme.textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -181,7 +178,8 @@ class AppointmentWidgetPatient extends StatelessWidget {
             // Cancellation reason if cancelled
             if (isCanceled && cancelReason != null) ...[
               kGap8,
-              const Divider(),
+              Divider(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
               kGap8,
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,8 +193,7 @@ class AppointmentWidgetPatient extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Reason: $cancelReason',
-                      style: const TextStyle(
-                        fontSize: Font.small,
+                      style: theme.textTheme.labelMedium?.copyWith(
                         color: Colors.red,
                       ),
                     ),
@@ -208,7 +205,8 @@ class AppointmentWidgetPatient extends StatelessWidget {
             // Join call button (if applicable)
             if (showButton && !isPast && !isCanceled) ...[
               kGap12,
-              const Divider(),
+              Divider(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
               kGap8,
               SizedBox(
                 width: double.infinity,
@@ -216,18 +214,21 @@ class AppointmentWidgetPatient extends StatelessWidget {
                   onPressed: isReady ? onJoinCall : null,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size.fromHeight(42),
-                    backgroundColor: MyColors.primary,
+                    backgroundColor: theme.primaryColor,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: kRadius10,
                     ),
+                    disabledBackgroundColor:
+                        theme.colorScheme.onSurface.withValues(alpha: 0.1),
                   ),
                   child: Text(
                     isReady ? 'Join Call' : 'Waiting for scheduled time',
-                    style: TextStyle(
-                      fontSize: Font.small,
+                    style: theme.textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.bold,
-                      color: isReady ? MyColors.buttonText : MyColors.textGrey,
+                      color: isReady
+                          ? theme.colorScheme.onPrimary
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -237,24 +238,24 @@ class AppointmentWidgetPatient extends StatelessWidget {
             // For non-past appointments that aren't cancelled and don't show a button
             if (!showButton && !isPast && !isCanceled) ...[
               kGap12,
-              const Divider(),
+              Divider(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
               kGap8,
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   FaIcon(
                     FontAwesomeIcons.circleInfo,
                     size: 14,
-                    color: Colors.blue,
+                    color: theme.colorScheme.primary,
                   ),
                   kGap8,
                   Expanded(
                     child: Text(
                       'Appointments are initiated by patients. You can view details but cannot reschedule or start calls.',
-                      style: TextStyle(
-                        fontSize: Font.extraSmall,
+                      style: theme.textTheme.labelSmall?.copyWith(
                         fontStyle: FontStyle.italic,
-                        color: Colors.blue,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   ),
@@ -267,18 +268,18 @@ class AppointmentWidgetPatient extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(AppointmentStatus? status) {
+  Color _getStatusColor(AppointmentStatus? status, ThemeData theme) {
     switch (status) {
       case AppointmentStatus.completed:
-        return Colors.green;
+        return MyColors.green;
       case AppointmentStatus.cancelled:
-        return Colors.red;
+        return MyColors.cancel;
       case AppointmentStatus.missed:
-        return Colors.orange;
+        return MyColors.pending;
       case AppointmentStatus.scheduled:
-        return MyColors.primary;
+        return theme.primaryColor;
       default:
-        return MyColors.primary;
+        return theme.primaryColor;
     }
   }
 

@@ -8,6 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 @module
 abstract class BackendInjectableModule {
+  @lazySingleton
+  FirebaseStorage get firebaseStorage => FirebaseStorage.instance;
+
   @preResolve
   @lazySingleton
   Future<SharedPreferences> get sharedPreferences =>
@@ -21,9 +24,6 @@ abstract class BackendInjectableModule {
 
   @lazySingleton
   FirebaseFunctions get functions => FirebaseFunctions.instance;
-
-  @lazySingleton
-  FirebaseStorage get firestoreInstance => FirebaseStorage.instance;
 
   @singleton
   Logger get logger => Logger(

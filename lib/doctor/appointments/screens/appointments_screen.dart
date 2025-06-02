@@ -8,7 +8,6 @@ import 'package:medtalk/backend/appointment/models/appointment.dart';
 import 'package:medtalk/common/globals/globals.dart';
 import 'package:medtalk/common/widgets/cards/appointment_doctor_card.dart';
 import 'package:medtalk/styles/colors.dart';
-import 'package:medtalk/styles/font.dart';
 import 'package:medtalk/styles/sizes.dart';
 
 import '../../../common/widgets/badged_tab.dart';
@@ -54,11 +53,19 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: MyColors.background,
-        foregroundColor: MyColors.primary,
-        title: const Text('Appointments'),
+        elevation: 0,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: theme.primaryColor,
+        title: Text(
+          'Appointments',
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onBackground,
+          ),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(kToolbarHeight),
           child: BlocBuilder<DoctorAppointmentsBloc, DoctorAppointmentsState>(
@@ -72,10 +79,10 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
               }
 
               return Container(
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: MyColors.softStroke,
+                        color: theme.colorScheme.onBackground.withOpacity(0.1),
                         width: 1,
                       ),
                     ),
@@ -83,9 +90,12 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                   child: TabBar(
                     controller: _tabController,
                     indicatorSize: TabBarIndicatorSize.label,
-                    indicatorColor: MyColors.primary,
-                    unselectedLabelColor: Colors.grey,
+                    indicatorColor: theme.primaryColor,
+                    labelColor: theme.colorScheme.onBackground,
+                    unselectedLabelColor:
+                        theme.colorScheme.onBackground.withOpacity(0.6),
                     isScrollable: true,
+                    dividerColor: Colors.transparent,
                     tabs: [
                       const BadgedTab(
                         text: 'Today',
@@ -95,7 +105,7 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                         text: 'Upcoming',
                         icon: FontAwesomeIcons.calendarPlus,
                         badgeCount: unviewedUpcomingCount,
-                        badgeColor: MyColors.primary,
+                        badgeColor: theme.primaryColor,
                       ),
                       const BadgedTab(
                         text: 'Past',
@@ -105,7 +115,7 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                         text: 'Missed',
                         icon: FontAwesomeIcons.calendarXmark,
                         badgeCount: unviewedMissedCount,
-                        badgeColor: Colors.red,
+                        badgeColor: MyColors.cancel,
                       ),
                     ],
                     onTap: (index) {
@@ -137,7 +147,13 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                 alignment: Alignment.center,
                 children: [
                   IconButton(
-                    icon: const FaIcon(FontAwesomeIcons.filter),
+                    icon: FaIcon(
+                      FontAwesomeIcons.filter,
+                      size: 20,
+                      color: hasActiveFilters
+                          ? theme.primaryColor
+                          : theme.colorScheme.onBackground,
+                    ),
                     onPressed: () {
                       // Show enhanced filter dialog
                       _showEnhancedFilterDialog(context);
@@ -145,13 +161,13 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                   ),
                   if (hasActiveFilters)
                     Positioned(
-                      top: 8,
-                      right: 8,
+                      top: 10,
+                      right: 10,
                       child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: theme.primaryColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -168,7 +184,12 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Colors.red,
+                backgroundColor: MyColors.cancel,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                margin: const EdgeInsets.all(10),
               ),
             );
           }
@@ -179,9 +200,17 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
               context
                   .read<DoctorAppointmentsBloc>()
                   .add(LoadDoctorAppointments());
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                child: CircularProgressIndicator(
+                  color: theme.primaryColor,
+                ),
+              );
             case DoctorAppointmentsLoading():
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                child: CircularProgressIndicator(
+                  color: theme.primaryColor,
+                ),
+              );
             case DoctorAppointmentsLoaded():
               return TabBarView(
                 controller: _tabController,
@@ -224,22 +253,21 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
             case DoctorAppointmentsError():
               return _AppointmentsError(message: state.message);
             default:
-              return const Center(child: Text('Unexpected state'));
+              return Center(
+                child: Text(
+                  'Unexpected state',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              );
           }
         },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Refresh appointments
-          context.read<DoctorAppointmentsBloc>().add(LoadDoctorAppointments());
-        },
-        backgroundColor: MyColors.primary,
-        child: const Icon(Icons.refresh, color: Colors.white),
       ),
     );
   }
 
   void _showEnhancedFilterDialog(BuildContext context) {
+    final theme = Theme.of(context);
+
     // Get current filter criteria from state
     AppointmentFilterCriteria currentCriteria =
         const AppointmentFilterCriteria();
@@ -271,27 +299,42 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Filter Appointments'),
+            title: Text(
+              'Filter Appointments',
+              style: theme.textTheme.titleMedium,
+            ),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Date Range Section
-                  const Text(
+                  Text(
                     'Date Range',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       Expanded(
                         child: TextButton.icon(
-                          icon: const Icon(Icons.calendar_today),
+                          icon: FaIcon(
+                            FontAwesomeIcons.calendarDay,
+                            size: 16,
+                            color: theme.primaryColor,
+                          ),
                           label: Text(
                             fromDate != null
                                 ? DateFormat('MMM dd, yyyy').format(fromDate!)
                                 : 'From Date',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: fromDate != null
+                                  ? theme.colorScheme.onBackground
+                                  : theme.colorScheme.onBackground
+                                      .withOpacity(0.6),
+                            ),
                           ),
                           onPressed: () async {
                             final selectedDate = await showDatePicker(
@@ -301,16 +344,6 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                                   .subtract(const Duration(days: 365)),
                               lastDate:
                                   DateTime.now().add(const Duration(days: 365)),
-                              builder: (context, child) {
-                                return Theme(
-                                  data: ThemeData.light().copyWith(
-                                    colorScheme: const ColorScheme.light(
-                                      primary: MyColors.primary,
-                                    ),
-                                  ),
-                                  child: child!,
-                                );
-                              },
                             );
                             if (selectedDate != null) {
                               setState(() {
@@ -322,11 +355,21 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                       ),
                       Expanded(
                         child: TextButton.icon(
-                          icon: const Icon(Icons.calendar_today),
+                          icon: FaIcon(
+                            FontAwesomeIcons.calendarDay,
+                            size: 16,
+                            color: theme.primaryColor,
+                          ),
                           label: Text(
                             toDate != null
                                 ? DateFormat('MMM dd, yyyy').format(toDate!)
                                 : 'To Date',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: toDate != null
+                                  ? theme.colorScheme.onBackground
+                                  : theme.colorScheme.onBackground
+                                      .withOpacity(0.6),
+                            ),
                           ),
                           onPressed: () async {
                             final selectedDate = await showDatePicker(
@@ -336,16 +379,6 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                                   .subtract(const Duration(days: 365)),
                               lastDate:
                                   DateTime.now().add(const Duration(days: 365)),
-                              builder: (context, child) {
-                                return Theme(
-                                  data: ThemeData.light().copyWith(
-                                    colorScheme: const ColorScheme.light(
-                                      primary: MyColors.primary,
-                                    ),
-                                  ),
-                                  child: child!,
-                                );
-                              },
                             );
                             if (selectedDate != null) {
                               setState(() {
@@ -361,9 +394,11 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                   const SizedBox(height: 16),
 
                   // Status Filter Section
-                  const Text(
+                  Text(
                     'Status',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Wrap(
@@ -436,55 +471,130 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                   const SizedBox(height: 16),
 
                   // Patient Name Filter
-                  const Text(
+                  Text(
                     'Patient Name',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: patientNameController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Search by patient name',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color:
+                              theme.colorScheme.onBackground.withOpacity(0.2),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color:
+                              theme.colorScheme.onBackground.withOpacity(0.2),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      hintStyle: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onBackground.withOpacity(0.5),
+                      ),
                     ),
+                    style: theme.textTheme.labelMedium,
                   ),
 
                   const SizedBox(height: 16),
 
                   // Service Name Filter
-                  const Text(
+                  Text(
                     'Service',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: serviceNameController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Search by service',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color:
+                              theme.colorScheme.onBackground.withOpacity(0.2),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color:
+                              theme.colorScheme.onBackground.withOpacity(0.2),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      hintStyle: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onBackground.withOpacity(0.5),
+                      ),
                     ),
+                    style: theme.textTheme.labelMedium,
                   ),
 
                   const SizedBox(height: 16),
 
                   // Location Filter
-                  const Text(
+                  Text(
                     'Location',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextField(
                     controller: locationController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Search by location',
-                      border: OutlineInputBorder(),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color:
+                              theme.colorScheme.onBackground.withOpacity(0.2),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color:
+                              theme.colorScheme.onBackground.withOpacity(0.2),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: theme.primaryColor,
+                        ),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 12),
+                      hintStyle: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onBackground.withOpacity(0.5),
+                      ),
                     ),
+                    style: theme.textTheme.labelMedium,
                   ),
                 ],
               ),
@@ -496,13 +606,28 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                   context.read<DoctorAppointmentsBloc>().add(ResetFilters());
                   Navigator.pop(dialogContext);
                 },
-                child: const Text('Reset', style: TextStyle(color: Colors.red)),
+                style: TextButton.styleFrom(
+                  foregroundColor: MyColors.cancel,
+                ),
+                child: Text(
+                  'Reset',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: MyColors.cancel,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () {
                   Navigator.pop(dialogContext);
                 },
-                child: const Text('Cancel'),
+                style: TextButton.styleFrom(
+                  foregroundColor: theme.colorScheme.onBackground,
+                ),
+                child: Text(
+                  'Cancel',
+                  style: theme.textTheme.labelMedium,
+                ),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -531,10 +656,20 @@ class _DoctorAppointmentsViewState extends State<DoctorAppointmentsView>
                   Navigator.pop(dialogContext);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: MyColors.primary,
-                  foregroundColor: Colors.white,
+                  backgroundColor: theme.primaryColor,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-                child: const Text('Apply'),
+                child: Text(
+                  'Apply',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           );
@@ -558,19 +693,29 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return FilterChip(
-      label: Text(label),
+      label: Text(
+        label,
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: selected ? theme.primaryColor : theme.colorScheme.onBackground,
+          fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
       selected: selected,
       onSelected: onSelected,
-      backgroundColor: Colors.grey[200],
-      selectedColor: MyColors.primary.withValues(alpha: 0.2),
-      checkmarkColor: MyColors.primary,
+      backgroundColor: theme.colorScheme.onBackground.withOpacity(0.05),
+      selectedColor: theme.primaryColor.withOpacity(0.15),
+      checkmarkColor: theme.primaryColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: selected ? MyColors.primary : Colors.transparent,
+          color: selected ? theme.primaryColor : Colors.transparent,
+          width: 1.5,
         ),
       ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
     );
   }
 }
@@ -614,6 +759,7 @@ class _AppointmentItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final appointment = appointmentPatientCard.appointment;
 
     final isUpcoming = appointment.appointmentDate.isAfter(DateTime.now());
@@ -683,11 +829,19 @@ class _AppointmentItem extends StatelessWidget {
             top: 8,
             right: 8,
             child: Container(
-              width: 12,
-              height: 12,
+              width: 10,
+              height: 10,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isMissed ? Colors.red : Colors.blue,
+                color: isMissed ? MyColors.cancel : theme.primaryColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: (isMissed ? MyColors.cancel : theme.primaryColor)
+                        .withOpacity(0.4),
+                    blurRadius: 4,
+                    spreadRadius: 1,
+                  ),
+                ],
               ),
             ),
           ),
@@ -696,6 +850,8 @@ class _AppointmentItem extends StatelessWidget {
   }
 
   void _handleJoinCall(BuildContext context, Appointment appointment) {
+    final theme = Theme.of(context);
+
     // Check if appointment is active (within 10 minutes of start time)
     final now = DateTime.now();
     final startWindow =
@@ -709,10 +865,19 @@ class _AppointmentItem extends StatelessWidget {
       );
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-              "You can only join calls within 10 minutes of the appointment time"),
-          backgroundColor: Colors.red,
+            "You can only join calls within 10 minutes of the appointment time",
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: MyColors.cancel,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: const EdgeInsets.all(10),
         ),
       );
     }
@@ -726,23 +891,43 @@ class _EmptyStateMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const FaIcon(
+          FaIcon(
             FontAwesomeIcons.calendarXmark,
             size: 48,
-            color: MyColors.subtitleDark,
+            color: theme.colorScheme.onBackground.withOpacity(0.4),
           ),
           kGap20,
           Text(
             message,
-            style: const TextStyle(
-              fontSize: Font.medium,
-              color: MyColors.subtitleDark,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onBackground.withOpacity(0.7),
             ),
             textAlign: TextAlign.center,
+          ),
+          kGap20,
+          ElevatedButton.icon(
+            onPressed: () {
+              context
+                  .read<DoctorAppointmentsBloc>()
+                  .add(LoadDoctorAppointments());
+            },
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Refresh'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.primaryColor,
+              foregroundColor: theme.colorScheme.onPrimary,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
           ),
         ],
       ),
@@ -757,6 +942,8 @@ class _AppointmentsError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -764,16 +951,26 @@ class _AppointmentsError extends StatelessWidget {
           FaIcon(
             FontAwesomeIcons.circleExclamation,
             size: 48,
-            color: Colors.red[300],
+            color: MyColors.cancel.withOpacity(0.8),
           ),
           kGap20,
-          Text(
-            'Error: $message',
-            style: const TextStyle(
-              color: Colors.red,
-              fontSize: Font.medium,
+          Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            decoration: BoxDecoration(
+              color: MyColors.cancel.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: MyColors.cancel.withOpacity(0.3),
+              ),
             ),
-            textAlign: TextAlign.center,
+            child: Text(
+              'Error: $message',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: MyColors.cancel,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
           kGap20,
           ElevatedButton.icon(
@@ -782,11 +979,16 @@ class _AppointmentsError extends StatelessWidget {
                   .read<DoctorAppointmentsBloc>()
                   .add(LoadDoctorAppointments());
             },
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, size: 18),
             label: const Text('Retry'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: MyColors.primary,
-              foregroundColor: Colors.white,
+              backgroundColor: theme.primaryColor,
+              foregroundColor: theme.colorScheme.onPrimary,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
         ],

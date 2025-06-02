@@ -70,7 +70,7 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
             }
           }
         } catch (e) {
-          logger.e('Error fetching patient with ID $id: $e');
+          addError(e);
         }
       }
 
@@ -87,7 +87,7 @@ class PatientsBloc extends Bloc<PatientsEvent, PatientsState> {
         currentFilter: event.filter,
       ));
     } catch (e) {
-      logger.e('Error loading patients: $e');
+      addError(e);
       emit(PatientsError(e.toString()));
     }
   }

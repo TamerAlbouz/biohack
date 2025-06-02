@@ -1,0 +1,2 @@
+C:/Users/tamer/StudioProjects/biohack/android/app/.cxx/Debug/p4s351m6/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/tamer/StudioProjects/biohack/android/app/.cxx/Debug/p4s351m6/armeabi-v7a/CMakeFiles/rebuild_cache.dir

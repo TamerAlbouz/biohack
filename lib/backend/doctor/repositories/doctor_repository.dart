@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:medtalk/backend/doctor/interfaces/doctor_interface.dart';
 import 'package:medtalk/backend/doctor/models/doctor.dart';
+import 'package:medtalk/backend/doctor/models/update_doctor_dto.dart';
 import 'package:medtalk/backend/extensions/object.dart';
 import 'package:medtalk/backend/user/repositories/user_repository.dart';
 
@@ -34,8 +35,9 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
 
           // Add services to doctor data
           doctorData['services'] = services;
+          doctorData['uid'] = id;
 
-          return Doctor.fromMap(id, doctorData);
+          return Doctor.fromJson(doctorData);
         }
 
         return null;
@@ -52,7 +54,7 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
   @override
   Future<void> addDoctor(Doctor doctor) {
     try {
-      return _doctorCollection.doc(doctor.uid).set(doctor.toMap);
+      return _doctorCollection.doc(doctor.uid).set(doctor.toJson());
     } on FirebaseException catch (e) {
       logger.e(e.message);
       throw DoctorException.fromCode(e.code);
@@ -65,7 +67,7 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
   @override
   Future<void> updateDoctor(Doctor doctor) {
     try {
-      return _doctorCollection.doc(doctor.uid).update(doctor.toMap);
+      return _doctorCollection.doc(doctor.uid).update(doctor.toJson());
     } on FirebaseException catch (e) {
       logger.e(e.message);
       throw DoctorException.fromCode(e.code);
@@ -101,7 +103,7 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
 
       return query.get().then((snapshot) => (
             snapshot.docs
-                .map((doc) => Doctor.fromMap(doc.id, doc.data().toMap()))
+                .map((doc) => Doctor.fromJson(doc.data().toMap()))
                 .toList(),
             snapshot.docs.isNotEmpty ? snapshot.docs.last : null
           ));
@@ -121,7 +123,7 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
           .where('patientIds', arrayContains: id)
           .get()
           .then((snapshot) => snapshot.docs
-              .map((doc) => Doctor.fromMap(doc.id, doc.data().toMap()))
+              .map((doc) => Doctor.fromJson(doc.data().toMap()))
               .toList());
     } on FirebaseException catch (e) {
       logger.e(e.message);
@@ -142,6 +144,44 @@ class DoctorRepository extends UserRepository implements IDoctorRepository {
           .get();
 
       return snapshot.docs.isNotEmpty;
+    } on FirebaseException catch (e) {
+      logger.e(e.message);
+      throw DoctorException.fromCode(e.code);
+    } catch (e) {
+      logger.e(e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> updateDoctorProfile(UpdateDoctorDto dto) {
+    try {
+      // update with merge
+      return _doctorCollection.doc(dto.uid).update(
+            dto.toJson(),
+          );
+    } on FirebaseException catch (e) {
+      logger.e(e.message);
+      throw DoctorException.fromCode(e.code);
+    } catch (e) {
+      logger.e(e);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<bool?> getDoctorActiveStatus(String userId) async {
+    try {
+      final snapshot = await _doctorCollection
+          .where('uid', isEqualTo: userId)
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final doctorData = snapshot.docs.first.data();
+        return (doctorData as Map<String, dynamic>)['active'] as bool?;
+      }
+      return null;
     } on FirebaseException catch (e) {
       logger.e(e.message);
       throw DoctorException.fromCode(e.code);

@@ -17,12 +17,8 @@ Doctor _$DoctorFromJson(Map<String, dynamic> json) => Doctor(
       role: $enumDecodeNullable(_$RoleEnumMap, json['role']),
       busy: json['busy'] as bool? ?? false,
       profilePictureUrl: json['profilePictureUrl'] as String?,
-      createdAt: json['createdAt'] == null
-          ? null
-          : DateTime.parse(json['createdAt'] as String),
-      updatedAt: json['updatedAt'] == null
-          ? null
-          : DateTime.parse(json['updatedAt'] as String),
+      createdAt: const TimestampConverter().fromJson(json['createdAt']),
+      updatedAt: const TimestampConverter().fromJson(json['updatedAt']),
       sex: json['sex'] as String?,
       tokens:
           (json['tokens'] as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -40,6 +36,10 @@ Doctor _$DoctorFromJson(Map<String, dynamic> json) => Doctor(
       patientIds: (json['patientIds'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      locationNotes: json['locationNotes'] as String?,
+      qualifications: (json['qualifications'] as List<dynamic>?)
+          ?.map((e) => Qualification.fromJson(e as Map<String, dynamic>))
+          .toList(),
       previousName: json['previousName'] as String?,
       licenseType: json['licenseType'] as String?,
       zone: json['zone'] as String?,
@@ -54,8 +54,8 @@ Map<String, dynamic> _$DoctorToJson(Doctor instance) => <String, dynamic>{
       'sex': instance.sex,
       'role': _$RoleEnumMap[instance.role],
       'profilePictureUrl': instance.profilePictureUrl,
-      'createdAt': instance.createdAt?.toIso8601String(),
-      'updatedAt': instance.updatedAt?.toIso8601String(),
+      'createdAt': const TimestampConverter().toJson(instance.createdAt),
+      'updatedAt': const TimestampConverter().toJson(instance.updatedAt),
       'email': instance.email,
       'uid': instance.uid,
       'name': instance.name,
@@ -71,6 +71,7 @@ Map<String, dynamic> _$DoctorToJson(Doctor instance) => <String, dynamic>{
           instance.availability.map((k, e) => MapEntry(k, e?.toJson())),
       'patientIds': instance.patientIds,
       'previousName': instance.previousName,
+      'locationNotes': instance.locationNotes,
       'licenseType': instance.licenseType,
       'zone': instance.zone,
       'location': instance.location,
@@ -78,6 +79,8 @@ Map<String, dynamic> _$DoctorToJson(Doctor instance) => <String, dynamic>{
       'registryHomeJurisdiction': instance.registryHomeJurisdiction,
       'registrantType': instance.registrantType,
       'termsAccepted': instance.termsAccepted,
+      'qualifications':
+          instance.qualifications?.map((e) => e.toJson()).toList(),
     };
 
 const _$RoleEnumMap = {

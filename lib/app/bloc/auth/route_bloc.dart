@@ -165,7 +165,7 @@ class RouteBloc extends Bloc<RouteEvent, RouteState> {
       logger.i('Role chosen: ${event.role}');
       emit(AuthLogin(event.role));
     } catch (e) {
-      logger.e('Error choosing role: $e');
+      addError(e);
       emit(AuthFailure('Error choosing role'));
     }
   }

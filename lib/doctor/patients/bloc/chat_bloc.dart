@@ -32,6 +32,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       emit(ChatHistoryLoaded(messages: messages));
     } catch (e) {
+      addError(e);
       emit(ChatError(message: 'Failed to load chat history: $e'));
     }
   }
@@ -103,6 +104,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           emit(ChatMessageSent(messages: updatedMessages));
         }
       } catch (e) {
+        addError(e);
         emit(ChatError(message: 'Failed to send message: $e'));
         // Restore previous state
         emit(ChatHistoryLoaded(messages: currentMessages));

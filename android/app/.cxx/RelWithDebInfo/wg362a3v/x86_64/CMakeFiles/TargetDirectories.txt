@@ -1,0 +1,2 @@
+C:/Users/tamer/StudioProjects/biohack/android/app/.cxx/RelWithDebInfo/wg362a3v/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/tamer/StudioProjects/biohack/android/app/.cxx/RelWithDebInfo/wg362a3v/x86_64/CMakeFiles/rebuild_cache.dir

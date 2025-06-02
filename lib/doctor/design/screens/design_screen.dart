@@ -204,13 +204,17 @@ class _DesignScreenState extends State<DesignScreen>
               children: [
                 TextField(
                   controller: titleController,
-                  style: const TextStyle(
-                    fontSize: 15,
+                  style: TextStyle(
+                    fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
                     color: MyColors.textBlack,
                   ),
                   decoration: InputDecoration(
                     labelText: 'Qualification Title',
                     hintText: 'e.g. MD, Harvard Medical School',
+                    hintStyle: TextStyle(
+                      color: MyColors.textGrey.withValues(alpha: 0.7),
+                      fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -469,16 +473,16 @@ class _DesignScreenState extends State<DesignScreen>
               color: MyColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  _getSaveIcon(),
+                  Icons.edit,
                   size: 14,
                   color: MyColors.primary,
                 ),
-                const SizedBox(width: 6),
-                const Text(
+                SizedBox(width: 6),
+                Text(
                   'Editing',
                   style: TextStyle(
                     fontSize: 12,

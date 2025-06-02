@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:medtalk/backend/authentication/enums/role.dart';
 
@@ -15,9 +16,9 @@ abstract class IUser extends Equatable {
   /// The current user's profile picture.
   String? get profilePictureUrl;
 
-  DateTime? get createdAt;
+  Timestamp? get createdAt;
 
-  DateTime? get updatedAt;
+  Timestamp? get updatedAt;
 
   /// The current user's email address.
   String get email;
@@ -48,7 +49,7 @@ abstract class IUser extends Equatable {
     String? name,
     String? sex,
     String? profilePictureUrl,
-    DateTime? updatedAt,
+    Timestamp? updatedAt,
     bool? busy,
     String? biography,
     List<String>? tokens,
@@ -95,10 +96,10 @@ class _UserImpl extends IUser {
   final String? profilePictureUrl;
 
   @override
-  final DateTime? createdAt;
+  final Timestamp? createdAt;
 
   @override
-  final DateTime? updatedAt;
+  final Timestamp? updatedAt;
 
   @override
   final String email;
@@ -125,11 +126,11 @@ class _UserImpl extends IUser {
     String? name,
     String? sex,
     String? profilePictureUrl,
-    DateTime? updatedAt,
+    Timestamp? updatedAt,
     bool? busy,
     String? biography,
     List<String>? tokens,
-    DateTime? createdAt,
+    Timestamp? createdAt,
   }) {
     return _UserImpl(
       email: email ?? this.email,

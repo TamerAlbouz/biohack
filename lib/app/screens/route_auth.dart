@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medtalk/backend/authentication/enums/auth_status.dart';
 import 'package:medtalk/backend/authentication/enums/role.dart';
 import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
 import 'package:medtalk/backend/injectable.dart';
 import 'package:medtalk/common/globals/globals.dart';
+import 'package:medtalk/common/widgets/loading_screen.dart';
 import 'package:medtalk/doctor/navigation/screens/navigation_doctor_screen.dart';
 import 'package:medtalk/patient/navigation/screens/navigation_patient_screen.dart';
-import 'package:medtalk/styles/sizes.dart';
 import 'package:medtalk/styles/themes.dart';
 
 import '../../login/screens/login_screen.dart';
 import '../../patient/dashboard/bloc/patient/patient_bloc.dart';
-import '../../styles/colors.dart';
-import '../../styles/font.dart';
 import '../bloc/auth/route_bloc.dart';
 import 'auth_screen.dart';
 
@@ -64,7 +61,9 @@ class _AppViewState extends State<_AppView> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      themeMode: ThemeMode.light,
+      theme: lightTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       navigatorKey: AppGlobal.navigatorKey,
       builder: (context, child) {
@@ -108,81 +107,10 @@ class _AppViewState extends State<_AppView> {
       onGenerateRoute: (settings) {
         return MaterialPageRoute<void>(
           builder: (context) {
-            return Scaffold(
-              body: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // App logo
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: const BoxDecoration(
-                        color: MyColors.primary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: SvgPicture.asset(
-                          'assets/svgs/Logo.svg',
-                          width: 80,
-                          height: 80,
-                          color: MyColors.white,
-                          fit: BoxFit.fill,
-                          // Fallback to icon if image isn't available during testing
-                          placeholderBuilder: (context) => const Icon(
-                            Icons.medical_services_rounded,
-                            size: 60,
-                            color: MyColors.primary,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    kGap40,
-
-                    // Loading indicator
-                    const SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(MyColors.primary),
-                      ),
-                    ),
-
-                    kGap24,
-
-                    // App name
-                    const Text(
-                      'MedTalk',
-                      style: TextStyle(
-                        fontSize: Font.large,
-                        fontWeight: FontWeight.bold,
-                        color: MyColors.primary,
-                      ),
-                    ),
-
-                    kGap8,
-
-                    // Tagline
-                    const Text(
-                      'Connecting doctors and patients',
-                      style: TextStyle(
-                        fontSize: Font.small,
-                        color: MyColors.subtitleDark,
-                      ),
-                    ),
-
-                    kGap80,
-                  ],
-                ),
-              ),
-            );
+            return const LoadingMedicalScreen();
           },
         );
       },
-      theme: lightTheme,
     );
   }
 

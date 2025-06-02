@@ -39,7 +39,7 @@ ThemeData get lightTheme {
               : MyColors.textBlack),
       hourMinuteColor: WidgetStateColor.resolveWith((states) =>
           states.contains(WidgetState.selected)
-              ? MyColors.primary.withValues(alpha: 0.2)
+              ? MyColors.primary.withOpacity(0.2)
               : Colors.transparent),
       hourMinuteTextColor: WidgetStateColor.resolveWith((states) =>
           states.contains(WidgetState.selected)
@@ -147,7 +147,7 @@ ThemeData get lightTheme {
       ),
       titleSmall: TextStyle(
         fontFamily: Font.family,
-        fontSize: Font.mediumLarge,
+        fontSize: 18,
         color: MyColors.textBlack,
         fontWeight: FontWeight.bold,
       ),
@@ -224,7 +224,6 @@ ThemeData get lightTheme {
       showSelectedLabels: true,
       selectedLabelStyle: TextStyle(
         fontFamily: Font.family,
-        // make tiny incase of small screen
         fontSize: Font.tiny,
         color: MyColors.white,
         fontWeight: FontWeight.bold,
@@ -237,6 +236,252 @@ ThemeData get lightTheme {
       ),
     ),
     datePickerTheme: datePickerTheme,
+  );
+}
+
+// Dark theme implementation
+ThemeData get darkTheme {
+  return ThemeData(
+    fontFamily: Font.family,
+    fontFamilyFallback: const [Font.family],
+    scaffoldBackgroundColor: const Color(0xFF121212),
+    // Dark background
+    // This sets the color for all progress indicators including RefreshIndicator
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: MyColors.primary,
+      brightness: Brightness.dark,
+      primary: MyColors.primary,
+      background: const Color(0xFF121212),
+      surface: const Color(0xFF1E1E1E),
+      onSurface: MyColors.white,
+      onBackground: MyColors.white,
+    ),
+    // You can also set it directly here, though colorScheme is preferred in newer Flutter versions
+    primaryColor: MyColors.primary,
+    timePickerTheme: TimePickerThemeData(
+      helpTextStyle: const TextStyle(
+        fontSize: Font.medium,
+        fontWeight: FontWeight.normal,
+        color: MyColors.white,
+      ),
+      backgroundColor: const Color(0xFF1E1E1E),
+      // Dark card background
+      hourMinuteShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      dayPeriodShape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      dayPeriodColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.selected)
+              ? MyColors.primary
+              : Colors.transparent),
+      dayPeriodTextColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.selected)
+              ? Colors.white
+              : MyColors.white),
+      hourMinuteColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.selected)
+              ? MyColors.primary.withOpacity(0.2)
+              : Colors.transparent),
+      hourMinuteTextColor: WidgetStateColor.resolveWith((states) =>
+          states.contains(WidgetState.selected)
+              ? MyColors.primary
+              : MyColors.white),
+      dialBackgroundColor: const Color(0xFF1E1E1E),
+      dialHandColor: MyColors.primary,
+      dialTextColor: WidgetStateColor.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? Colors.white
+            : MyColors.white,
+      ),
+      entryModeIconColor: MyColors.primary,
+    ),
+    dialogTheme: const DialogTheme(
+      backgroundColor: Color(0xFF1E1E1E),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: MyColors.primary,
+        foregroundColor: MyColors.buttonText,
+        shape: RoundedRectangleBorder(
+          borderRadius: kRadius10,
+        ),
+      ),
+    ),
+    buttonTheme: ButtonThemeData(
+      buttonColor: MyColors.primary,
+      textTheme: ButtonTextTheme.primary,
+      shape: RoundedRectangleBorder(
+        borderRadius: kRadius10,
+        side: const BorderSide(
+          color: MyColors.buttonStroke,
+        ),
+      ),
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Color(0xFF121212),
+      elevation: 0,
+      toolbarHeight: 0,
+      scrolledUnderElevation: 0,
+      iconTheme: IconThemeData(color: MyColors.white),
+      titleTextStyle: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.large,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.large,
+        color: MyColors.white,
+      ),
+      bodyMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.white,
+      ),
+      bodySmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumSmall,
+        color: MyColors.white,
+      ),
+      displayLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.largest,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      displayMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.large,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      displaySmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumLarge,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.sectionTitleSize,
+        color: MyColors.white,
+      ),
+      headlineSmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.white,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.largest,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      titleMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.large,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      titleSmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: 18,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.sectionTitleSize,
+        color: MyColors.white,
+      ),
+      labelLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.white,
+      ),
+      labelMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumSmall,
+        color: MyColors.white,
+      ),
+      labelSmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.cardSubTitleSize,
+        color: MyColors.white,
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        textStyle: const TextStyle(
+          fontFamily: Font.family,
+          fontSize: Font.medium,
+          fontWeight: FontWeight.normal,
+          color: MyColors.primaryLight,
+        ),
+        foregroundColor: MyColors.primaryLight,
+      ),
+    ),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+        TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+      },
+    ),
+    cardTheme: const CardTheme(
+      color: Color(0xFF1E1E1E), // Dark card background
+    ),
+    tabBarTheme: const TabBarTheme(
+      labelColor: MyColors.white,
+      labelStyle: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        fontWeight: FontWeight.bold,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        fontWeight: FontWeight.normal,
+      ),
+      unselectedLabelColor: Color(0xFFAAAAAA),
+      // Lighter grey for dark mode
+      dividerHeight: 0,
+      indicatorColor: MyColors.primary,
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: MyColors.white,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      type: BottomNavigationBarType.fixed,
+      landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
+      enableFeedback: true,
+      showUnselectedLabels: true,
+      backgroundColor: Color(0xFF151515),
+      // Dark nav bar background
+      unselectedIconTheme: IconThemeData(color: MyColors.grey),
+      selectedIconTheme: IconThemeData(color: MyColors.white),
+      elevation: 0,
+      selectedItemColor: MyColors.white,
+      unselectedItemColor: MyColors.grey,
+      showSelectedLabels: true,
+      selectedLabelStyle: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.tiny,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.tiny,
+        color: MyColors.grey,
+        fontWeight: FontWeight.normal,
+      ),
+    ),
+    datePickerTheme: darkDatePickerTheme,
   );
 }
 
@@ -329,6 +574,95 @@ ThemeData get cardTextTheme {
   );
 }
 
+// Dark card text theme
+ThemeData get darkCardTextTheme {
+  return ThemeData(
+    textTheme: const TextTheme(
+      bodyLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.large,
+        color: MyColors.white,
+      ),
+      bodyMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.white,
+      ),
+      bodySmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumSmall,
+        color: MyColors.white,
+      ),
+      displayLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.largest,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      displayMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.large,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      displaySmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumLarge,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.sectionTitleSize,
+        color: MyColors.white,
+      ),
+      headlineSmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.white,
+      ),
+      titleLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.largest,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      titleMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.large,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      titleSmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumLarge,
+        color: MyColors.white,
+        fontWeight: FontWeight.bold,
+      ),
+      headlineLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.sectionTitleSize,
+        color: MyColors.white,
+      ),
+      labelLarge: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.white,
+      ),
+      labelMedium: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumSmall,
+        color: MyColors.white,
+      ),
+      labelSmall: TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.cardSubTitleSize,
+        color: MyColors.white,
+      ),
+    ),
+  );
+}
+
 // Date picker theme
 DatePickerThemeData get datePickerTheme {
   return DatePickerThemeData(
@@ -411,6 +745,107 @@ DatePickerThemeData get datePickerTheme {
         fontFamily: Font.family,
         fontSize: Font.medium,
         color: MyColors.grey,
+      ),
+      labelStyle: const TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.mediumLarge,
+        color: MyColors.primaryLight,
+      ),
+      // inner value style
+      errorMaxLines: 2,
+      errorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: MyColors.errorRed,
+          width: 2,
+        ),
+        borderRadius: kRadius10,
+      ),
+    ),
+  );
+}
+
+// Dark date picker theme
+DatePickerThemeData get darkDatePickerTheme {
+  return DatePickerThemeData(
+    backgroundColor: const Color(0xFF1E1E1E),
+    cancelButtonStyle: const ButtonStyle(
+      foregroundColor: WidgetStatePropertyAll(MyColors.primaryLight),
+      textStyle: WidgetStatePropertyAll(TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.primaryLight,
+      )),
+    ),
+    confirmButtonStyle: const ButtonStyle(
+      foregroundColor: WidgetStatePropertyAll(MyColors.primaryLight),
+      textStyle: WidgetStatePropertyAll(TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.primaryLight,
+      )),
+    ),
+    dividerColor: MyColors.lineDivider,
+    headerForegroundColor: MyColors.white,
+    headerHeadlineStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.large,
+      color: MyColors.white,
+    ),
+    headerHelpStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.medium,
+      color: MyColors.white,
+    ),
+    dayStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.medium,
+      color: MyColors.white,
+    ),
+    yearStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.medium,
+      color: Color(0xFFBBBBBB), // Lighter grey for dark mode
+    ),
+    weekdayStyle: const TextStyle(
+      fontFamily: Font.family,
+      fontSize: Font.mediumLarge,
+      color: MyColors.white,
+      fontWeight: FontWeight.bold,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: const TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: Color(0xFFBBBBBB), // Lighter grey for dark mode
+        fontWeight: FontWeight.normal,
+      ),
+      activeIndicatorBorder: const BorderSide(
+        color: MyColors.primaryLight,
+        width: 2,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: MyColors.primaryLight,
+          width: 2,
+        ),
+        borderRadius: kRadius10,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: MyColors.primaryLight,
+          width: 2,
+        ),
+        borderRadius: kRadius10,
+      ),
+      errorStyle: const TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: MyColors.errorRed,
+      ),
+      helperStyle: const TextStyle(
+        fontFamily: Font.family,
+        fontSize: Font.medium,
+        color: Color(0xFFBBBBBB), // Lighter grey for dark mode
       ),
       labelStyle: const TextStyle(
         fontFamily: Font.family,

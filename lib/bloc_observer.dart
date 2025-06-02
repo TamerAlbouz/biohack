@@ -11,13 +11,13 @@ class CustomBlocObserver extends BlocObserver {
   @override
   void onChange(BlocBase bloc, Change change) {
     super.onChange(bloc, change);
-    logger.i('${bloc.runtimeType} $change');
+    // logger.i('${bloc.runtimeType} $change');
   }
 
   @override
   void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
-    logger.i('${bloc.runtimeType} $transition');
+    // logger.i('${bloc.runtimeType} $transition');
   }
 
   @override

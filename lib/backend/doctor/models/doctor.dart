@@ -1,12 +1,17 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:medtalk/backend/authentication/enums/role.dart';
 import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/doctor/models/qualification.dart';
+import 'package:medtalk/backend/extensions/timestamp_converter.dart';
 import 'package:medtalk/backend/services/models/service.dart';
 import 'package:medtalk/backend/user/models/user.dart';
 
 part 'doctor.g.dart';
 
-@JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true, converters: [
+  TimestampConverter(),
+])
 class Doctor extends User {
   const Doctor({
     required super.email,
@@ -28,6 +33,8 @@ class Doctor extends User {
     required this.availability,
     this.services,
     this.patientIds,
+    this.locationNotes,
+    this.qualifications,
     // New fields from the signup form
     this.previousName,
     this.licenseType,
@@ -66,6 +73,9 @@ class Doctor extends User {
   /// Previous name of the doctor if applicable
   final String? previousName;
 
+  /// Notes about the doctor's location
+  final String? locationNotes;
+
   /// Type of license that the doctor holds
   final String? licenseType;
 
@@ -87,6 +97,9 @@ class Doctor extends User {
   /// Whether the doctor has accepted CPSNS Virtual Care Standards
   final bool? termsAccepted;
 
+  /// List of qualifications the doctor holds
+  final List<Qualification>? qualifications;
+
   /// Returns a new [Doctor] with updated fields.
   @override
   Doctor copyWith({
@@ -100,7 +113,7 @@ class Doctor extends User {
     String? medicalLicenseUrl,
     bool? active,
     String? profilePictureUrl,
-    DateTime? updatedAt,
+    Timestamp? updatedAt,
     bool? busy,
     List<String>? tokens,
     String? biography,
@@ -108,6 +121,8 @@ class Doctor extends User {
     Map<String, WorkingHours?>? availability,
     List<String>? patientIds,
     List<Service>? services,
+    String? locationNotes,
+    List<Qualification>? qualifications,
     // New fields
     String? previousName,
     String? licenseType,
@@ -138,6 +153,7 @@ class Doctor extends User {
       availability: availability ?? this.availability,
       patientIds: patientIds ?? this.patientIds,
       services: services ?? this.services,
+      locationNotes: locationNotes ?? this.locationNotes,
       // New fields
       previousName: previousName ?? this.previousName,
       licenseType: licenseType ?? this.licenseType,
@@ -148,83 +164,8 @@ class Doctor extends User {
           registryHomeJurisdiction ?? this.registryHomeJurisdiction,
       registrantType: registrantType ?? this.registrantType,
       termsAccepted: termsAccepted ?? this.termsAccepted,
+      qualifications: qualifications ?? this.qualifications,
     );
-  }
-
-  /// Converts a [Map<String, dynamic>] to a [Doctor].
-  factory Doctor.fromMap(String docId, Map<String, dynamic> data) {
-    return Doctor(
-      email: data['email'],
-      uid: docId,
-      active: data['active'],
-      name: data['name'],
-      sex: data['sex'],
-      licNum: data['licNum'],
-      govIdUrl: data['govIdUrl'],
-      medicalLicenseUrl: data['medicalLicenseUrl'],
-      role: Role.doctor,
-      profilePictureUrl: data['profilePictureUrl'],
-      createdAt: data['createdAt'].toDate(),
-      updatedAt: data['updatedAt']?.toDate(),
-      busy: data['busy'],
-      tokens: const ["100"],
-      biography: data['biography'],
-      specialties: data['specialties'] != null
-          ? List<String>.from(data['specialties'])
-          : null,
-      availability: (data['availability'] as Map<String, dynamic>)
-          .map((k, v) => MapEntry(k, WorkingHours.fromJson(v))),
-      patientIds: data['patientIds'] != null
-          ? List<String>.from(data['patientIds'])
-          : null,
-      services: data['services'] != null
-          ? (data['services'] as List<dynamic>)
-              .map((e) => Service.fromJson(e))
-              .toList()
-          : null,
-      // New fields
-      previousName: data['previousName'],
-      licenseType: data['licenseType'],
-      zone: data['zone'],
-      location: data['location'],
-      isAtlanticRegistry: data['isAtlanticRegistry'],
-      registryHomeJurisdiction: data['registryHomeJurisdiction'],
-      registrantType: data['registrantType'],
-      termsAccepted: data['termsAccepted'],
-    );
-  }
-
-  /// Converts a [Doctor] to a [Map<String, dynamic>].
-  Map<String, dynamic> get toMap {
-    return {
-      'email': email,
-      'uid': uid,
-      'active': active,
-      'sex': sex,
-      'name': name,
-      'licNum': licNum,
-      'govIdUrl': govIdUrl,
-      'medicalLicenseUrl': medicalLicenseUrl,
-      'role': role!.name,
-      'profilePictureUrl': profilePictureUrl,
-      'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'busy': busy,
-      'tokens': tokens,
-      'biography': biography,
-      'specialties': specialties,
-      'availability': availability,
-      'patientIds': patientIds,
-      // New fields
-      'previousName': previousName,
-      'licenseType': licenseType,
-      'zone': zone,
-      'location': location,
-      'isAtlanticRegistry': isAtlanticRegistry,
-      'registryHomeJurisdiction': registryHomeJurisdiction,
-      'registrantType': registrantType,
-      'termsAccepted': termsAccepted,
-    };
   }
 
   @override
@@ -248,6 +189,8 @@ class Doctor extends User {
         availability,
         patientIds,
         services,
+        locationNotes,
+        qualifications,
         // New fields
         previousName,
         licenseType,

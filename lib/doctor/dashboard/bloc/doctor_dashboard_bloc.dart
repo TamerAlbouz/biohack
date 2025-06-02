@@ -82,7 +82,7 @@ class DoctorDashboardBloc
         recentPatients: recentPatients,
       ));
     } catch (e) {
-      logger.e('Error loading dashboard data: $e');
+      addError(e);
       emit(DoctorDashboardError(e.toString()));
     }
   }

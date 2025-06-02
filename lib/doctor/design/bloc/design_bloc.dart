@@ -7,6 +7,7 @@ import 'package:medtalk/backend/authentication/interfaces/auth_interface.dart';
 import 'package:medtalk/backend/doctor/interfaces/doctor_interface.dart';
 import 'package:medtalk/backend/doctor/models/doctor.dart';
 import 'package:medtalk/backend/doctor/models/doctor_work_times.dart';
+import 'package:medtalk/backend/doctor/models/update_doctor_dto.dart';
 import 'package:medtalk/backend/services/models/service.dart';
 import 'package:medtalk/doctor/design/bloc/design_event.dart';
 import 'package:medtalk/doctor/design/bloc/design_state.dart';
@@ -114,6 +115,7 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
         schedule: initialSchedule,
       ));
     } catch (e) {
+      addError(e);
       emit(state.copyWith(
         errorMessage: 'Failed to load profile: ${e.toString()}',
         isLoading: false,
@@ -129,8 +131,17 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
 
     try {
       // Here we would save to API or repository
-      // For now, just simulate a delay
-      await Future.delayed(const Duration(milliseconds: 500));
+      await _doctorRepository.updateDoctorProfile(
+        UpdateDoctorDto(
+          uid: _authenticationRepository.currentUser.uid,
+          biography: event.bio,
+          location: event.address,
+          locationNotes: event.notes,
+          services: state.services,
+          availability: state.schedule,
+          updatedAt: DateTime.now(),
+        ),
+      );
 
       // Update state with new values
       emit(state.copyWith(
@@ -142,6 +153,7 @@ class DesignBloc extends Bloc<DesignEvent, DesignState> {
         schedule: event.schedule,
       ));
     } catch (e) {
+      addError(e);
       emit(state.copyWith(
         errorMessage: 'Failed to save profile: ${e.toString()}',
         isLoading: false,

@@ -22,7 +22,11 @@ class PatientRepository extends UserRepository implements IPatientRepository {
     try {
       return _userCollection.doc(id).get().then((snapshot) {
         if (snapshot.exists) {
-          return Patient.fromMap(id, snapshot.data()!.toMap());
+          var data = snapshot.data()!.toMap();
+
+          data['uid'] = id;
+
+          return Patient.fromJson(data);
         }
 
         return null;
@@ -39,7 +43,7 @@ class PatientRepository extends UserRepository implements IPatientRepository {
   @override
   Future<void> addPatient(Patient patient) {
     try {
-      return _userCollection.doc(patient.uid).set(patient.toMap);
+      return _userCollection.doc(patient.uid).set(patient.toJson());
     } on FirebaseException catch (e) {
       logger.e(e.message);
       throw PatientException.fromCode(e.code);
@@ -52,7 +56,7 @@ class PatientRepository extends UserRepository implements IPatientRepository {
   @override
   Future<void> updatePatient(Patient patient) {
     try {
-      return _userCollection.doc(patient.uid).update(patient.toMap);
+      return _userCollection.doc(patient.uid).update(patient.toJson());
     } on FirebaseException catch (e) {
       logger.e(e.message);
       throw PatientException.fromCode(e.code);

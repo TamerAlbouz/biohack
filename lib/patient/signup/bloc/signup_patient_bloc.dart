@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypton/crypton.dart';
 import 'package:equatable/equatable.dart';
 import 'package:formz/formz.dart';
@@ -327,10 +328,11 @@ class SignUpPatientBloc extends Bloc<SignUpPatientEvent, SignUpPatientState> {
       final patient = Patient(
         email: state.signUpEmail.value,
         name: state.fullName.value,
-        dateOfBirth: formatter.parse(state.dateOfBirth.value),
+        dateOfBirth:
+            Timestamp.fromDate(formatter.parse(state.dateOfBirth.value)),
         sex: state.sex.value,
         uid: _authenticationRepository.currentUser.uid,
-        createdAt: DateTime.now(),
+        createdAt: Timestamp.now(),
         role: Role.patient,
       );
 

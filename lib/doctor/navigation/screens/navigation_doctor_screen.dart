@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:medtalk/app/bloc/auth/route_bloc.dart';
 import 'package:medtalk/backend/injectable.dart';
+import 'package:medtalk/common/widgets/loading_screen.dart';
 import 'package:medtalk/doctor/appointments/bloc/doctor_appointments_bloc.dart';
 import 'package:medtalk/doctor/dashboard/screens/doctor_dashboard_screen.dart';
 import 'package:medtalk/doctor/design/screens/design_screen.dart';
@@ -66,9 +67,7 @@ class _NavigationPatientViewState extends State<NavigationPatientView> {
     return BlocBuilder<NavigationDoctorCubit, NavigationDoctorState>(
         builder: (context, state) {
       if (state.isLoading) {
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
+        return const LoadingMedicalScreen();
       }
 
       // Check if the doctor is active

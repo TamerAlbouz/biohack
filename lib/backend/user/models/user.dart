@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:medtalk/backend/extensions/timestamp_converter.dart';
 
 import '../../authentication/enums/role.dart';
 import '../../authentication/models/user_interface.dart';
@@ -9,7 +11,9 @@ part 'user.g.dart';
 /// User model
 ///
 /// [User.empty] represents an unauthenticated user.
-@JsonSerializable()
+@JsonSerializable(explicitToJson: true, converters: [
+  TimestampConverter(),
+])
 class User extends Equatable implements IUser {
   /// {@macro user}
   const User({
@@ -39,10 +43,12 @@ class User extends Equatable implements IUser {
   final String? profilePictureUrl;
 
   @override
-  final DateTime? createdAt;
+  @TimestampConverter()
+  final Timestamp? createdAt;
 
   @override
-  final DateTime? updatedAt;
+  @TimestampConverter()
+  final Timestamp? updatedAt;
 
   /// The current user's email address.
   @override
@@ -82,7 +88,7 @@ class User extends Equatable implements IUser {
     String? sex,
     bool? firstTime,
     String? profilePictureUrl,
-    DateTime? updatedAt,
+    Timestamp? updatedAt,
     bool? busy,
     String? biography,
     List<String>? tokens,

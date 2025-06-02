@@ -36,10 +36,9 @@ class NavigationDoctorCubit extends Cubit<NavigationDoctorState> {
       final userId = _authRepo.currentUser.uid;
 
       // Fetch the doctor data using the userId
-      final doctor = await _doctorRepo.getDoctor(userId);
-      logger.i('Doctor data: $doctor');
-      if (doctor != null) {
-        final isActive = doctor.active;
+      final active = await _doctorRepo.getDoctorActiveStatus(userId);
+      if (active != null) {
+        final isActive = active;
         String? message;
 
         if (!isActive) {
@@ -55,7 +54,7 @@ class NavigationDoctorCubit extends Cubit<NavigationDoctorState> {
       }
     } catch (e) {
       // Handle any errors while fetching doctor data
-      logger.e('Error checking doctor status: $e');
+      addError(e);
     }
   }
 

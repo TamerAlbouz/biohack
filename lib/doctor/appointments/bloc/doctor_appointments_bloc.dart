@@ -118,13 +118,9 @@ class DoctorAppointmentsBloc
       // Get the current doctor ID
       final currentUser = _authRepository.currentUser;
 
-      logger.d('Loading appointments for doctor: ${currentUser.uid}');
-
       // Get appointments for the doctor
       final appointments =
           await _appointmentRepository.getDoctorAppointments(currentUser.uid);
-
-      logger.d('Retrieved ${appointments.length} appointments');
 
       // Process the appointments
       await _processAndEmitAppointments(
@@ -135,7 +131,7 @@ class DoctorAppointmentsBloc
         const AppointmentFilterCriteria(),
       );
     } catch (e) {
-      logger.e('Error loading doctor appointments: $e');
+      addError(e);
       emit(DoctorAppointmentsError(e.toString()));
     }
   }
@@ -164,7 +160,7 @@ class DoctorAppointmentsBloc
           const AppointmentFilterCriteria(),
         );
       } catch (e) {
-        logger.e('Error resetting filters: $e');
+        addError(e);
         emit(DoctorAppointmentsError(e.toString()));
       }
     }
@@ -193,7 +189,7 @@ class DoctorAppointmentsBloc
         event.filterCriteria,
       );
     } catch (e) {
-      logger.e('Error filtering appointments: $e');
+      addError(e);
       emit(DoctorAppointmentsError(e.toString()));
     }
   }
@@ -227,7 +223,7 @@ class DoctorAppointmentsBloc
         filterCriteria,
       );
     } catch (e) {
-      logger.e('Error filtering doctor appointments: $e');
+      addError(e);
       emit(DoctorAppointmentsError(e.toString()));
     }
   }
@@ -374,8 +370,7 @@ class DoctorAppointmentsBloc
               'Patient not found for appointment: ${appointment.appointmentId}');
         }
       } catch (e) {
-        logger.e(
-            'Error loading patient for appointment ${appointment.appointmentId}: $e');
+        addError(e);
         // Continue with other appointments
       }
     }
@@ -458,8 +453,8 @@ class DoctorAppointmentsBloc
         filterCriteria: currentState.filterCriteria,
       ));
     } catch (e) {
-      logger.e('Error updating appointment status: $e');
-      // Emit error state with message, but keep the data from current state
+      addError(
+          e); // Emit error state with message, but keep the data from current state
       if (state is DoctorAppointmentsLoaded) {
         emit(DoctorAppointmentsError(
           'Failed to update appointment status: ${e.toString()}',

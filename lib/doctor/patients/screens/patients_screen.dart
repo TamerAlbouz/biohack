@@ -422,7 +422,7 @@ class _PatientListItem extends StatelessWidget {
                   ),
                   if (patient.dateOfBirth != null)
                     Text(
-                      '${_calculateAge(patient.dateOfBirth!)} years • ${patient.sex ?? 'Not specified'}',
+                      '${_calculateAge(patient.dateOfBirth!.toDate())} years • ${patient.sex ?? 'Not specified'}',
                       style: const TextStyle(
                         fontSize: Font.extraSmall,
                         color: MyColors.subtitleDark,

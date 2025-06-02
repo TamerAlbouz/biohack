@@ -11,13 +11,13 @@ import '../interfaces/storage_interface.dart';
 
 @LazySingleton(as: IStorageRepository)
 class StorageRepository implements IStorageRepository {
-  final FirebaseStorage _storage;
+  final FirebaseStorage storage;
   final Logger logger;
 
   StorageRepository({
-    FirebaseStorage? storage,
+    required this.storage,
     required this.logger,
-  }) : _storage = storage ?? FirebaseStorage.instance;
+  });
 
   @override
   Future<String> uploadFile(String localPath, String remotePath,
@@ -25,7 +25,7 @@ class StorageRepository implements IStorageRepository {
     try {
       logger.i('Uploading file from $localPath to $remotePath');
 
-      final ref = _storage.ref().child(remotePath);
+      final ref = storage.ref().child(remotePath);
 
       UploadTask uploadTask;
 
@@ -53,7 +53,7 @@ class StorageRepository implements IStorageRepository {
     try {
       logger.i('Uploading bytes to $remotePath');
 
-      final ref = _storage.ref().child(remotePath);
+      final ref = storage.ref().child(remotePath);
 
       UploadTask uploadTask;
 
@@ -79,7 +79,7 @@ class StorageRepository implements IStorageRepository {
   Future<void> deleteFile(String remotePath) async {
     try {
       logger.i('Deleting file at $remotePath');
-      await _storage.ref().child(remotePath).delete();
+      await storage.ref().child(remotePath).delete();
       logger.i('File deleted successfully');
     } catch (e) {
       logger.e('Error deleting file: $e');
@@ -92,7 +92,7 @@ class StorageRepository implements IStorageRepository {
     try {
       logger.i('Getting download URL for $remotePath');
       final downloadUrl =
-          await _storage.ref().child(remotePath).getDownloadURL();
+          await storage.ref().child(remotePath).getDownloadURL();
       return downloadUrl;
     } catch (e) {
       logger.e('Error getting download URL: $e');

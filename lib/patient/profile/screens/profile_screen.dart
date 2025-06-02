@@ -102,7 +102,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
       // _addressController.text = state.patient.address ?? '';
       _selectedBloodType = state.patient.bloodType;
       _selectedSex = state.patient.sex;
-      _selectedDob = state.patient.dateOfBirth;
+      _selectedDob = state.patient.dateOfBirth!.toDate();
       // _profileImageUrl = state.patient.profileImageUrl;
 
       setState(() {
@@ -529,7 +529,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen>
               const SizedBox(width: 4),
               Text(
                 state.patient.dateOfBirth != null
-                    ? "${_calculateAge(state.patient.dateOfBirth)} years"
+                    ? "${_calculateAge(state.patient.dateOfBirth!.toDate())} years"
                     : "Age not provided",
                 style: TextStyle(
                   fontSize: 16,
