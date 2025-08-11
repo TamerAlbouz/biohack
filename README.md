@@ -1,6 +1,6 @@
-# medtalk
+# BioHack
 
-MedTalk, helping patients reach doctors.
+BioHack, helping patients reach doctors.
 
 ## Getting Started
 
