@@ -2,6 +2,16 @@
 
 BioHack, helping patients reach doctors.
 
+## Accomplishments
+
+- Worked on implementing Bloc & Cubit clean architecture within the app.
+- Implemented firebase firestore, authentication, and cloud function using GCP.
+- Designed the entire UI & UX of the app.
+- Added Agora video call integration and token generation server.
+- Developed a minor chatting system within the app.
+- Utilized a hybrid encryption scheme using KDFs, RSA, and AES algorithms to implement end-to-end encryption.
+- Added dependency injection for the repository pattern used with firebase firestore.
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
